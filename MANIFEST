@@ -1,0 +1,101 @@
+MANIFEST for cdk-perl-20020728, version t020728
+
+MANIFEST                        this file
+CHANGES                         changelog for Perl/Cdk
+COPYING                         copyright notice
+Cdk.pm                          perl module for Cdk
+Cdk.xs                          perl interface to Cdk
+Makefile.PL                     perl makefile template
+README                          overview (read this first)
+fixpaths                        script to fix pathnames of perl in perl-scripts
+typemap                         mapping between Perl and C parameter types
+Cdk/Alphalist.pm                Cdk::Alphalist package
+Cdk/Buttonbox.pm                Cdk::Buttonbox package
+Cdk/Calendar.pm                 Cdk::Calendar package
+Cdk/Debug.pm                    Cdk::Debug package
+Cdk/Diag.pm                     Cdk::Diag package
+Cdk/Dialog.pm                   Cdk::Dialog package
+Cdk/Entry.pm                    Cdk::Entry package
+Cdk/Fselect.pm                  Cdk::Fselect package
+Cdk/Graph.pm                    Cdk::Graph package
+Cdk/Histogram.pm                Cdk::Histogram package
+Cdk/Itemlist.pm                 Cdk::Itemlist package
+Cdk/Label.pm                    Cdk::Label package
+Cdk/Marquee.pm                  Cdk::Marquee package
+Cdk/Matrix.pm                   Cdk::Matrix package
+Cdk/Mentry.pm                   Cdk::Mentry package
+Cdk/Menu.pm                     Cdk::Menu package
+Cdk/Radio.pm                    Cdk::Radio package
+Cdk/Scale.pm                    Cdk::Scale package
+Cdk/Scroll.pm                   Cdk::Scroll package
+Cdk/Selection.pm                Cdk::Selection package
+Cdk/Slider.pm                   Cdk::Slider package
+Cdk/Swindow.pm                  Cdk::Swindow package
+Cdk/Template.pm                 Cdk::Template package
+Cdk/Viewer.pm                   Cdk::Viewer package
+demos/async                     Demonstrates how to manipulate defined widgets asynchronously.
+demos/bday                      Demonstrates how to use the calendar widget.
+demos/perlbug                   Rips off Larry's utils/perlbug program.
+demos/pkgInfo                   Basic Solaris package install/remove program.
+demos/pwdInfo                   Basic password file browser.
+demos/rolodex                   Comprehensive personal rolodex.
+demos/workman                   A workman database editor
+examples/alphalist              Demonstrates the alphalist widget.
+examples/bind                   Demonstrates how to use the bind function.
+examples/buttonbox              Demonstrates the buttonbox widget.
+examples/calendar               Demonstrates the calendar widget.
+examples/dialog                 Demonstrates the dialog widget.
+examples/entry                  Demonstrates the entry widget.
+examples/fselect                Demonstrates the file selector widget.
+examples/graph                  Demonstrates the graph widget.
+examples/histogram              Demonstrates the histogram widget.
+examples/itemlist               Demonstrates the itemlist widget.
+examples/label                  Demonstrates the label widget.
+examples/marquee                Demonstrates the marquee widget.
+examples/matrix                 Demonstrates the matrix widget.
+examples/mentry                 Demonstrates the mentry widget.
+examples/menu                   Demonstrates the menu widget.
+examples/postProcess            Demonstrates how to use the post-process capabilities.
+examples/preProcess             Demonstrates how to use the pre-process capabilities.
+examples/radio                  Demonstrates the radio-button widget.
+examples/scale                  Demonstrates the scale widget.
+examples/scroll                 Demonstrates the scroll widget.
+examples/selection              Demonstrates the selection widget.
+examples/slider                 Demonstrates the slider widget.
+examples/swindow                Demonstrates the scrolling window widget.
+examples/template               Demonstrates the template widget.
+examples/viewer                 Demonstrates the viewer widget.
+fulldemo/cdkdemo                combines all of the widgets via pulldown-menus
+fulldemo/help/alphalist.help    description of alphalist-widget
+fulldemo/help/binding.help      description of binding-widget
+fulldemo/help/bugs.help         known bugs in Perl+Cdk
+fulldemo/help/calendar.help     description of calendar-widget
+fulldemo/help/charfile.help     using line-drawing graphics in Perl+Cdk
+fulldemo/help/colors.help       how to use color in Perl+Cdk
+fulldemo/help/concepts.help     concepts & terminology used in Perl+Cdk
+fulldemo/help/debug.help        comments on debugging Perl+Cdk
+fulldemo/help/dialog.help       description of dialog-widget
+fulldemo/help/display.help      notes on display-options
+fulldemo/help/entry.help        description of entry-widget
+fulldemo/help/fselect.help      description of fselect-widget
+fulldemo/help/future.help       wishlist/future development
+fulldemo/help/general.help      general comments on Perl+Cdk
+fulldemo/help/graph.help        description of graph-widget
+fulldemo/help/histogram.help    description of histogram-widget
+fulldemo/help/itemlist.help     description of itemlist-widget
+fulldemo/help/label.help        description of label-widget
+fulldemo/help/marquee.help      description of marquee-widget
+fulldemo/help/matrix.help       description of matrix-widget
+fulldemo/help/mentry.help       description of mentry-widget
+fulldemo/help/menu.help         description of menu-widget
+fulldemo/help/postprocess.help  description of postprocess-widget
+fulldemo/help/preprocess.help   description of preprocess-widget
+fulldemo/help/radio.help        description of radio-widget
+fulldemo/help/scale.help        description of scale-widget
+fulldemo/help/scroll.help       description of scroll-widget
+fulldemo/help/selection.help    description of selection-widget
+fulldemo/help/slider.help       description of slider-widget
+fulldemo/help/special.help      special keywords used in Cdk's viewer
+fulldemo/help/swindow.help      description of swindow-widget
+fulldemo/help/template.help     description of template-widget
+fulldemo/help/viewer.help       description of viewer-widget

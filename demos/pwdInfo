@@ -1,4 +1,5 @@
-#!../../../perl
+#!/usr/bin/perl -w
+# $Id: pwdInfo,v 1.2 2002/07/27 20:07:47 tom Exp $
 
 #
 # This reads the passwd file and creates an interface to browse the

@@ -1,8 +1,10 @@
+# $Id: Cdk.pm,v 1.5 2002/07/28 18:44:16 tom Exp $
+
 package Cdk;
 
-require Exporter;
-require DynaLoader;
-require AutoLoader;
+use Exporter ();
+use DynaLoader ();
+use AutoLoader ();
 
 @ISA	= qw(Exporter DynaLoader);
 
@@ -10,12 +12,12 @@ require AutoLoader;
 select (STDIN); $| = 1 ;
 
 # Set the version.
-$VERSION = "4.9.10";
+$VERSION = "4.09010"; # must be a floating-point number
 
 # Set the diag flag off.
 $DIAGFLAG = 0;
 
-# Items to export into callers namespace by default. Note: do not export
+# Items to export into callers' namespace by default.  Note: do not export
 # names by default without a very good reason. Use EXPORT_OK instead.
 # Do not simply export all your public functions/methods/constants.
 @EXPORT = qw (VERSION checkDef checkReq popupLabel popupDialog);
@@ -34,7 +36,7 @@ sub AUTOLOAD {
 	    goto &AutoLoader::AUTOLOAD;
 	}
 	else {
-		die "Your vendor has not defined Cdk macro $constname";
+	    die "Your vendor has not defined Cdk macro $constname";
 	}
     }
     eval "sub $AUTOLOAD { $val }";
@@ -84,7 +86,7 @@ sub checkDef
 {
    my ($type, $name, $value, $def)	= @_;
 
-   # Check if its defined.
+   # Check if it is defined.
    if (!defined $value)
    {
       Cdk::Diag::Log ("Diag", $type, "Default parameter $name being set to default value <$def>");
@@ -104,7 +106,7 @@ sub checkReq
 {
    my ($type, $name, $value)	= @_;
 
-   # Check if its defined.
+   # Check if it is defined.
    if (! defined $value)
    {
       # Close the Cdk screen and shut down curses.
@@ -144,7 +146,7 @@ sub popupDialog
    my ($mesg, $buttons) = @_;
  
    my $popup = new Cdk::Dialog ('Message' => $mesg, 'Buttons' => $buttons);
-   return $popup->activate;
+   return $popup->activate();
 }
 
 #

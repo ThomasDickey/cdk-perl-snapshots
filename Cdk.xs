@@ -1,13 +1,14 @@
 /*
  * $Author: tom $
- * $Date: 2001/04/21 16:37:08 $
- * $Revision: 1.4 $
+ * $Date: 2002/07/28 19:08:31 $
+ * $Revision: 1.8 $
  */
 
 #include <EXTERN.h>
 #include <perl.h>
 #include <XSUB.h>
 
+#define CDK_PERL_EXT
 #include <cdk/cdk.h>
 
 /* Prior to perl5.005, the PL_ prefix wasn't used for things such
@@ -20,7 +21,7 @@
 #define PL_sv_undef sv_undef
 #endif
 
-char *checkChtypeKey(chtype key);
+static char *checkChtypeKey(chtype key);
 
 CDKSCREEN *	GCDKSCREEN	= (CDKSCREEN *)NULL;
 WINDOW *	GCWINDOW	= (WINDOW *)NULL;
@@ -88,7 +89,7 @@ WINDOW *	GCWINDOW	= (WINDOW *)NULL;
 	   for (x=0; x <= (LEN); x++)					\
 	   {								\
 	      SV *foo		= *av_fetch(src, x, FALSE);		\
-	      (DEST)[x+(START)] = (chtype)sv2chtype (foo);		\
+	      (DEST)[x+(START)] = sv2chtype (foo);			\
 	   }								\
 	   (LEN)++;							\
 	} while (0)
@@ -255,498 +256,460 @@ void checkCdkInit()
    }
 }
 
-char *
+static char *
 checkChtypeKey(key)
 chtype key;
 {
+   char *result = 0;
+
    if (key == KEY_UP)
-   {
-      return "KEY_UP";
-   }
+      result = "KEY_UP";
    else if (key == KEY_DOWN)
-   {
-      return "KEY_DOWN";
-   }
+      result = "KEY_DOWN";
    else if (key == KEY_LEFT)
-   {
-      return "KEY_LEFT";
-   }
+      result = "KEY_LEFT";
    else if (key == KEY_RIGHT)
-   {
-      return "KEY_RIGHT";
-   }
+      result = "KEY_RIGHT";
    else if (key == KEY_NPAGE)
-   {
-      return "KEY_NPAGE";
-   }
+      result = "KEY_NPAGE";
    else if (key == KEY_PPAGE)
-   {
-      return "KEY_PPAGE";
-   }
+      result = "KEY_PPAGE";
    else if (key == KEY_END)
-   {
-      return "KEY_END";
-   }
+      result = "KEY_END";
    else if (key == KEY_HOME)
-   {
-      return "KEY_HOME";
-   }
+      result = "KEY_HOME";
    else if (key == KEY_BACKSPACE)
-   {
-      return "KEY_BACKSPACE";
-   }
+      result = "KEY_BACKSPACE";
    else if (key == DELETE)
-   {
-      return "KEY_DELETE";
-   }
+      result = "KEY_DELETE";
    else if (key == KEY_ESC)
-   {
-      return "KEY_ESC";
-   }
-   else
-   {
-      return (char *)NULL;
-   }
+      result = "KEY_ESC";
+
+   return result;
 }
 
-chtype
+static chtype
 sv2chtype(sv)
 SV *sv;
 {
+   bool found = TRUE;
+   chtype result = 0;
+
    if (SvPOK(sv))
    {
       char *name = SvPV(sv,PL_na);
       chtype *fillerChtype;
-      chtype filler;
       int j1, j2;
 
       if (strEQ(name, "ACS_BTEE"))
-	  return ACS_BTEE;
-      if (strEQ(name, "ACS_HLINE"))
-	  return ACS_HLINE;
-      if (strEQ(name, "ACS_LLCORNER"))
-	  return ACS_LLCORNER;
-      if (strEQ(name, "ACS_LRCORNER"))
-	  return ACS_LRCORNER;
-      if (strEQ(name, "ACS_LTEE"))
-	  return ACS_LTEE;
-      if (strEQ(name, "ACS_PLUS"))
-	  return ACS_PLUS;
-      if (strEQ(name, "ACS_RTEE"))
-	  return ACS_RTEE;
-      if (strEQ(name, "ACS_TTEE"))
-	  return ACS_TTEE;
-      if (strEQ(name, "ACS_ULCORNER"))
-	  return ACS_ULCORNER;
-      if (strEQ(name, "ACS_URCORNER"))
-	  return ACS_URCORNER;
-      if (strEQ(name, "ACS_VLINE"))
-	  return ACS_VLINE;
-      if (strEQ(name, "A_ALTCHARSET"))
-	  return A_ALTCHARSET;
-      if (strEQ(name, "A_ATTRIBUTES"))
-	  return A_ATTRIBUTES;
-      if (strEQ(name, "A_BLINK"))
-	  return A_BLINK;
-      if (strEQ(name, "A_BOLD"))
-	  return A_BOLD;
-      if (strEQ(name, "A_CHARTEXT"))
-	  return A_CHARTEXT;
-      if (strEQ(name, "A_COLOR"))
-	  return A_COLOR;
-      if (strEQ(name, "A_DIM"))
-	  return A_DIM;
-      if (strEQ(name, "A_INVIS"))
-	  return A_INVIS;
-      if (strEQ(name, "A_NORMAL"))
-	  return A_NORMAL;
-      if (strEQ(name, "A_PROTECT"))
-	  return A_PROTECT;
-      if (strEQ(name, "A_REVERSE"))
-	  return A_REVERSE;
-      if (strEQ(name, "A_STANDOUT"))
-	  return A_STANDOUT;
-      if (strEQ(name, "A_UNDERLINE"))
-	  return A_UNDERLINE;
-      if (strEQ(name, "CDK_COPY"))
-	  return CDK_COPY;
-      if (strEQ(name, "CDK_CUT"))
-	  return CDK_CUT;
-      if (strEQ(name, "CDK_ERASE"))
-	  return CDK_ERASE;
-      if (strEQ(name, "CDK_PASTE"))
-	  return CDK_PASTE;
-      if (strEQ(name, "CDK_REFRESH"))
-	  return CDK_REFRESH;
+	  result = ACS_BTEE;
+      else if (strEQ(name, "ACS_HLINE"))
+	  result = ACS_HLINE;
+      else if (strEQ(name, "ACS_LLCORNER"))
+	  result = ACS_LLCORNER;
+      else if (strEQ(name, "ACS_LRCORNER"))
+	  result = ACS_LRCORNER;
+      else if (strEQ(name, "ACS_LTEE"))
+	  result = ACS_LTEE;
+      else if (strEQ(name, "ACS_PLUS"))
+	  result = ACS_PLUS;
+      else if (strEQ(name, "ACS_RTEE"))
+	  result = ACS_RTEE;
+      else if (strEQ(name, "ACS_TTEE"))
+	  result = ACS_TTEE;
+      else if (strEQ(name, "ACS_ULCORNER"))
+	  result = ACS_ULCORNER;
+      else if (strEQ(name, "ACS_URCORNER"))
+	  result = ACS_URCORNER;
+      else if (strEQ(name, "ACS_VLINE"))
+	  result = ACS_VLINE;
+      else if (strEQ(name, "A_ALTCHARSET"))
+	  result = A_ALTCHARSET;
+      else if (strEQ(name, "A_ATTRIBUTES"))
+	  result = A_ATTRIBUTES;
+      else if (strEQ(name, "A_BLINK"))
+	  result = A_BLINK;
+      else if (strEQ(name, "A_BOLD"))
+	  result = A_BOLD;
+      else if (strEQ(name, "A_CHARTEXT"))
+	  result = A_CHARTEXT;
+      else if (strEQ(name, "A_COLOR"))
+	  result = A_COLOR;
+      else if (strEQ(name, "A_DIM"))
+	  result = A_DIM;
+      else if (strEQ(name, "A_INVIS"))
+	  result = A_INVIS;
+      else if (strEQ(name, "A_NORMAL"))
+	  result = A_NORMAL;
+      else if (strEQ(name, "A_PROTECT"))
+	  result = A_PROTECT;
+      else if (strEQ(name, "A_REVERSE"))
+	  result = A_REVERSE;
+      else if (strEQ(name, "A_STANDOUT"))
+	  result = A_STANDOUT;
+      else if (strEQ(name, "A_UNDERLINE"))
+	  result = A_UNDERLINE;
+      else if (strEQ(name, "CDK_COPY"))
+	  result = CDK_COPY;
+      else if (strEQ(name, "CDK_CUT"))
+	  result = CDK_CUT;
+      else if (strEQ(name, "CDK_ERASE"))
+	  result = CDK_ERASE;
+      else if (strEQ(name, "CDK_PASTE"))
+	  result = CDK_PASTE;
+      else if (strEQ(name, "CDK_REFRESH"))
+	  result = CDK_REFRESH;
 #ifdef COLOR
-      if (strEQ(name, "COLOR_BLACK"))
-	 return COLOR_BLACK;
-      if (strEQ(name, "COLOR_BLUE"))
-	 return COLOR_BLUE;
-      if (strEQ(name, "COLOR_CYAN"))
-	 return COLOR_CYAN;
-      if (strEQ(name, "COLOR_GREEN"))
-	 return COLOR_GREEN;
-      if (strEQ(name, "COLOR_MAGENTA"))
-	 return COLOR_MAGENTA;
-      if (strEQ(name, "COLOR_RED"))
-	 return COLOR_RED;
-      if (strEQ(name, "COLOR_WHITE"))
-	 return COLOR_WHITE;
-      if (strEQ(name, "COLOR_YELLOW"))
-	 return COLOR_YELLOW;
+      else if (strEQ(name, "COLOR_BLACK"))
+	 result = COLOR_BLACK;
+      else if (strEQ(name, "COLOR_BLUE"))
+	 result = COLOR_BLUE;
+      else if (strEQ(name, "COLOR_CYAN"))
+	 result = COLOR_CYAN;
+      else if (strEQ(name, "COLOR_GREEN"))
+	 result = COLOR_GREEN;
+      else if (strEQ(name, "COLOR_MAGENTA"))
+	 result = COLOR_MAGENTA;
+      else if (strEQ(name, "COLOR_RED"))
+	 result = COLOR_RED;
+      else if (strEQ(name, "COLOR_WHITE"))
+	 result = COLOR_WHITE;
+      else if (strEQ(name, "COLOR_YELLOW"))
+	 result = COLOR_YELLOW;
 #endif
-      if (strEQ(name, "DELETE"))
-	  return DELETE;
-      if (strEQ(name, "KEY_A1"))
-	  return KEY_A1;
-      if (strEQ(name, "KEY_A3"))
-	  return KEY_A3;
-      if (strEQ(name, "KEY_B2"))
-	  return KEY_B2;
-      if (strEQ(name, "KEY_BACKSPACE"))
-	  return KEY_BACKSPACE;
-      if (strEQ(name, "KEY_BEG"))
-	  return KEY_BEG;
-      if (strEQ(name, "KEY_BREAK"))
-	  return KEY_BREAK;
-      if (strEQ(name, "KEY_BTAB"))
-	  return KEY_BTAB;
-      if (strEQ(name, "KEY_C1"))
-	  return KEY_C1;
-      if (strEQ(name, "KEY_C3"))
-	  return KEY_C3;
-      if (strEQ(name, "KEY_CANCEL"))
-	  return KEY_CANCEL;
-      if (strEQ(name, "KEY_CATAB"))
-	  return KEY_CATAB;
-      if (strEQ(name, "KEY_CLEAR"))
-	  return KEY_CLEAR;
-      if (strEQ(name, "KEY_CLOSE"))
-	  return KEY_CLOSE;
-      if (strEQ(name, "KEY_COMMAND"))
-	  return KEY_COMMAND;
-      if (strEQ(name, "KEY_COPY"))
-	  return KEY_COPY;
-      if (strEQ(name, "KEY_CREATE"))
-	  return KEY_CREATE;
-      if (strEQ(name, "KEY_CTAB"))
-	  return KEY_CTAB;
-      if (strEQ(name, "KEY_DC"))
-	  return KEY_DC;
-      if (strEQ(name, "KEY_DL"))
-	  return KEY_DL;
-      if (strEQ(name, "KEY_DOWN"))
-	  return KEY_DOWN;
-      if (strEQ(name, "KEY_EIC"))
-	  return KEY_EIC;
-      if (strEQ(name, "KEY_END"))
-	  return KEY_END;
-      if (strEQ(name, "KEY_ENTER"))
-	  return KEY_ENTER;
-      if (strEQ(name, "KEY_EOL"))
-	  return KEY_EOL;
-      if (strEQ(name, "KEY_EOS"))
-	  return KEY_EOS;
-      if (strEQ(name, "KEY_ESC"))
-	  return KEY_ESC;
-      if (strEQ(name, "KEY_EXIT"))
-	  return KEY_EXIT;
-      if (strEQ(name, "KEY_F0"))
-	  return KEY_F0;
-      if (strEQ(name, "KEY_F1"))
-	  return KEY_F1;
-      if (strEQ(name, "KEY_F10"))
-	  return KEY_F10;
-      if (strEQ(name, "KEY_F11"))
-	  return KEY_F11;
-      if (strEQ(name, "KEY_F12"))
-	  return KEY_F12;
-      if (strEQ(name, "KEY_F2"))
-	  return KEY_F2;
-      if (strEQ(name, "KEY_F3"))
-	  return KEY_F3;
-      if (strEQ(name, "KEY_F4"))
-	  return KEY_F4;
-      if (strEQ(name, "KEY_F5"))
-	  return KEY_F5;
-      if (strEQ(name, "KEY_F6"))
-	  return KEY_F6;
-      if (strEQ(name, "KEY_F7"))
-	  return KEY_F7;
-      if (strEQ(name, "KEY_FIND"))
-	  return KEY_FIND;
-      if (strEQ(name, "KEY_HELP"))
-	  return KEY_HELP;
-      if (strEQ(name, "KEY_HOME"))
-	  return KEY_HOME;
-      if (strEQ(name, "KEY_IC"))
-	  return KEY_IC;
-      if (strEQ(name, "KEY_IL"))
-	  return KEY_IL;
-      if (strEQ(name, "KEY_LEFT"))
-	  return (chtype)KEY_LEFT;
-      if (strEQ(name, "KEY_LL"))
-	  return KEY_LL;
-      if (strEQ(name, "KEY_MARK"))
-	  return KEY_MARK;
-      if (strEQ(name, "KEY_MAX"))
-	  return KEY_MAX;
-      if (strEQ(name, "KEY_MESSAGE"))
-	  return KEY_MESSAGE;
-      if (strEQ(name, "KEY_MIN"))
-	  return KEY_MIN;
-      if (strEQ(name, "KEY_MOVE"))
-	  return KEY_MOVE;
-      if (strEQ(name, "KEY_NPAGE"))
-	  return KEY_NPAGE;
-      if (strEQ(name, "KEY_OPEN"))
-	  return KEY_OPEN;
-      if (strEQ(name, "KEY_OPTIONS"))
-	  return KEY_OPTIONS;
-      if (strEQ(name, "KEY_PPAGE"))
-	  return KEY_PPAGE;
-      if (strEQ(name, "KEY_PREVIOUS"))
-	  return KEY_PREVIOUS;
-      if (strEQ(name, "KEY_PRINT"))
-	  return KEY_PRINT;
-      if (strEQ(name, "KEY_REDO"))
-	  return KEY_REDO;
-      if (strEQ(name, "KEY_REFERENCE"))
-	  return KEY_REFERENCE;
-      if (strEQ(name, "KEY_REFRESH"))
-	  return KEY_REFRESH;
-      if (strEQ(name, "KEY_REPLACE"))
-	  return KEY_REPLACE;
-      if (strEQ(name, "KEY_RESET"))
-	  return KEY_RESET;
-      if (strEQ(name, "KEY_RESTART"))
-	  return KEY_RESTART;
-      if (strEQ(name, "KEY_RESUME"))
-	  return KEY_RESUME;
-      if (strEQ(name, "KEY_RETURN"))
-	  return KEY_RETURN;
-      if (strEQ(name, "KEY_RIGHT"))
-	  return KEY_RIGHT;
-      if (strEQ(name, "KEY_SAVE"))
-	  return KEY_SAVE;
-      if (strEQ(name, "KEY_SBEG"))
-	  return KEY_SBEG;
-      if (strEQ(name, "KEY_SCANCEL"))
-	  return KEY_SCANCEL;
-      if (strEQ(name, "KEY_SCOMMAND"))
-	  return KEY_SCOMMAND;
-      if (strEQ(name, "KEY_SCOPY"))
-	  return KEY_SCOPY;
-      if (strEQ(name, "KEY_SCREATE"))
-	  return KEY_SCREATE;
-      if (strEQ(name, "KEY_SDC"))
-	  return KEY_SDC;
-      if (strEQ(name, "KEY_SDL"))
-	  return KEY_SDL;
-      if (strEQ(name, "KEY_SELECT"))
-	  return KEY_SELECT;
-      if (strEQ(name, "KEY_SEND"))
-	  return KEY_SEND;
-      if (strEQ(name, "KEY_SEOL"))
-	  return KEY_SEOL;
-      if (strEQ(name, "KEY_SEXIT"))
-	  return KEY_SEXIT;
-      if (strEQ(name, "KEY_SF"))
-	  return KEY_SF;
-      if (strEQ(name, "KEY_SFIND"))
-	  return KEY_SFIND;
-      if (strEQ(name, "KEY_SHELP"))
-	  return KEY_SHELP;
-      if (strEQ(name, "KEY_SHOME"))
-	  return KEY_SHOME;
-      if (strEQ(name, "KEY_SIC"))
-	  return KEY_SIC;
-      if (strEQ(name, "KEY_SLEFT"))
-	  return KEY_SLEFT;
-      if (strEQ(name, "KEY_SMESSAGE"))
-	  return KEY_SMESSAGE;
-      if (strEQ(name, "KEY_SMOVE"))
-	  return KEY_SMOVE;
-      if (strEQ(name, "KEY_SNEXT"))
-	  return KEY_SNEXT;
-      if (strEQ(name, "KEY_SOPTIONS"))
-	  return KEY_SOPTIONS;
-      if (strEQ(name, "KEY_SPREVIOUS"))
-	  return KEY_SPREVIOUS;
-      if (strEQ(name, "KEY_SPRINT"))
-	  return KEY_SPRINT;
-      if (strEQ(name, "KEY_SR"))
-	  return KEY_SR;
-      if (strEQ(name, "KEY_SREDO"))
-	  return KEY_SREDO;
-      if (strEQ(name, "KEY_SREPLACE"))
-	  return KEY_SREPLACE;
-      if (strEQ(name, "KEY_SRESET"))
-	  return KEY_SRESET;
-      if (strEQ(name, "KEY_SRIGHT"))
-	  return KEY_SRIGHT;
-      if (strEQ(name, "KEY_SRSUME"))
-	  return KEY_SRSUME;
-      if (strEQ(name, "KEY_SSAVE"))
-	  return KEY_SSAVE;
-      if (strEQ(name, "KEY_SSUSPEND"))
-	  return KEY_SSUSPEND;
-      if (strEQ(name, "KEY_STAB"))
-	  return KEY_STAB;
-      if (strEQ(name, "KEY_SUNDO"))
-	  return KEY_SUNDO;
-      if (strEQ(name, "KEY_SUSPEND"))
-	  return KEY_SUSPEND;
-      if (strEQ(name, "KEY_TAB"))
-	  return KEY_TAB;
-      if (strEQ(name, "KEY_UNDO"))
-	  return KEY_UNDO;
-      if (strEQ(name, "KEY_UP"))
-	  return KEY_UP;
-      if (strEQ(name, "SPACE"))
-	 return SPACE;
-      if (strEQ(name, "TAB"))
-	 return TAB;
-
+      else if (strEQ(name, "DELETE"))
+	  result = DELETE;
+      else if (strEQ(name, "KEY_A1"))
+	  result = KEY_A1;
+      else if (strEQ(name, "KEY_A3"))
+	  result = KEY_A3;
+      else if (strEQ(name, "KEY_B2"))
+	  result = KEY_B2;
+      else if (strEQ(name, "KEY_BACKSPACE"))
+	  result = KEY_BACKSPACE;
+      else if (strEQ(name, "KEY_BEG"))
+	  result = KEY_BEG;
+      else if (strEQ(name, "KEY_BREAK"))
+	  result = KEY_BREAK;
+      else if (strEQ(name, "KEY_BTAB"))
+	  result = KEY_BTAB;
+      else if (strEQ(name, "KEY_C1"))
+	  result = KEY_C1;
+      else if (strEQ(name, "KEY_C3"))
+	  result = KEY_C3;
+      else if (strEQ(name, "KEY_CANCEL"))
+	  result = KEY_CANCEL;
+      else if (strEQ(name, "KEY_CATAB"))
+	  result = KEY_CATAB;
+      else if (strEQ(name, "KEY_CLEAR"))
+	  result = KEY_CLEAR;
+      else if (strEQ(name, "KEY_CLOSE"))
+	  result = KEY_CLOSE;
+      else if (strEQ(name, "KEY_COMMAND"))
+	  result = KEY_COMMAND;
+      else if (strEQ(name, "KEY_COPY"))
+	  result = KEY_COPY;
+      else if (strEQ(name, "KEY_CREATE"))
+	  result = KEY_CREATE;
+      else if (strEQ(name, "KEY_CTAB"))
+	  result = KEY_CTAB;
+      else if (strEQ(name, "KEY_DC"))
+	  result = KEY_DC;
+      else if (strEQ(name, "KEY_DL"))
+	  result = KEY_DL;
+      else if (strEQ(name, "KEY_DOWN"))
+	  result = KEY_DOWN;
+      else if (strEQ(name, "KEY_EIC"))
+	  result = KEY_EIC;
+      else if (strEQ(name, "KEY_END"))
+	  result = KEY_END;
+      else if (strEQ(name, "KEY_ENTER"))
+	  result = KEY_ENTER;
+      else if (strEQ(name, "KEY_EOL"))
+	  result = KEY_EOL;
+      else if (strEQ(name, "KEY_EOS"))
+	  result = KEY_EOS;
+      else if (strEQ(name, "KEY_ESC"))
+	  result = KEY_ESC;
+      else if (strEQ(name, "KEY_EXIT"))
+	  result = KEY_EXIT;
+      else if (strEQ(name, "KEY_F0"))
+	  result = KEY_F0;
+      else if (strEQ(name, "KEY_F1"))
+	  result = KEY_F1;
+      else if (strEQ(name, "KEY_F10"))
+	  result = KEY_F10;
+      else if (strEQ(name, "KEY_F11"))
+	  result = KEY_F11;
+      else if (strEQ(name, "KEY_F12"))
+	  result = KEY_F12;
+      else if (strEQ(name, "KEY_F2"))
+	  result = KEY_F2;
+      else if (strEQ(name, "KEY_F3"))
+	  result = KEY_F3;
+      else if (strEQ(name, "KEY_F4"))
+	  result = KEY_F4;
+      else if (strEQ(name, "KEY_F5"))
+	  result = KEY_F5;
+      else if (strEQ(name, "KEY_F6"))
+	  result = KEY_F6;
+      else if (strEQ(name, "KEY_F7"))
+	  result = KEY_F7;
+      else if (strEQ(name, "KEY_FIND"))
+	  result = KEY_FIND;
+      else if (strEQ(name, "KEY_HELP"))
+	  result = KEY_HELP;
+      else if (strEQ(name, "KEY_HOME"))
+	  result = KEY_HOME;
+      else if (strEQ(name, "KEY_IC"))
+	  result = KEY_IC;
+      else if (strEQ(name, "KEY_IL"))
+	  result = KEY_IL;
+      else if (strEQ(name, "KEY_LEFT"))
+	  result = KEY_LEFT;
+      else if (strEQ(name, "KEY_LL"))
+	  result = KEY_LL;
+      else if (strEQ(name, "KEY_MARK"))
+	  result = KEY_MARK;
+      else if (strEQ(name, "KEY_MAX"))
+	  result = KEY_MAX;
+      else if (strEQ(name, "KEY_MESSAGE"))
+	  result = KEY_MESSAGE;
+      else if (strEQ(name, "KEY_MIN"))
+	  result = KEY_MIN;
+      else if (strEQ(name, "KEY_MOVE"))
+	  result = KEY_MOVE;
+      else if (strEQ(name, "KEY_NPAGE"))
+	  result = KEY_NPAGE;
+      else if (strEQ(name, "KEY_OPEN"))
+	  result = KEY_OPEN;
+      else if (strEQ(name, "KEY_OPTIONS"))
+	  result = KEY_OPTIONS;
+      else if (strEQ(name, "KEY_PPAGE"))
+	  result = KEY_PPAGE;
+      else if (strEQ(name, "KEY_PREVIOUS"))
+	  result = KEY_PREVIOUS;
+      else if (strEQ(name, "KEY_PRINT"))
+	  result = KEY_PRINT;
+      else if (strEQ(name, "KEY_REDO"))
+	  result = KEY_REDO;
+      else if (strEQ(name, "KEY_REFERENCE"))
+	  result = KEY_REFERENCE;
+      else if (strEQ(name, "KEY_REFRESH"))
+	  result = KEY_REFRESH;
+      else if (strEQ(name, "KEY_REPLACE"))
+	  result = KEY_REPLACE;
+      else if (strEQ(name, "KEY_RESET"))
+	  result = KEY_RESET;
+      else if (strEQ(name, "KEY_RESTART"))
+	  result = KEY_RESTART;
+      else if (strEQ(name, "KEY_RESUME"))
+	  result = KEY_RESUME;
+      else if (strEQ(name, "KEY_RETURN"))
+	  result = KEY_RETURN;
+      else if (strEQ(name, "KEY_RIGHT"))
+	  result = KEY_RIGHT;
+      else if (strEQ(name, "KEY_SAVE"))
+	  result = KEY_SAVE;
+      else if (strEQ(name, "KEY_SBEG"))
+	  result = KEY_SBEG;
+      else if (strEQ(name, "KEY_SCANCEL"))
+	  result = KEY_SCANCEL;
+      else if (strEQ(name, "KEY_SCOMMAND"))
+	  result = KEY_SCOMMAND;
+      else if (strEQ(name, "KEY_SCOPY"))
+	  result = KEY_SCOPY;
+      else if (strEQ(name, "KEY_SCREATE"))
+	  result = KEY_SCREATE;
+      else if (strEQ(name, "KEY_SDC"))
+	  result = KEY_SDC;
+      else if (strEQ(name, "KEY_SDL"))
+	  result = KEY_SDL;
+      else if (strEQ(name, "KEY_SELECT"))
+	  result = KEY_SELECT;
+      else if (strEQ(name, "KEY_SEND"))
+	  result = KEY_SEND;
+      else if (strEQ(name, "KEY_SEOL"))
+	  result = KEY_SEOL;
+      else if (strEQ(name, "KEY_SEXIT"))
+	  result = KEY_SEXIT;
+      else if (strEQ(name, "KEY_SF"))
+	  result = KEY_SF;
+      else if (strEQ(name, "KEY_SFIND"))
+	  result = KEY_SFIND;
+      else if (strEQ(name, "KEY_SHELP"))
+	  result = KEY_SHELP;
+      else if (strEQ(name, "KEY_SHOME"))
+	  result = KEY_SHOME;
+      else if (strEQ(name, "KEY_SIC"))
+	  result = KEY_SIC;
+      else if (strEQ(name, "KEY_SLEFT"))
+	  result = KEY_SLEFT;
+      else if (strEQ(name, "KEY_SMESSAGE"))
+	  result = KEY_SMESSAGE;
+      else if (strEQ(name, "KEY_SMOVE"))
+	  result = KEY_SMOVE;
+      else if (strEQ(name, "KEY_SNEXT"))
+	  result = KEY_SNEXT;
+      else if (strEQ(name, "KEY_SOPTIONS"))
+	  result = KEY_SOPTIONS;
+      else if (strEQ(name, "KEY_SPREVIOUS"))
+	  result = KEY_SPREVIOUS;
+      else if (strEQ(name, "KEY_SPRINT"))
+	  result = KEY_SPRINT;
+      else if (strEQ(name, "KEY_SR"))
+	  result = KEY_SR;
+      else if (strEQ(name, "KEY_SREDO"))
+	  result = KEY_SREDO;
+      else if (strEQ(name, "KEY_SREPLACE"))
+	  result = KEY_SREPLACE;
+      else if (strEQ(name, "KEY_SRESET"))
+	  result = KEY_SRESET;
+      else if (strEQ(name, "KEY_SRIGHT"))
+	  result = KEY_SRIGHT;
+      else if (strEQ(name, "KEY_SRSUME"))
+	  result = KEY_SRSUME;
+      else if (strEQ(name, "KEY_SSAVE"))
+	  result = KEY_SSAVE;
+      else if (strEQ(name, "KEY_SSUSPEND"))
+	  result = KEY_SSUSPEND;
+      else if (strEQ(name, "KEY_STAB"))
+	  result = KEY_STAB;
+      else if (strEQ(name, "KEY_SUNDO"))
+	  result = KEY_SUNDO;
+      else if (strEQ(name, "KEY_SUSPEND"))
+	  result = KEY_SUSPEND;
+      else if (strEQ(name, "KEY_TAB"))
+	  result = KEY_TAB;
+      else if (strEQ(name, "KEY_UNDO"))
+	  result = KEY_UNDO;
+      else if (strEQ(name, "KEY_UP"))
+	  result = KEY_UP;
+      else if (strEQ(name, "SPACE"))
+	 result = SPACE;
+      else if (strEQ(name, "TAB"))
+	 result = TAB;
       /* Else they used a format of </X> to specify a chtype. */
-      fillerChtype = char2Chtype (name, &j1, &j2);
-      filler = fillerChtype[0];
-      freeChtype (fillerChtype);
-      return (chtype)filler;
+      else if ((fillerChtype = char2Chtype (name, &j1, &j2)) != 0) {
+	  result = fillerChtype[0];
+	  freeChtype (fillerChtype);
+      }
+      else
+	 found = FALSE;
    }
-   return (chtype)SvIV(sv);
-}
-
-int
-sv2cdktype(sv)
-SV * sv;
-{
-   if (SvPOK(sv))
+   if (!found)
    {
-      char *name = SvPV(sv,PL_na);
-      if (strEQ (name, "vENTRY"))
-	 return vENTRY;
-      if (strEQ (name, "vMENTRY"))
-	 return vMENTRY;
-      if (strEQ (name, "vLABEL"))
-	 return vLABEL;
-      if (strEQ (name, "vSCROLL"))
-	 return vSCROLL;
-      if (strEQ (name, "vDIALOG"))
-	 return vDIALOG;
-      if (strEQ (name, "vSCALE"))
-	 return vSCALE;
-      if (strEQ (name, "vMARQUEE"))
-	 return vMARQUEE;
-      if (strEQ (name, "vMENU"))
-	 return vMENU;
-      if (strEQ (name, "vMATRIX"))
-	 return vMATRIX;
-      if (strEQ (name, "vHISTOGRAM"))
-	 return vHISTOGRAM;
-      if (strEQ (name, "vSELECTION"))
-	 return vSELECTION;
-      if (strEQ (name, "vVIEWER"))
-	 return vVIEWER;
-      if (strEQ (name, "vGRAPH"))
-	 return vGRAPH;
-      if (strEQ (name, "vRADIO"))
-	 return vRADIO;
+      result = (chtype)SvIV(sv);
    }
-   return vNULL;
+   return result;
 }
 
-int
+static int
 sv2dtype(sv)
 SV * sv;
 {
+   bool found = TRUE;
+   int result = vINVALID;
+
    if (SvPOK(sv))
    {
       char *name = SvPV(sv,PL_na);
       if (strEQ (name, "CHAR"))
-	 return vCHAR;
-      if (strEQ (name, "HCHAR"))
-	 return vHCHAR;
-      if (strEQ (name, "INT"))
-	 return vINT;
-      if (strEQ (name, "HINT"))
-	 return vHINT;
-      if (strEQ (name, "MIXED"))
-	 return vMIXED;
-      if (strEQ (name, "HMIXED"))
-	 return vHMIXED;
-      if (strEQ (name, "UCHAR"))
-	 return vUCHAR;
-      if (strEQ (name, "LCHAR"))
-	 return vLCHAR;
-      if (strEQ (name, "UHCHAR"))
-	 return vUHCHAR;
-      if (strEQ (name, "LHCHAR"))
-	 return vLHCHAR;
-      if (strEQ (name, "UMIXED"))
-	 return vUMIXED;
-      if (strEQ (name, "LMIXED"))
-	 return vLMIXED;
-      if (strEQ (name, "UHMIXED"))
-	 return vUHMIXED;
-      if (strEQ (name, "LHMIXED"))
-	 return vLHMIXED;
-      if (strEQ (name, "VIEWONLY"))
-	 return vVIEWONLY;
-      if (strEQ (name, "NONE"))
-	 return vNONE;
-      if (strEQ (name, "PERCENT"))
-	 return vPERCENT;
-      if (strEQ (name, "REAL"))
-	 return vREAL;
-      if (strEQ (name, "PLOT"))
-	 return vPLOT;
-      if (strEQ (name, "LINE"))
-	 return vLINE;
+	 result = vCHAR;
+      else if (strEQ (name, "HCHAR"))
+	 result = vHCHAR;
+      else if (strEQ (name, "INT"))
+	 result = vINT;
+      else if (strEQ (name, "HINT"))
+	 result = vHINT;
+      else if (strEQ (name, "MIXED"))
+	 result = vMIXED;
+      else if (strEQ (name, "HMIXED"))
+	 result = vHMIXED;
+      else if (strEQ (name, "UCHAR"))
+	 result = vUCHAR;
+      else if (strEQ (name, "LCHAR"))
+	 result = vLCHAR;
+      else if (strEQ (name, "UHCHAR"))
+	 result = vUHCHAR;
+      else if (strEQ (name, "LHCHAR"))
+	 result = vLHCHAR;
+      else if (strEQ (name, "UMIXED"))
+	 result = vUMIXED;
+      else if (strEQ (name, "LMIXED"))
+	 result = vLMIXED;
+      else if (strEQ (name, "UHMIXED"))
+	 result = vUHMIXED;
+      else if (strEQ (name, "LHMIXED"))
+	 result = vLHMIXED;
+      else if (strEQ (name, "VIEWONLY"))
+	 result = vVIEWONLY;
+      else if (strEQ (name, "NONE"))
+	 result = vNONE;
+      else if (strEQ (name, "PERCENT"))
+	 result = vPERCENT;
+      else if (strEQ (name, "REAL"))
+	 result = vREAL;
+      else if (strEQ (name, "PLOT"))
+	 result = vPLOT;
+      else if (strEQ (name, "LINE"))
+	 result = vLINE;
+      else
+	 found = FALSE;
    }
-   return (int)SvIV(sv);
+   if (!found)
+   {
+      result = (int)SvIV(sv);
+   }
+   return result;
 }
 
 static int
 sv2int(sv)
 SV *sv;
 {
+   bool found = TRUE;
+   int result = 0;
+
    if (SvPOK(sv))
    {
       char *name = SvPV(sv,PL_na);
       if (strEQ(name, "BOTTOM"))
-	 return BOTTOM;
-      if (strEQ(name, "CENTER"))
-	 return CENTER;
-      if (strEQ(name, "COL"))
-	 return COL;
-      if (strEQ(name, "FALSE"))
-	 return FALSE;
-      if (strEQ(name, "FULL"))
-	 return FULL;
-      if (strEQ(name, "HORIZONTAL"))
-	 return HORIZONTAL;
-      if (strEQ(name, "LEFT"))
-	 return LEFT;
-      if (strEQ(name, "NONE"))
-	 return NONE;
-      if (strEQ(name, "NONUMBERS"))
-	 return NONUMBERS;
-      if (strEQ(name, "NUMBERS"))
-	 return NUMBERS;
-      if (strEQ(name, "RIGHT"))
-	 return RIGHT;
-      if (strEQ(name, "ROW"))
-	 return ROW;
-      if (strEQ(name, "TRUE"))
-	 return TRUE;
-      if (strEQ(name, "TOP"))
-	 return TOP;
-      if (strEQ(name, "VERTICAL"))
-	 return VERTICAL;
+	 result = BOTTOM;
+      else if (strEQ(name, "CENTER"))
+	 result = CENTER;
+      else if (strEQ(name, "COL"))
+	 result = COL;
+      else if (strEQ(name, "FALSE"))
+	 result = FALSE;
+      else if (strEQ(name, "FULL"))
+	 result = FULL;
+      else if (strEQ(name, "HORIZONTAL"))
+	 result = HORIZONTAL;
+      else if (strEQ(name, "LEFT"))
+	 result = LEFT;
+      else if (strEQ(name, "NONE"))
+	 result = NONE;
+      else if (strEQ(name, "NONUMBERS"))
+	 result = NONUMBERS;
+      else if (strEQ(name, "NUMBERS"))
+	 result = NUMBERS;
+      else if (strEQ(name, "RIGHT"))
+	 result = RIGHT;
+      else if (strEQ(name, "ROW"))
+	 result = ROW;
+      else if (strEQ(name, "TRUE"))
+	 result = TRUE;
+      else if (strEQ(name, "TOP"))
+	 result = TOP;
+      else if (strEQ(name, "VERTICAL"))
+	 result = VERTICAL;
+      else
+	 found = FALSE;
    }
-   return (int)SvIV(sv);
+   if (!found)
+      result = (int)SvIV(sv);
+   return result;
 }
 
 static char *
@@ -834,6 +797,15 @@ not_there:
 }
 
 MODULE	= Cdk	PACKAGE = Cdk
+
+char *
+getVersion()
+	CODE:
+	{
+	    RETVAL = CDKVersion();
+	}
+	OUTPUT:
+	    RETVAL
 
 double
 constant(name,arg)
@@ -1106,7 +1078,7 @@ Erase(object)
 	}
 
 char
-Wait(object, key=(chtype)NULL)
+Wait(object, key=0)
 	CDKLABEL *	object
 	chtype		key = sv2chtype ($arg);
 	CODE:

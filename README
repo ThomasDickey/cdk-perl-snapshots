@@ -1,114 +1,54 @@
+-- $Id: README,v 1.3 2002/07/28 19:28:17 tom Exp $
+
 Cdk Perl5 Extension,
-Mike Glover, Copyright 1995, 1996, 1997, 1998, 1999
+Mike Glover, Copyright 1995-1999
+Thomas Dickey modifications copyright 1999-2001, 2002
+
 ------------------------------------------------------------------------------
 
 This is the Perl5 extension to the Cdk library written by Mike Glover.
-All the copyright notices from the Cdk C distribution also apply to the
-extension. If you don't agree then remove this package.
+See MANIFEST for a list of files provided with this extension.
+See COPYING for the licensing terms for this package.
+See
+	http://invisible-island.net/cdk/
+	ftp://invisible-island.net/cdk/
+for the current version of this package.
 
-The file FILES contains a list of all of the example and demonstration files
-provided with the Perl5 Cdk extension.
-
-Preamble
---------
-******* BEFORE YOU CAN COMPILE THIS EXTENSION YOU NEED THE CDK LIBRARY!!!!! ***********
-But don't worry, you can pick it up from the CDK web page at:
-
-        http://members.home.net/vexus/CDK.html (official)
-        http://www.datasoft.on.ca/~cdk (Sponsored by the nice folks at Datasoft)
-
-Then you must compile and install Cdk on your machine before you can
-compile this extension. Compiling and installing Cdk should not be a
-problem; it is supported on many platforms including Linx, FreeBSD, 
-Solaris, AIX, SGI, HP, DEC, Sun, etc...
-
-Compiling procedure:
+How to build/install:
 ---------------------
 
-1.  To incorporate this extension into Perl you must copy the 'Cdk' directory
-    tree under your Perl build tree, to ext/Cdk.  Then modify the Makefile.PL
-    file to tell the compiler where to find the Cdk library and header files. 
-    The following is an example Makefile.PL file:
+1.  Make sure that Cdk (the C library libcdk and its header files) are
+    installed.  Normally those are
+	/usr/local/include/cdk/cdk.h (and other files)
+	/usr/local/lib/libcdk.a (and perhaps a shared-library)
 
-use ExtUtils::MakeMaker;
-# See lib/ExtUtils/MakeMaker.pm for details of how to influence
-# the contents of the Makefile that is written.
-
-WriteMakefile(
-    'NAME'	=> 'Cdk',
-    'VERSION'	=> '4.9.8',
-    'LIBS'	=> ['-L/usr/local/lib -lcdk -lcurses'],
-    'DEFINE'	=> '-DHAVE_USLEEP -DHAVE_NCURSES -DHAVE_COLOR -DCDK_PERL_EXT',
-    'INC'	=> '-I/usr/include/ncurses -I/usr/local/include/cdk',
-    'clean'	=> {FILES => 'Makefile.old'},
-);
+2.  Modify Makefile.PL as needed to tell the compiler where to find the Cdk
+    library and header files.  In particular, these values may require change:
 
     * LIBS tells the compiler where to find the Cdk and curses libraries.  Just
       change the -L paths to reflect what is on your system.  Leave the -lcdk
-      and -lcurses.  (You may have to change -lcurses to -lncurses).
-
-    * DEFINE tells the compiler which extra flags to use when compiling the
-      extension. Here are the flags currently supported.
-
-	* If you are using Ncurses, set -DHAVE_NCURSES, as above. If not then
-	  leave it blank.
-
-	* If your header file defines COLOR_* values for color support then
-	  use -DHAVE_COLOR.
+      and -lcurses.  You may have to change -lcurses to -lncurses, for
+      instance.
 
     * INC tells the compiler where to find the header files.  Just change the
       -I paths to reflect what is on your system.
 
-2.  Change directories into the Perl5 home directory and rerun Configure.  When
-    it asks about Perl5 extensions, make sure that Cdk is in the list.  If it's
-    not then add it.  Configure will ask about statically or dynamically loaded
-    extensions, pick one for Cdk.  Don't choose both.
-
-3.  Run make and let Perl rebuild itself.
-
-4.  If you have any problems compiling, read the NOTES file.  If you are
-    compiling on a Solaris box read the NOTES file.
+3.  If your version of perl supports dynamic loading, it is simple to
+    add new packages.  Run these commands
+	perl Makefile.PL
+	make install
+    to generate a makefile for your configuration, build and install the
+    extension.  (The process of building perl with statically loaded extensions
+    is more complicated).
 
 Testing the Cdk extension:
 --------------------------
 
-1.  To test the extension, change directories into the ext/Cdk/fulldemo
-    directory.  This directory has a file named cdkdemo.  It demonstrates all
-    of the current Cdk widgets.  There are two more directories:  examples,
-    which has a script which demonstrates each widget individually and demo
-    which has a few simple application programs.
+There are several examples in the subdirectories of this package:
 
-2.  Before running the demo script set your PERL5LIB environment variable to
-    the lib directory under the Perl5 source tree.  On my machine Perl is
-    under:
-	/opt/perl5.001n
-    so my PERL5LIB would be temporarily set to
-	/opt/perl5.001n/lib
-
-3.  Run the cdkdemo script.  If everything is OK, you should see the main
-    screen to the cdkdemo script.
-
-4.  Install the new version of Perl.  Change directories into the source tree
-    and make install. 
-
-5.  Revert your PERL5LIB environment variable to whatever it was before.
-
-Miscellaneous:
--------------
-
-The cdkdemo script has a full complement of help on how to build Cdk Perl
-scripts. If you want some more examples, look under the examples directory
-in this distribution. There is an example for each widget.
-
-Have fun.
-
-If you want to contact me, mail me at one of the following:
-        glover@credit.erin.utoronto.ca
-        vexus@home.com
-
-The CDK Web page has several homes. They are:
-        http://members.home.net/vexus/CDK.html (official)
-        http://www.datasoft.on.ca/~cdk (Sponsored by the nice folks at Datasoft)
-
-ttfn,
-	Mike
+    demo
+	contains a few simple application programs.
+    examples
+	contains scripts which demonstrate each widget separately.
+    fulldemo
+	combines all of the widgets into a menu-driven application.
