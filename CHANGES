@@ -1,5 +1,11 @@
+2001/4/21 - Thomas Dickey <dickey@herndon4.his.com>
+===================================================
+	+ correct include-path for cdk.h (reports by Pawel Gajda
+	  <pawelg@obop.com.pl> and Ron Poulton <thok@technologist.com>)
+	+ correct missing Box parameter of drawCDKMenu (Pawel Gajda).
+
 2001/1/7 - Thomas Dickey <dickey@herndon4.his.com>
-==================================================
+===================================================
 	+ modify to work with perl 5.6.0
 	+ fix several places where functions did not return value.
 	+ modify some scripts to show nonblank character, e.g., for slider.
