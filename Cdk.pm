@@ -10,7 +10,7 @@ require AutoLoader;
 select (STDIN); $| = 1 ;
 
 # Set the version.
-$VERSION = "4.9.6";
+$VERSION = "4.9.8";
 
 # Set the diag flag off.
 $DIAGFLAG = 0;

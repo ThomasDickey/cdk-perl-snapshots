@@ -1,3 +1,4 @@
+#!../../../perl -w
 #
 # Purpose:
 #	This script demonstrates the Cdk widget set and how you can use them.

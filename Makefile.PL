@@ -15,15 +15,15 @@ use ExtUtils::MakeMaker;
 #
 WriteMakefile(
     'NAME'	=> 'Cdk',
-    'VERSION'	=> '4.9.6',
-    'LIBS'	=> ['-L/home/glover/local/lib -lcdk -lncurses'],
+    'VERSION'	=> '4.9.8',
+    'LIBS'	=> ['-L/usr/local/lib -lcdk -lncurses'],
     'DEFINE'	=> '-DHAVE_USLEEP -DHAVE_NCURSES -DHAVE_COLOR -DCDK_PERL_EXT',
-    'INC'	=> '-I/usr/include/ncurses -I/home/glover/local/include/cdk',
+    'INC'	=> '-I/usr/include/ncurses -I/usr/local/include/cdk',
     'clean'	=> {FILES => 'Makefile.old'},
 );
 
 #
-#If you want to get a hold of me mail me at one of the following:
+# If you want to talk to me mail me at one of the following:
 #        glover@credit.erin.utoronto.ca
 #        vexus@home.com
 #
