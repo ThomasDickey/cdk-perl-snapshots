@@ -1,7 +1,7 @@
 /*
  * $Author: tom $
- * $Date: 2002/07/28 19:08:31 $
- * $Revision: 1.8 $
+ * $Date: 2003/12/10 20:40:41 $
+ * $Revision: 1.18 $
  */
 
 #include <EXTERN.h>
@@ -21,12 +21,16 @@
 #define PL_sv_undef sv_undef
 #endif
 
-static char *checkChtypeKey(chtype key);
+static char * checkChtypeKey(chtype key);
+static chtype sv2chtype(SV *sv);
+static int sv2dtype(SV * sv);
+static int sv2int(SV *sv);
 
 CDKSCREEN *	GCDKSCREEN	= (CDKSCREEN *)NULL;
 WINDOW *	GCWINDOW	= (WINDOW *)NULL;
 
-#define MAKE_CHAR_MATRIX(START,INPUT,NEWARRAY,ARRAYSIZE,ARRAYLEN)	\
+/* this would be a function, except the menu widget relies on a fixed array */
+#define MAKE_MENU_MATRIX(START,INPUT,NEWARRAY,ARRAYSIZE,ARRAYLEN)	\
 	do {								\
 	   AV *array	= (AV *)SvRV((INPUT));				\
 	   int x, y;							\
@@ -49,100 +53,128 @@ WINDOW *	GCWINDOW	= (WINDOW *)NULL;
 	   (ARRAYLEN)++;						\
 	} while (0)
 
-#define MAKE_INT_ARRAY(START,INPUT,DEST,LEN)				\
-	do {								\
-	   AV *src	= (AV *)SvRV((INPUT));				\
-	   int x;							\
-									\
-	   (LEN)	= av_len(src);					\
-									\
-	   for (x=0; x <= (LEN); x++)					\
-	   {								\
-	      SV *foo		= *av_fetch(src, x, FALSE);		\
-	      (DEST)[x+(START)] = sv2int (foo);				\
-	   }								\
-	   (LEN)++;							\
-	} while (0)
+static void make_int_array(int start, SV* input, int **dest, int *destlen)
+{
+   AV *src	= (AV *)SvRV(input);
+   int length	= av_len(src) + 1;
+   int x;
 
-#define MAKE_DTYPE_ARRAY(START,INPUT,DEST,LEN)				\
-	do {								\
-	   AV *src	= (AV *)SvRV((INPUT));				\
-	   int x;							\
-									\
-	   (LEN)	= av_len(src);					\
-									\
-	   for (x=0; x <= (LEN); x++)					\
-	   {								\
-	      SV *foo		= *av_fetch(src, x, FALSE);		\
-	      (DEST)[x+(START)] = sv2dtype (foo);			\
-	   }								\
-	   (LEN)++;							\
-	} while (0)
+   if ((*dest = (int *)calloc(length + 2, sizeof(int *))) == 0)
+   {
+      croak("make_int_array(%d)", length + 2);
+   }
+   for (x=0; x < length; x++)
+   {
+      SV *foo	         = *av_fetch(src, x, FALSE);
+      (*dest)[x + start] = sv2int (foo);
+   }
+   *destlen = length;
+}
+#define MAKE_INT_ARRAY(START, INPUT, DEST, LEN) \
+	make_int_array(START, INPUT, &DEST, &LEN)
 
-#define MAKE_CHTYPE_ARRAY(START,INPUT,DEST,LEN)				\
-	do {								\
-	   AV *src	= (AV *)SvRV((INPUT));				\
-	   int x;							\
-									\
-	   (LEN)	= av_len(src);					\
-									\
-	   for (x=0; x <= (LEN); x++)					\
-	   {								\
-	      SV *foo		= *av_fetch(src, x, FALSE);		\
-	      (DEST)[x+(START)] = sv2chtype (foo);			\
-	   }								\
-	   (LEN)++;							\
-	} while (0)
+static void make_dtype_array(int start, SV *input, int **dest, int *destlen)
+{
+   AV *src	= (AV *)SvRV(input);
+   int length	= av_len(src) + 1;
+   int x;
 
-#define MAKE_CHAR_ARRAY(START,INPUT,DEST,LEN)				\
-	do {								\
-	   AV *src	= (AV *)SvRV((INPUT));				\
-	   int x;							\
-									\
-	   (LEN)	= av_len(src);					\
-									\
-	   for (x=0; x <= (LEN); x++)					\
-	   {								\
-	      SV *foo		= *av_fetch(src, x, FALSE);		\
-	      (DEST)[x+(START)] = copyChar((char *)SvPV(foo,PL_na));	\
-	   }								\
-	   (LEN)++;							\
-	} while (0)
+   if ((*dest = (int *)calloc(length + 2, sizeof(int *))) == 0)
+   {
+      croak("make_dtype_array(%d)", length + 2);
+   }
+   for (x=0; x < length; x++)
+   {
+      SV *foo		 = *av_fetch(src, x, FALSE);
+      (*dest)[x + start] = sv2dtype (foo);
+   }
+   *destlen = length;
+}
+#define MAKE_DTYPE_ARRAY(START, INPUT, DEST, LEN) \
+	make_dtype_array(START, INPUT, &DEST, &LEN)
 
-#define MAKE_TITLE(INPUT,DEST)						\
-	do {								\
-	   if (SvTYPE(SvRV(INPUT)) == SVt_PVAV)				\
-	   {								\
-	      AV *src	= (AV *)SvRV((INPUT));				\
-	      int lines = 0;						\
-	      int x, len;						\
-									\
-	      len = av_len(src);					\
-									\
-	      for (x=0; x <= len; x++)					\
-	      {								\
-		 SV *foo		= *av_fetch(src, x, FALSE);	\
-		 if (lines == 0)					\
-		 {							\
-		    sprintf ((DEST), "%s", (char *)SvPV(foo,PL_na));	\
-		 }							\
-		 else							\
-		 {							\
-		    sprintf ((DEST), "%s\n%s", (DEST), (char *)SvPV(foo,PL_na));	\
-		 }							\
-		 lines++;						\
-	      }								\
-									\
-	      if (lines == 0)						\
-	      {								\
-		 strcpy ((DEST), "");					\
-	      }								\
-	   }								\
-	   else								\
-	   {								\
-	      sprintf ((DEST), "%s", (char *)SvPV(INPUT,PL_na));		\
-	   }								\
-	} while (0)
+static void make_chtype_array(int start, SV *input, chtype **dest, int *destlen)
+{
+   AV *src	= (AV *)SvRV(input);
+   int length	= av_len(src) + 1;
+   int x;
+
+   if ((*dest = (chtype *)calloc(length + 2, sizeof(chtype *))) == 0)
+   {
+      croak("make_chtype_array(%d)", length + 2);
+   }
+   for (x=0; x < length; x++)
+   {
+      SV *foo		 = *av_fetch(src, x, FALSE);
+      (*dest)[x + start] = sv2chtype (foo);
+   }
+   *destlen = length;
+}
+#define MAKE_CHTYPE_ARRAY(START, INPUT, DEST, LEN) \
+	make_chtype_array(START, INPUT, &DEST, &LEN)
+
+static void make_char_array(int start, SV *input, char ***dest, int *destlen)
+{
+   AV *src	= (AV *)SvRV(input);
+   int length	= av_len(src) + 1;
+   int x;
+
+   if ((*dest = (char **)calloc(length + 2, sizeof(char *))) == 0)
+   {
+      croak("make_char_array(%d)", length + 2);
+   }
+   for (x=0; x < length; x++)
+   {
+      SV *foo		 = *av_fetch(src, x, FALSE);
+      (*dest)[x + start] = copyChar((char *)SvPV(foo,PL_na));
+   }
+   *destlen = length;
+}
+#define MAKE_CHAR_ARRAY(START, INPUT, DEST, LEN) \
+	make_char_array(START, INPUT, &DEST, &LEN)
+
+static void make_title(SV * input, char **dest)
+{
+   char *data;
+
+   if (SvROK(input) && SvTYPE(SvRV(input)) == SVt_PVAV)
+   {
+      AV *src	= (AV *)SvRV(input);
+      int len = av_len(src) + 1;
+      int x;
+      int length = 2;
+
+      for (x=0; x < len; x++)
+      {
+	 SV *foo = *av_fetch(src, x, FALSE);
+	 data = (char *)SvPV(foo,PL_na);
+	 length += strlen(data) + 1;
+      }
+      *dest = malloc(length);
+      if (*dest == 0)
+	 croak("make_title");
+
+      **dest = '\0';
+      for (x=0; x < len; x++)
+      {
+	 SV *foo = *av_fetch(src, x, FALSE);
+	 data = (char *)SvPV(foo,PL_na);
+	 if (x != 0)
+	    strcat(*dest, "\n");
+	 strcat(*dest, data);
+      }
+   }
+   else
+   {
+      data = (char *)SvPV(input,PL_na);
+      *dest = malloc(strlen(data) + 1);
+      if (*dest == 0)
+	 croak("make_title");
+      strcpy (*dest, data);
+   }
+}
+#define MAKE_TITLE(INPUT, DEST) \
+	make_title(INPUT, &DEST)
 
 /*
  * The callback callback to run Perl callback routines. Are you confused???
@@ -248,7 +280,7 @@ int PerlProcessCB (EObjectType cdktype, void *object, void *data, chtype input)
    return returnValue;
 }
 
-void checkCdkInit()
+void checkCdkInit(void)
 {
    if (GCDKSCREEN == (CDKSCREEN *)NULL)
    {
@@ -257,8 +289,7 @@ void checkCdkInit()
 }
 
 static char *
-checkChtypeKey(key)
-chtype key;
+checkChtypeKey(chtype key)
 {
    char *result = 0;
 
@@ -288,11 +319,24 @@ chtype key;
    return result;
 }
 
-static chtype
-sv2chtype(sv)
-SV *sv;
+static int
+sv2integer(SV *sv, int invalid)
 {
-   bool found = TRUE;
+   char *from = SvPV(sv,PL_na);
+   char mark;
+   int result;
+
+   if (sscanf(from, "%d%c", &result, &mark) != 1)
+   {
+      result = invalid;
+   }
+   return result;
+}
+
+static chtype
+sv2chtype(SV *sv)
+{
+   bool found = FALSE;
    chtype result = 0;
 
    if (SvPOK(sv))
@@ -301,6 +345,7 @@ SV *sv;
       chtype *fillerChtype;
       int j1, j2;
 
+      found = TRUE;
       if (strEQ(name, "ACS_BTEE"))
 	  result = ACS_BTEE;
       else if (strEQ(name, "ACS_HLINE"))
@@ -599,21 +644,22 @@ SV *sv;
    }
    if (!found)
    {
-      result = (chtype)SvIV(sv);
+      result = (chtype)sv2integer(sv, 0);
    }
    return result;
 }
 
 static int
-sv2dtype(sv)
-SV * sv;
+sv2dtype(SV * sv)
 {
-   bool found = TRUE;
+   bool found = FALSE;
    int result = vINVALID;
 
    if (SvPOK(sv))
    {
       char *name = SvPV(sv,PL_na);
+
+      found = TRUE;
       if (strEQ (name, "CHAR"))
 	 result = vCHAR;
       else if (strEQ (name, "HCHAR"))
@@ -659,21 +705,22 @@ SV * sv;
    }
    if (!found)
    {
-      result = (int)SvIV(sv);
+      result = sv2integer(sv, vINVALID);
    }
    return result;
 }
 
 static int
-sv2int(sv)
-SV *sv;
+sv2int(SV *sv)
 {
-   bool found = TRUE;
+   bool found = FALSE;
    int result = 0;
 
    if (SvPOK(sv))
    {
       char *name = SvPV(sv,PL_na);
+
+      found = TRUE;
       if (strEQ(name, "BOTTOM"))
 	 result = BOTTOM;
       else if (strEQ(name, "CENTER"))
@@ -708,30 +755,28 @@ SV *sv;
 	 found = FALSE;
    }
    if (!found)
-      result = (int)SvIV(sv);
+   {
+      result = sv2integer(sv, 0);
+   }
    return result;
 }
 
 static char *
-sv2CharPtr(inp)
-SV *inp;
+sv2CharPtr(SV *inp)
 {
    char *name = (char *)SvPV(inp,PL_na);
    return (name);
 }
 
 static int
-not_here(s)
-char *s;
+not_here(char *s)
 {
     croak("%s not implemented on this architecture", s);
     return -1;
 }
 
 static double
-constant(name, arg)
-char *name;
-int arg;
+constant(char *name, int arg)
 {
     errno = 0;
     switch (*name) {
@@ -941,16 +986,17 @@ New(mesg,xPos=CENTER,yPos=CENTER,box=TRUE,shadow=FALSE)
 	CODE:
 	{
 	   CDKLABEL *	widget = (CDKLABEL *)NULL;
-	   char *	message[MAX_LINES];
+	   char **	message;
 	   int		messageLines;
 
 	   checkCdkInit();
 
-	   MAKE_CHAR_ARRAY (0,mesg,message,messageLines);
+	   MAKE_CHAR_ARRAY (0, mesg, message, messageLines);
 
-	   widget = newCDKLabel (GCDKSCREEN,xPos,yPos,
-					message,messageLines,
-					box,shadow);
+	   widget = newCDKLabel (GCDKSCREEN, xPos, yPos,
+					message, messageLines,
+					box, shadow);
+	   free (message);
 
 	   /* Check the return value. */
 	   if (widget == (CDKLABEL *)NULL)
@@ -971,12 +1017,12 @@ SetMessage(object,mesg)
 	SV *		mesg
 	CODE:
 	{
-	   char *	message[MAX_LINES];
+	   char **	message;
 	   int		messageLines;
 
-	   MAKE_CHAR_ARRAY (0,mesg,message,messageLines);
-
-	   setCDKLabelMessage (object,message,messageLines);
+	   MAKE_CHAR_ARRAY (0, mesg, message, messageLines);
+	   setCDKLabelMessage (object, message, messageLines);
+	   free (message);
 	}
 
 void
@@ -1145,21 +1191,23 @@ New(message,buttons,xPos=CENTER,yPos=CENTER,highlight=A_REVERSE,seperator=TRUE,B
 	CODE:
 	{
 	   CDKDIALOG *	dialogWidget = (CDKDIALOG *)NULL;
-	   char *	Message[MAX_DIALOG_ROWS];
-	   char *	Buttons[MAX_DIALOG_BUTTONS];
+	   char **	Message;
+	   char **	Buttons;
 	   int		buttonCount;
 	   int		rowCount;
 
 	   checkCdkInit();
 
-	   MAKE_CHAR_ARRAY (0,message,Message,rowCount);
-	   MAKE_CHAR_ARRAY (0,buttons,Buttons,buttonCount);
+	   MAKE_CHAR_ARRAY (0, message, Message, rowCount);
+	   MAKE_CHAR_ARRAY (0, buttons, Buttons, buttonCount);
 
 	   dialogWidget = newCDKDialog (GCDKSCREEN,xPos,yPos,
 					Message,rowCount,
 					Buttons,buttonCount,
 					highlight,seperator,
 					Box,shadow);
+	   free (Message);
+	   free (Buttons);
 
 	   /* Check the return type. */
 	   if (dialogWidget == (CDKDIALOG *)NULL)
@@ -1179,15 +1227,15 @@ Activate(object,...)
 	CDKDIALOG *	object
 	CODE:
 	{
-	   chtype Keys[300];
-	   int arrayLen;
-	   int value;
+	   chtype *	Keys;
+	   int		arrayLen;
+	   int		value;
 
 	   if (items > 1)
 	   {
-	      MAKE_CHTYPE_ARRAY(0,ST(1),Keys,arrayLen);
-
+	      MAKE_CHTYPE_ARRAY(0, ST(1), Keys, arrayLen);
 	      value = activateCDKDialog (object, Keys);
+	      free (Keys);
 	   }
 	   else
 	   {
@@ -1430,22 +1478,23 @@ New (title,mesg,height,width,xPos=CENTER,yPos=CENTER,sPos=RIGHT,numbers=TRUE,hig
 	int	shadow = sv2int ($arg);
 	CODE:
 	{
-	   CDKSCROLL * scrollWidget = (CDKSCROLL *)NULL;
-	   char *Message[MAX_ITEMS];
-	   char Title[1000];
-	   int mesglen;
+	   CDKSCROLL *	scrollWidget = 0;
+	   char **	Message;
+	   char *	Title;
+	   int		mesglen;
 
 	   checkCdkInit();
 
-	   MAKE_CHAR_ARRAY(0,mesg,Message,mesglen);
-	   Message[mesglen] = "";
+	   MAKE_CHAR_ARRAY(0, mesg, Message, mesglen);
 	   MAKE_TITLE (title,Title);
 
-	   scrollWidget = newCDKScroll (GCDKSCREEN,xPos,yPos,sPos,
-					height,width,
-					Title,Message,mesglen,
-					numbers,highlight,
-					Box,shadow);
+	   scrollWidget = newCDKScroll (GCDKSCREEN, xPos, yPos, sPos,
+					height, width,
+					Title, Message, mesglen,
+					numbers, highlight,
+					Box, shadow);
+	   free (Message);
+	   free (Title);
 
 	   /* Check the return type. */
 	   if (scrollWidget == (CDKSCROLL *)NULL)
@@ -1465,15 +1514,15 @@ Activate(object,...)
 	CDKSCROLL *	object
 	CODE:
 	{
-	   chtype Keys[300];
-	   int arrayLen;
-	   int value;
+	   chtype *	Keys;
+	   int		arrayLen;
+	   int		value;
 
 	   if (items > 1)
 	   {
-	      MAKE_CHTYPE_ARRAY(0,ST(1),Keys,arrayLen);
-
+	      MAKE_CHTYPE_ARRAY(0, ST(1), Keys, arrayLen);
 	      value = activateCDKScroll (object, Keys);
+	      free (Keys);
 	   }
 	   else
 	   {
@@ -1595,13 +1644,12 @@ SetItems(object,items,numbers=FALSE)
 	int		numbers = sv2int ($arg);
 	CODE:
 	{
-	   char *Items[MAX_ITEMS];
-	   int itemLength;
+	   char **	Items;
+	   int		itemLength;
 
-	   MAKE_CHAR_ARRAY(0,items,Items,itemLength);
-	   Items[itemLength] = "";
-
-	   setCDKScrollItems (object,Items,itemLength,numbers);
+	   MAKE_CHAR_ARRAY(0, items, Items, itemLength);
+	   setCDKScrollItems (object, Items, itemLength, numbers);
+	   free (Items);
 	}
 
 void
@@ -1755,8 +1803,8 @@ New(title,label,start,low,high,inc,fastinc,fieldwidth,xPos=CENTER,yPos=CENTER,fi
 	int	shadow = sv2int ($arg);
 	CODE:
 	{
-	   CDKSCALE * scaleWidget = (CDKSCALE *)NULL;
-	   char Title[1000];
+	   CDKSCALE *	scaleWidget = (CDKSCALE *)NULL;
+	   char *	Title;
 
 	   checkCdkInit();
 
@@ -1767,6 +1815,7 @@ New(title,label,start,low,high,inc,fastinc,fieldwidth,xPos=CENTER,yPos=CENTER,fi
 					fieldattr,fieldwidth,
 					start,low,high,inc,fastinc,
 					Box,shadow);
+	   free (Title);
 
 	   /* Check the return type. */
 	   if (scaleWidget == (CDKSCALE *)NULL)
@@ -1786,14 +1835,15 @@ Activate(object,...)
 	CDKSCALE *	object
 	CODE:
 	{
-	   chtype Keys[300];
-	   int arrayLen;
-	   int value;
+	   chtype *	Keys;
+	   int		arrayLen;
+	   int		value;
 
 	   if (items > 1)
 	   {
-	      MAKE_CHTYPE_ARRAY(0,ST(1),Keys,arrayLen);
+	      MAKE_CHTYPE_ARRAY(0, ST(1), Keys, arrayLen);
 	      value = activateCDKScale (object, Keys);
+	      free (Keys);
 	   }
 	   else
 	   {
@@ -2036,13 +2086,15 @@ New(title,height,width,orient=HORIZONTAL,xPos=CENTER,yPos=CENTER,Box=TRUE,shadow
 	CODE:
 	{
 	   CDKHISTOGRAM * histWidget = (CDKHISTOGRAM *)NULL;
-	   char Title[1000];
+	   char *	Title;
 
 	   checkCdkInit();
 
 	   MAKE_TITLE (title,Title);
 
 	   histWidget = newCDKHistogram (GCDKSCREEN,xPos,yPos,height,width,orient,Title,Box,shadow);
+
+	   free (Title);
 
 	   /* Check the return type. */
 	   if (histWidget == (CDKHISTOGRAM *)NULL)
@@ -2259,7 +2311,7 @@ GetWindow(object)
 MODULE	= Cdk	PACKAGE = Cdk::Menu
 
 CDKMENU *
-New(menulist,menuloc,titleattr=A_REVERSE,subtitleattr=A_REVERSE,menuPos=TOP)
+New(menulist, menuloc, titleattr=A_REVERSE, subtitleattr=A_REVERSE, menuPos=TOP)
 	SV *	menulist
 	SV *	menuloc
 	chtype	titleattr = sv2chtype ($arg);
@@ -2267,23 +2319,24 @@ New(menulist,menuloc,titleattr=A_REVERSE,subtitleattr=A_REVERSE,menuPos=TOP)
 	int	menuPos = sv2int ($arg);
 	CODE:
 	{
-	   char *menuList[MAX_MENU_ITEMS][MAX_SUB_ITEMS];
-	   int	subSize[MAX_SUB_ITEMS];
-	   int	menuLoc[MAX_MENU_ITEMS];
-	   int	menulen, loclen;
+	   char *	menuList[MAX_MENU_ITEMS][MAX_SUB_ITEMS];
+	   int		subSize[MAX_SUB_ITEMS];
+	   int *	menuLoc;
+	   int		menulen;
+	   int		loclen;
 
 	   checkCdkInit();
 
-	   MAKE_CHAR_MATRIX(0,menulist,menuList,subSize,menulen);
+	   MAKE_MENU_MATRIX(0, menulist, menuList, subSize, menulen);
 
-	   MAKE_INT_ARRAY (0,menuloc,menuLoc,loclen);
-
+	   MAKE_INT_ARRAY (0, menuloc, menuLoc, loclen);
 	   if (menulen != loclen)
 	   {
 	      croak ("Cdk::Menu The menu list and menu location arrays are not the same size.");
 	   }
-
 	   RETVAL = newCDKMenu (GCDKSCREEN,menuList,menulen,subSize,menuLoc,menuPos,titleattr,subtitleattr);
+
+	   free (menuLoc);
 	}
 	OUTPUT:
 	   RETVAL
@@ -2293,15 +2346,15 @@ Activate(object,...)
 	CDKMENU *	object
 	CODE:
 	{
-	   chtype Keys[300];
-	   int arrayLen;
-	   int value;
+	   chtype *	Keys;
+	   int		arrayLen;
+	   int		value;
 
 	   if (items > 1)
 	   {
-	      MAKE_CHTYPE_ARRAY(0,ST(1),Keys,arrayLen);
-
+	      MAKE_CHTYPE_ARRAY(0, ST(1), Keys, arrayLen);
 	      value = activateCDKMenu (object, Keys);
+	      free (Keys);
 	   }
 	   else
 	   {
@@ -2473,8 +2526,8 @@ New(title,label,min,max,fieldWidth,filler=".",disptype=vMIXED,xPos=CENTER,yPos=C
 	int		shadow = sv2int ($arg);
 	CODE:
 	{
-	   CDKENTRY * entryWidget = (CDKENTRY *)NULL;
-	   char Title[1000];
+	   CDKENTRY *	entryWidget = (CDKENTRY *)NULL;
+	   char *	Title;
 
 	   checkCdkInit();
 
@@ -2485,6 +2538,7 @@ New(title,label,min,max,fieldWidth,filler=".",disptype=vMIXED,xPos=CENTER,yPos=C
 					fieldattr,filler,disptype,
 					fieldWidth,min,max,
 					Box,shadow);
+	   free (Title);
 
 	   /* Check the return type. */
 	   if (entryWidget == (CDKENTRY *)NULL)
@@ -2504,15 +2558,15 @@ Activate(object,...)
 	CDKENTRY *	object
 	CODE:
 	{
-	   chtype Keys[300];
-	   int arrayLen;
-	   char *value;
+	   chtype *	Keys;
+	   int		arrayLen;
+	   char *	value;
 
 	   if (items > 1)
 	   {
-	      MAKE_CHTYPE_ARRAY(0,ST(1),Keys,arrayLen);
-
+	      MAKE_CHTYPE_ARRAY(0, ST(1), Keys, arrayLen);
 	      value = activateCDKEntry (object, Keys);
+	      free (Keys);
 	   }
 	   else
 	   {
@@ -2802,8 +2856,8 @@ New(title,label,min,physical,logical,fieldWidth,disptype=vMIXED,filler=".",xPos=
 	int		shadow = sv2int ($arg);
 	CODE:
 	{
-	   CDKMENTRY * mentryWidget = (CDKMENTRY *)NULL;
-	   char Title[1000];
+	   CDKMENTRY *	mentryWidget = (CDKMENTRY *)NULL;
+	   char *	Title;
 
 	   checkCdkInit();
 
@@ -2815,6 +2869,7 @@ New(title,label,min,physical,logical,fieldWidth,disptype=vMIXED,filler=".",xPos=
 					disptype,fieldWidth,
 					physical,logical,min,
 					Box,shadow);
+	   free (Title);
 
 	   /* Check the return type. */
 	   if (mentryWidget == (CDKMENTRY *)NULL)
@@ -2834,15 +2889,15 @@ Activate(object,...)
 	CDKMENTRY *	object
 	CODE:
 	{
-	   chtype Keys[300];
-	   int arrayLen;
-	   char *value;
+	   chtype *	Keys;
+	   int		arrayLen;
+	   char *	value;
 
 	   if (items > 1)
 	   {
-	      MAKE_CHTYPE_ARRAY(0,ST(1),Keys,arrayLen);
-
+	      MAKE_CHTYPE_ARRAY(0, ST(1), Keys, arrayLen);
 	      value = activateCDKMentry (object, Keys);
+	      free (Keys);
 	   }
 	   else
 	   {
@@ -3126,20 +3181,20 @@ New(title,rowtitles,coltitles,colwidths,coltypes,vrows,vcols,xPos=CENTER,yPos=CE
 	CODE:
 	{
 	   CDKMATRIX * matrixWidget = (CDKMATRIX *)NULL;
-	   char *colTitles[MAX_MATRIX_COLS+1];
-	   char *rowTitles[MAX_MATRIX_ROWS+1];
-	   int	colWidths[MAX_MATRIX_COLS+1];
-	   int	colTypes[MAX_MATRIX_COLS+1];
+	   char **	colTitles;
+	   char **	rowTitles;
+	   char *	Title;
+	   int *	colWidths;
+	   int *	colTypes;
 	   int	rows, cols, widths, dtype;
-	   char Title[1000];
 
 	   checkCdkInit();
 
 	   /* Make the arrays. */
-	   MAKE_CHAR_ARRAY (1,rowtitles,rowTitles,rows);
-	   MAKE_CHAR_ARRAY (1,coltitles,colTitles,cols);
-	   MAKE_INT_ARRAY (1,colwidths,colWidths,widths);
-	   MAKE_DTYPE_ARRAY (1,coltypes,colTypes,dtype);
+	   MAKE_CHAR_ARRAY (1, rowtitles, rowTitles, rows);
+	   MAKE_CHAR_ARRAY (1, coltitles, colTitles, cols);
+	   MAKE_INT_ARRAY (1, colwidths, colWidths, widths);
+	   MAKE_DTYPE_ARRAY (1, coltypes, colTypes, dtype);
 	   MAKE_TITLE (title,Title);
 
 	   /* Now check them... */
@@ -3158,15 +3213,15 @@ New(title,rowtitles,coltitles,colwidths,coltypes,vrows,vcols,xPos=CENTER,yPos=CE
 
 	   /* OK, everything is ok. Lets make the matrix. */
 	   matrixWidget = newCDKMatrix (GCDKSCREEN,
-						xPos, yPos,
-						rows, cols,
-						vrows, vcols,
-						Title, rowTitles,
-						colTitles,
-						colWidths, colTypes,
-						rowspace, colspace, filler,
-						dominant,
-						boxMatrix, boxCell, shadow);
+					xPos, yPos,
+					rows, cols,
+					vrows, vcols,
+					Title, rowTitles,
+					colTitles,
+					colWidths, colTypes,
+					rowspace, colspace, filler,
+					dominant,
+					boxMatrix, boxCell, shadow);
 
 	   /* Check the return type. */
 	   if (matrixWidget == (CDKMATRIX *)NULL)
@@ -3177,6 +3232,11 @@ New(title,rowtitles,coltitles,colwidths,coltypes,vrows,vcols,xPos=CENTER,yPos=CE
 	   {
 	      RETVAL = matrixWidget;
 	   }
+	   free (colTitles);
+	   free (rowTitles);
+	   free (colWidths);
+	   free (colTypes);
+	   free (Title);
 	}
 	OUTPUT:
 	   RETVAL
@@ -3186,15 +3246,15 @@ Activate(object,...)
 	CDKMATRIX *	object
 	PPCODE:
 	{
-	   AV *cellInfo = newAV();
+	   AV *		cellInfo = newAV();
+	   chtype *	Keys;
 	   int x, y, value, arrayLen;
-	   chtype Keys[300];
 
 	   if (items > 1)
 	   {
-	      MAKE_CHTYPE_ARRAY(0,ST(1),Keys,arrayLen);
-
+	      MAKE_CHTYPE_ARRAY(0, ST(1), Keys, arrayLen);
 	      value = activateCDKMatrix (object, Keys);
+	      free (Keys);
 	   }
 	   else
 	   {
@@ -3215,7 +3275,8 @@ Activate(object,...)
 
 	      for (y=1; y <= object->cols; y++)
 	      {
-		 av_push (av, newSVpv (object->info[x][y], strlen (object->info[x][y])));
+		 char *data = object->info[CELL_INDEX(object,x,y)];
+		 av_push (av, newSVpv (data, strlen (data)));
 	      }
 
 	      av_push (cellInfo, newRV((SV *)av));
@@ -3310,13 +3371,50 @@ Set(object,info)
 	SV *		info
 	CODE:
 	{
-	   char *	Info[MAX_MATRIX_ROWS][MAX_MATRIX_COLS];
-	   int		subSize[MAX_MATRIX_ROWS];
+	   char **	Info;
+	   int *	subSize;
 	   int		matrixlen;
+	   int		width = 1;
 
-	   MAKE_CHAR_MATRIX (1,info,Info,subSize,matrixlen);
+	   AV *array	= (AV *)SvRV(info);
+	   int x, y;
 
-	   setCDKMatrix (object,Info,matrixlen,subSize);
+	   matrixlen	= av_len (array) + 1;
+	   subSize	= (int *)calloc(matrixlen + 2, sizeof(int));
+
+	   if (subSize != 0)
+	   {
+	      for (x = 1; x <= matrixlen; x++)
+	      {
+		 SV *name		= *av_fetch(array, x - 1, FALSE);
+		 AV *subArray	= (AV *)SvRV(name);
+		 int subLen	= av_len (subArray) + 1;
+		 width = MAXIMUM(width, subLen);
+	      }
+	      Info = (char **)calloc((width + 1) * (matrixlen + 1), sizeof(char *));
+
+	      if (Info != 0)
+	      {
+		 for (x = 1; x <= matrixlen; x++)
+		 {
+		    SV *name		= *av_fetch(array, x - 1, FALSE);
+		    AV *subArray	= (AV *)SvRV(name);
+		    int subLen	= av_len (subArray) + 1;
+		    subSize[x]	= subLen;
+
+		    for (y=1; y <= subLen; y++)
+		    {
+		       SV *sv = *av_fetch(subArray, y - 1, FALSE);
+		       Info[x * (matrixlen + 1) + y] = copyChar((char *)SvPV(sv,PL_na));
+		    }
+		 }
+
+		 setCDKMatrixCells (object, Info, matrixlen, width, subSize);
+
+		 free (Info);
+	      }
+	      free (subSize);
+	   }
 	}
 
 void
@@ -3696,20 +3794,25 @@ New(title,list,choices,height,width,xPos=CENTER,yPos=CENTER,sPos=RIGHT,highlight
 	CODE:
 	{
 	   CDKSELECTION * selectionWidget = (CDKSELECTION *)NULL;
-	   char *List[MAX_ITEMS], *Choices[MAX_ITEMS], Title[1000];
+	   char **	List;
+	   char **	Choices;
+	   char *	Title;
 	   int listSize, choiceSize;
 
 	   checkCdkInit();
 
-	   MAKE_CHAR_ARRAY(0,list,List,listSize);
-	   MAKE_CHAR_ARRAY(0,choices,Choices,choiceSize);
+	   MAKE_CHAR_ARRAY(0, list, List, listSize);
+	   MAKE_CHAR_ARRAY(0, choices, Choices, choiceSize);
 	   MAKE_TITLE (title,Title);
 
-	   selectionWidget = newCDKSelection (GCDKSCREEN,xPos,yPos,sPos,
-						height,width,
-						Title,List,listSize,
-						Choices,choiceSize,
-						highlight,Box,shadow);
+	   selectionWidget = newCDKSelection (GCDKSCREEN, xPos, yPos, sPos,
+						height, width,
+						Title, List, listSize,
+						Choices, choiceSize,
+						highlight, Box, shadow);
+	   free (List);
+	   free (Choices);
+	   free (Title);
 
 	   /* Check the return type. */
 	   if (selectionWidget == (CDKSELECTION *)NULL)
@@ -3729,15 +3832,15 @@ Activate(object,...)
 	CDKSELECTION *	object
 	PPCODE:
 	{
-	   chtype Keys[300];
+	   chtype *	Keys;
 	   int arrayLen;
 	   int value, x;
 
 	   if (items > 1)
 	   {
-	      MAKE_CHTYPE_ARRAY(0,ST(1),Keys,arrayLen);
-
+	      MAKE_CHTYPE_ARRAY(0, ST(1), Keys, arrayLen);
 	      value = activateCDKSelection (object, Keys);
+	      free (Keys);
 	   }
 	   else
 	   {
@@ -3840,12 +3943,12 @@ SetChoices(object,choices)
 	SV *		choices
 	CODE:
 	{
-	   int defaultChoices[MAX_CHOICES];
-	   int choiceLength;
+	   int *	defaultChoices;
+	   int		choiceLength;
 
-	   MAKE_INT_ARRAY (0,choices,defaultChoices,choiceLength);
-
+	   MAKE_INT_ARRAY (0, choices, defaultChoices, choiceLength);
 	   setCDKSelectionChoices (object,defaultChoices);
+	   free (defaultChoices);
 	}
 
 void
@@ -3864,12 +3967,12 @@ SetModes(object,modes)
 	SV *		modes
 	CODE:
 	{
-	   int Modes[MAX_CHOICES];
-	   int modeLength;
+	   int *	Modes;
+	   int		modeLength;
 
-	   MAKE_INT_ARRAY (0,modes,Modes,modeLength);
-
+	   MAKE_INT_ARRAY (0, modes, Modes, modeLength);
 	   setCDKSelectionModes (object,Modes);
+	   free (Modes);
 	}
 
 void
@@ -4019,18 +4122,19 @@ New(buttons,height,width,buttonHighlight=A_REVERSE,xpos=CENTER,ypos=CENTER,Box=T
 	int	shadow = sv2int ($arg);
 	CODE:
 	{
-	   CDKVIEWER * viewerWidget = (CDKVIEWER *)NULL;
-	   char *Buttons[MAX_BUTTONS];
-	   int buttonCount;
+	   CDKVIEWER *	viewerWidget = (CDKVIEWER *)NULL;
+	   char **	Buttons;
+	   int		buttonCount;
 
 	   checkCdkInit();
 
-	   MAKE_CHAR_ARRAY (0,buttons,Buttons,buttonCount);
+	   MAKE_CHAR_ARRAY (0, buttons, Buttons, buttonCount);
 
-	   viewerWidget = newCDKViewer (GCDKSCREEN,xpos,ypos,
-					height,width,
-					Buttons,buttonCount,
-					buttonHighlight,Box,shadow);
+	   viewerWidget = newCDKViewer (GCDKSCREEN, xpos, ypos,
+					height, width,
+					Buttons, buttonCount,
+					buttonHighlight, Box, shadow);
+	   free (Buttons);
 
 	   /* Check the return type. */
 	   if (viewerWidget == (CDKVIEWER *)NULL)
@@ -4069,13 +4173,12 @@ SetInfo(object,info,interpret=TRUE)
 	int		interpret = sv2int ($arg);
 	CODE:
 	{
-	   char *Info[MAX_LINES];
-	   int infolen;
+	   char **	Info;
+	   int		infolen;
 
-	   MAKE_CHAR_ARRAY(0,info, Info, infolen);
-	   Info[infolen] = "";
-
-	   setCDKViewerInfo (object,Info,infolen,interpret);
+	   MAKE_CHAR_ARRAY(0, info, Info, infolen);
+	   setCDKViewerInfo (object, Info, infolen, interpret);
+	   free (Info);
 	}
 
 void
@@ -4269,14 +4372,16 @@ New(title,xtitle,ytitle,height,width,xpos=CENTER,ypos=CENTER)
 	int	ypos = sv2int ($arg);
 	CODE:
 	{
-	   CDKGRAPH * graphWidget = (CDKGRAPH *)NULL;
-	   char Title[1000];
+	   CDKGRAPH *	graphWidget = (CDKGRAPH *)NULL;
+	   char *	Title;
 
 	   checkCdkInit();
 
 	   MAKE_TITLE (title,Title);
 
 	   graphWidget = newCDKGraph (GCDKSCREEN,xpos,ypos,height,width,Title,xtitle,ytitle);
+
+	   free (Title);
 
 	   /* Check the return type. */
 	   if (graphWidget == (CDKGRAPH *)NULL)
@@ -4298,12 +4403,12 @@ SetValues(object,values,startAtZero=TRUE)
 	int			startAtZero = sv2int ($arg);
 	CODE:
 	{
-	   int	Values[MAX_LINES];
-	   int	valueCount;
+	   int *	Values;
+	   int		valueCount;
 
-	   MAKE_INT_ARRAY (0,values,Values,valueCount);
-
+	   MAKE_INT_ARRAY (0, values, Values, valueCount);
 	   RETVAL = setCDKGraphValues (object,Values,valueCount,startAtZero);
+	   free (Values);
 	}
 	OUTPUT:
 	   RETVAL
@@ -4491,14 +4596,12 @@ New(title,list,height,width,xPos=CENTER,yPos=CENTER,sPos=RIGHT,choice="X",defaul
 	int	shadow = sv2int ($arg);
 	CODE:
 	{
-	   CDKRADIO * radioWidget = (CDKRADIO *)NULL;
-	   char *List[MAX_ITEMS];
-	   char Title[1000];
+	   CDKRADIO *	radioWidget = (CDKRADIO *)NULL;
+	   char **	List;
+	   char *	Title;
 	   int listlen;
 
-	   MAKE_CHAR_ARRAY(0,list,List,listlen);
-	   List[listlen] = "";
-
+	   MAKE_CHAR_ARRAY(0, list, List, listlen);
 	   MAKE_TITLE (title,Title);
 
 	   radioWidget = newCDKRadio (GCDKSCREEN,xPos,yPos,sPos,
@@ -4506,6 +4609,8 @@ New(title,list,height,width,xPos=CENTER,yPos=CENTER,sPos=RIGHT,choice="X",defaul
 					List,listlen,
 					choice,defaultItem,
 					highlight,Box,shadow);
+	   free (List);
+	   free (Title);
 
 	   /* Check the return type. */
 	   if (radioWidget == (CDKRADIO *)NULL)
@@ -4525,15 +4630,15 @@ Activate(object,...)
 	CDKRADIO *	object
 	CODE:
 	{
-	   chtype Keys[300];
+	   chtype *	Keys;
 	   int arrayLen;
 	   int value;
 
 	   if (items > 1)
 	   {
-	      MAKE_CHTYPE_ARRAY(0,ST(1),Keys,arrayLen);
-
+	      MAKE_CHTYPE_ARRAY(0, ST(1), Keys, arrayLen);
 	      value = activateCDKRadio (object, Keys);
+	      free (Keys);
 	   }
 	   else
 	   {
@@ -4792,7 +4897,7 @@ New(title,label,plate,overlay,xpos=CENTER,ypos=CENTER,Box=TRUE,shadow=FALSE)
 	CODE:
 	{
 	   CDKTEMPLATE * templateWidget = (CDKTEMPLATE *)NULL;
-	   char Title[1000];
+	   char *	Title;
 
 	   checkCdkInit();
 
@@ -4802,6 +4907,7 @@ New(title,label,plate,overlay,xpos=CENTER,ypos=CENTER,Box=TRUE,shadow=FALSE)
 						Title,label,
 						plate,overlay,
 						Box,shadow);
+	   free (Title);
 
 	   /* Check the return type. */
 	   if (templateWidget == (CDKTEMPLATE *)NULL)
@@ -4821,15 +4927,15 @@ Activate(object,...)
 	CDKTEMPLATE *	object
 	CODE:
 	{
-	   chtype Keys[300];
+	   chtype *	Keys;
 	   int arrayLen;
 	   char *value;
 
 	   if (items > 1)
 	   {
-	      MAKE_CHTYPE_ARRAY(0,ST(1),Keys,arrayLen);
-
+	      MAKE_CHTYPE_ARRAY(0, ST(1), Keys, arrayLen);
 	      value = activateCDKTemplate (object, Keys);
+	      free (Keys);
 	   }
 	   else
 	   {
@@ -5097,15 +5203,16 @@ New(title,savelines,height,width,xpos=CENTER,ypos=CENTER,box=TRUE,shadow=FALSE)
 	int	shadow = sv2int ($arg);
 	CODE:
 	{
-	   CDKSWINDOW * swindowWidget = (CDKSWINDOW *)NULL;
-	   char Title[1000];
+	   CDKSWINDOW *	swindowWidget = (CDKSWINDOW *)NULL;
+	   char *	Title;
 
-	   MAKE_TITLE (title, Title);
+	   MAKE_TITLE (title,Title);
 
 	   swindowWidget = newCDKSwindow (GCDKSCREEN,xpos,ypos,
 						height,width,
 						Title,savelines,
 						box,shadow);
+	   free (Title);
 
 	   /* Check the return type. */
 	   if (swindowWidget == (CDKSWINDOW *)NULL)
@@ -5125,13 +5232,14 @@ Activate(object,...)
 	CDKSWINDOW *	object
 	CODE:
 	{
-	   chtype Keys[300];
+	   chtype *	Keys;
 	   int arrayLen;
 
 	   if (items > 1)
 	   {
-	      MAKE_CHTYPE_ARRAY(0,ST(1),Keys,arrayLen);
+	      MAKE_CHTYPE_ARRAY(0, ST(1), Keys, arrayLen);
 	      activateCDKSwindow (object, Keys);
+	      free (Keys);
 	   }
 	   else
 	   {
@@ -5196,13 +5304,12 @@ SetContents(object,info)
 	SV *		info
 	CODE:
 	{
-	   char *Loginfo[MAX_ITEMS];
-	   int infolen;
+	   char **	Loginfo;
+	   int		infolen;
 
-	   MAKE_CHAR_ARRAY(0,info,Loginfo,infolen);
-	   Loginfo[infolen] = "";
-
-	   setCDKSwindowContents (object,Loginfo,infolen);
+	   MAKE_CHAR_ARRAY(0, info, Loginfo, infolen);
+	   setCDKSwindowContents (object, Loginfo, infolen);
+	   free (Loginfo);
 	}
 
 void
@@ -5327,10 +5434,10 @@ Get(object)
 	   char *temp;
 
 	   /* Push each item onto the stack.		*/
-	   for (x=0; x < object->itemCount ; x++)
+	   for (x=0; x < object->listSize ; x++)
 	   {
 	      /* We need to convert from chtype to char */
-	      temp = chtype2Char (object->info[x]);
+	      temp = chtype2Char (object->list[x]);
 
 	      /* Push it on the stack.			*/
 	      XPUSHs (sv_2mortal(newSVpv(temp, strlen(temp))));
@@ -5446,19 +5553,21 @@ New(title,label,itemlist,defaultItem=0,xpos=CENTER,ypos=CENTER,box=TRUE,shadow=F
 	CODE:
 	{
 	   CDKITEMLIST * itemlistWidget = (CDKITEMLIST *)NULL;
-	   char		Title[1000];
-	   char *	Itemlist[MAX_LINES];
+	   char *	Title;
+	   char **	Itemlist;
 	   int		itemLength;
 
 	   checkCdkInit();
 
-	   MAKE_CHAR_ARRAY (0,itemlist,Itemlist,itemLength);
+	   MAKE_CHAR_ARRAY (0, itemlist, Itemlist, itemLength);
 	   MAKE_TITLE (title,Title);
 
 	   itemlistWidget = newCDKItemlist (GCDKSCREEN,xpos,ypos,
 						Title,label,
 						Itemlist,itemLength,
 						defaultItem,box,shadow);
+	   free (Itemlist);
+	   free (Title);
 
 	   /* Check the return type. */
 	   if (itemlistWidget == (CDKITEMLIST *)NULL)
@@ -5478,15 +5587,15 @@ Activate(object,...)
 	CDKITEMLIST *	object
 	CODE:
 	{
-	   chtype Keys[300];
+	   chtype *	Keys;
 	   int arrayLen;
 	   int value;
 
 	   if (items > 1)
 	   {
-	      MAKE_CHTYPE_ARRAY(0,ST(1),Keys,arrayLen);
-
+	      MAKE_CHTYPE_ARRAY(0, ST(1), Keys, arrayLen);
 	      value = activateCDKItemlist (object, Keys);
+	      free (Keys);
 	   }
 	   else
 	   {
@@ -5560,12 +5669,12 @@ SetValues(object,values)
 	SV *		values
 	CODE:
 	{
-	   char *Values[MAX_ITEMS];
-	   int valueLength;
+	   char **	Values;
+	   int		valueLength;
 
-	   MAKE_CHAR_ARRAY(0,values,Values,valueLength);
-
-	   setCDKItemlistValues (object,Values,valueLength,object->defaultItem);
+	   MAKE_CHAR_ARRAY(0, values, Values, valueLength);
+	   setCDKItemlistValues (object, Values, valueLength, object->defaultItem);
+	   free (Values);
 	}
 
 void
@@ -5757,7 +5866,7 @@ New(title,label,height,width,dAttrib="</N>",fAttrib="</N>",lAttrib="</N>",sAttri
 	CODE:
 	{
 	   CDKFSELECT * fselectWidget = (CDKFSELECT *)NULL;
-	   char Title[1000];
+	   char *	Title;
 
 	   checkCdkInit();
 
@@ -5769,6 +5878,7 @@ New(title,label,height,width,dAttrib="</N>",fAttrib="</N>",lAttrib="</N>",sAttri
 						fieldAttribute,filler,highlight,
 						dAttrib,fAttrib,lAttrib,sAttrib,
 						box,shadow);
+	   free (Title);
 
 	   /* Check the return type. */
 	   if (fselectWidget == (CDKFSELECT *)NULL)
@@ -5788,15 +5898,15 @@ Activate(object,...)
 	CDKFSELECT *	object
 	CODE:
 	{
-	   chtype Keys[300];
+	   chtype *	Keys;
 	   int arrayLen;
 	   char *value;
 
 	   if (items > 1)
 	   {
-	      MAKE_CHTYPE_ARRAY(0,ST(1),Keys,arrayLen);
-
+	      MAKE_CHTYPE_ARRAY(0, ST(1), Keys, arrayLen);
 	      value = activateCDKFselect (object, Keys);
+	      free (Keys);
 	   }
 	   else
 	   {
@@ -6086,8 +6196,8 @@ New(title,label,start,low,high,inc,fastInc,fieldWidth,xPos,yPos,filler,Box,shado
 	int	shadow = sv2int ($arg);
 	CODE:
 	{
-	   CDKSLIDER * sliderWidget = (CDKSLIDER *)NULL;
-	   char Title[1000];
+	   CDKSLIDER *	sliderWidget = (CDKSLIDER *)NULL;
+	   char *	Title;
 
 	   checkCdkInit();
 
@@ -6100,6 +6210,7 @@ New(title,label,start,low,high,inc,fastInc,fieldWidth,xPos,yPos,filler,Box,shado
 					start,low,high,
 					inc,fastInc,
 					Box,shadow);
+	   free (Title);
 
 	   /* Check the return type. */
 	   if (sliderWidget == (CDKSLIDER *)NULL)
@@ -6119,15 +6230,15 @@ Activate(object,...)
 	CDKSLIDER *	object
 	CODE:
 	{
-	   chtype Keys[300];
+	   chtype *	Keys;
 	   int arrayLen;
 	   int value;
 
 	   if (items > 1)
 	   {
-	      MAKE_CHTYPE_ARRAY(0,ST(1),Keys,arrayLen);
-
+	      MAKE_CHTYPE_ARRAY(0, ST(1), Keys, arrayLen);
 	      value = activateCDKSlider (object, Keys);
+	      free (Keys);
 	   }
 	   else
 	   {
@@ -6372,16 +6483,14 @@ New(title,label,list,height,width,xPos,yPos,highlight,filler,box,shadow)
 	CODE:
 	{
 	   CDKALPHALIST * alphalistWidget = (CDKALPHALIST *)NULL;
-	   char *List[MAX_ITEMS];
-	   char Title[1000];
+	   char **	List;
+	   char *	Title;
 	   int listSize;
 
 	   checkCdkInit();
 
-	   MAKE_CHAR_ARRAY(0,list,List,listSize);
-	   List[listSize] = "";
-
-	   MAKE_TITLE(title,Title);
+	   MAKE_CHAR_ARRAY(0, list, List, listSize);
+	   MAKE_TITLE (title,Title);
 
 	   alphalistWidget = newCDKAlphalist (GCDKSCREEN,xPos,yPos,
 						height,width,
@@ -6389,6 +6498,8 @@ New(title,label,list,height,width,xPos,yPos,highlight,filler,box,shadow)
 						List,listSize,
 						filler,highlight,
 						box,shadow);
+	   free (List);
+	   free (Title);
 
 	   /* Check the return type. */
 	   if (alphalistWidget == (CDKALPHALIST *)NULL)
@@ -6409,15 +6520,15 @@ Activate(object,...)
 	PPCODE:
 	{
 	   SV *sv = (SV *)&PL_sv_undef;
-	   chtype Keys[300];
+	   chtype *	Keys;
 	   int arrayLen;
 	   char *value;
 
 	   if (items > 1)
 	   {
-	      MAKE_CHTYPE_ARRAY(0,ST(1),Keys,arrayLen);
-
+	      MAKE_CHTYPE_ARRAY(0, ST(1), Keys, arrayLen);
 	      value = activateCDKAlphalist (object, Keys);
+	      free (Keys);
 	   }
 	   else
 	   {
@@ -6454,13 +6565,12 @@ SetContents(object,list)
 	SV *		list
 	CODE:
 	{
-	   char *List[MAX_ITEMS];
-	   int listSize;
+	   char **	List;
+	   int		listSize;
 
-	   MAKE_CHAR_ARRAY(0,list,List,listSize);
-	   List[listSize] = "";
-
+	   MAKE_CHAR_ARRAY(0, list, List, listSize);
 	   setCDKAlphalistContents (object, List, listSize);
+	   free (List);
 	}
 
 void
@@ -6685,7 +6795,7 @@ New(title,day,month,year,dayAttrib,monthAttrib,yearAttrib,highlight,xPos=CENTER,
 	CODE:
 	{
 	   CDKCALENDAR * calendarWidget = (CDKCALENDAR *)NULL;
-	   char Title[1000];
+	   char *	Title;
 
 	   checkCdkInit();
 
@@ -6695,6 +6805,7 @@ New(title,day,month,year,dayAttrib,monthAttrib,yearAttrib,highlight,xPos=CENTER,
 						day,month,year,
 						dayAttrib,monthAttrib,yearAttrib,
 						highlight,Box,shadow);
+	   free (Title);
 
 	   /* Check the return type. */
 	   if (calendarWidget == (CDKCALENDAR *)NULL)
@@ -6714,13 +6825,14 @@ Activate(object,...)
 	CDKCALENDAR *	object
 	PPCODE:
 	{
-	   chtype Keys[300];
+	   chtype *	Keys;
 	   int arrayLen;
 
 	   if (items > 1)
 	   {
-	      MAKE_CHTYPE_ARRAY(0,ST(1),Keys,arrayLen);
+	      MAKE_CHTYPE_ARRAY(0, ST(1), Keys, arrayLen);
 	      activateCDKCalendar (object, Keys);
+	      free (Keys);
 	   }
 	   else
 	   {
@@ -6936,20 +7048,22 @@ New(title,buttons,rows,cols,height,width,xPos=CENTER,yPos=CENTER,highlight=A_REV
 	CODE:
 	{
 	   CDKBUTTONBOX *	widget = (CDKBUTTONBOX *)NULL;
-	   char *		Buttons[MAX_BUTTONS];
-	   char			Title[1000];
+	   char **		Buttons;
+	   char *		Title;
 	   int			buttonCount;
 
 	   checkCdkInit();
 
-	   MAKE_CHAR_ARRAY (0,buttons,Buttons,buttonCount);
+	   MAKE_CHAR_ARRAY (0, buttons, Buttons, buttonCount);
 	   MAKE_TITLE (title,Title);
 
-	   widget = newCDKButtonbox (GCDKSCREEN,xPos,yPos,
-					height,width,Title,
-					rows,cols,
-					Buttons,buttonCount,
-					highlight,Box,shadow);
+	   widget = newCDKButtonbox (GCDKSCREEN, xPos, yPos,
+					height, width, Title,
+					rows, cols,
+					Buttons, buttonCount,
+					highlight, Box, shadow);
+	   free (Buttons);
+	   free (Title);
 
 	   /* Check the return type. */
 	   if (widget == (CDKBUTTONBOX *)NULL)
@@ -6969,15 +7083,15 @@ Activate(object,...)
 	CDKBUTTONBOX *	object
 	CODE:
 	{
-	   chtype Keys[300];
+	   chtype *	Keys;
 	   int arrayLen;
 	   int value;
 
 	   if (items > 1)
 	   {
-	      MAKE_CHTYPE_ARRAY(0,ST(1),Keys,arrayLen);
-
+	      MAKE_CHTYPE_ARRAY(0, ST(1), Keys, arrayLen);
 	      value = activateCDKButtonbox (object, Keys);
+	      free (Keys);
 	   }
 	   else
 	   {
