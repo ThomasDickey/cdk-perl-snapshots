@@ -1,14 +1,14 @@
 /*
  * $Author: tom $
- * $Date: 2001/01/07 20:11:10 $
- * $Revision: 1.3 $
+ * $Date: 2001/04/21 16:37:08 $
+ * $Revision: 1.4 $
  */
 
 #include <EXTERN.h>
 #include <perl.h>
 #include <XSUB.h>
 
-#include <cdk.h>
+#include <cdk/cdk.h>
 
 /* Prior to perl5.005, the PL_ prefix wasn't used for things such
    as PL_rs.  Define the PL_ macros that we use if necessary. */
@@ -151,7 +151,7 @@ int PerlBindCB (EObjectType cdktype, void *object, void *data, chtype input)
    dSP ;
 
    SV *foo = (SV*)data;
-   int returnValueCount, returnValue, charKey;
+   int returnValueCount, returnValue;
    char *chtypeKey, temp[10];
 
    ENTER;
@@ -203,7 +203,7 @@ int PerlProcessCB (EObjectType cdktype, void *object, void *data, chtype input)
    dSP ;
 
    SV *foo = (SV*)data;
-   int returnValueCount, returnValue, charKey;
+   int returnValueCount, returnValue;
    char *chtypeKey, temp[10];
 
    ENTER;
@@ -851,7 +851,6 @@ CDKSCREEN *
 init()
 	CODE:
 	{
-	   int x	= 0;
 	   GCWINDOW	= initscr();
 	   GCDKSCREEN	= initCDKScreen (GCWINDOW);
 
@@ -2296,13 +2295,10 @@ New(menulist,menuloc,titleattr=A_REVERSE,subtitleattr=A_REVERSE,menuPos=TOP)
 	int	menuPos = sv2int ($arg);
 	CODE:
 	{
-	   CDKMENU * menuWidget = (CDKMENU *)NULL;
 	   char *menuList[MAX_MENU_ITEMS][MAX_SUB_ITEMS];
 	   int	subSize[MAX_SUB_ITEMS];
 	   int	menuLoc[MAX_MENU_ITEMS];
-	   int	menuItems;
 	   int	menulen, loclen;
-	   int	x;
 
 	   checkCdkInit();
 
@@ -2404,9 +2400,10 @@ PostProcess(object,functionRef)
 void
 Draw(object)
 	CDKMENU *	object
+	int		Box = sv2int ($arg);
 	CODE:
 	{
-	   drawCDKMenu (object);
+	   drawCDKMenu (object, Box);
 	}
 
 void
@@ -3161,7 +3158,7 @@ New(title,rowtitles,coltitles,colwidths,coltypes,vrows,vcols,xPos=CENTER,yPos=CE
 	   char *rowTitles[MAX_MATRIX_ROWS+1];
 	   int	colWidths[MAX_MATRIX_COLS+1];
 	   int	colTypes[MAX_MATRIX_COLS+1];
-	   int	rows, cols, widths, dtype, x;
+	   int	rows, cols, widths, dtype;
 	   char Title[1000];
 
 	   checkCdkInit();
@@ -3218,9 +3215,7 @@ Activate(object,...)
 	PPCODE:
 	{
 	   AV *cellInfo = newAV();
-	   char *info[MAX_MATRIX_ROWS][MAX_MATRIX_COLS];
-	   int subSize[MAX_MATRIX_ROWS];
-	   int x, y, value, arrayLen, matrixlen;
+	   int x, y, value, arrayLen;
 	   chtype Keys[300];
 
 	   if (items > 1)
@@ -6777,7 +6772,6 @@ Inject(object,key)
 	chtype		key = sv2chtype ($arg);
 	PPCODE:
 	{
-	   int value = injectCDKCalendar (object,key);
 	   if (object->exitType == vESCAPE_HIT ||
 	       object->exitType == vEARLY_EXIT)
 	   {
@@ -6973,7 +6967,6 @@ New(title,buttons,rows,cols,height,width,xPos=CENTER,yPos=CENTER,highlight=A_REV
 	   char *		Buttons[MAX_BUTTONS];
 	   char			Title[1000];
 	   int			buttonCount;
-	   int			rowCount;
 
 	   checkCdkInit();
 
