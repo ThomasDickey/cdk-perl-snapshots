@@ -2389,7 +2389,7 @@ Draw(object)
         CDKMENU *	object
         CODE:
         {
-           drawCDKMenu (object);
+           drawCDKMenu (object, 0);
         }
 
 void

@@ -1,3 +1,5 @@
+#!../../../perl -w
+
 #
 # Purpose:
 #	This 'rips' off Larry's perlbug from the utils directory.

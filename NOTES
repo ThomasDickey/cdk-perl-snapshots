@@ -33,12 +33,12 @@ Solution:
 
 Problems Compiling on SUN/OS
 ============================
-Ivan Kohler (ivan@voicenet.com) mailed me and mentioned that when he compliled
+Ivan Kohler (ivan@voicenet.com) mailed me and mentioned that when he compiled
 the Perl5/Cdk extension on Sun/OS 4.1.4 with ncurses 1.9.9e and Perl v 5.003
 there was a typedef collision with 'instr'. The only thing I can say is comment
 out the ncurses definition of 'instr' in the curses.h header file. I do not
 use the 'instr' function so it should be safe. I wish I didn't have to use this
-type of a kludge on typedef collsions, but I can't think of any other way to
+type of a kludge on typedef collisions, but I can't think of any other way to
 resolve the problem. If someone can think of a cleaner method mail me and I
 will suggest it.
 
@@ -48,7 +48,7 @@ If you want to get a hold of me mail me at one of the following:
 
 The CDK Web page has several homes. They are:
         http://members.home.net/vexus/CDK.html (official)
-        http://www.datasoft.on.ca/~cdk (Sponsered by the nice folks at Datasoft)
+        http://www.datasoft.on.ca/~cdk (Sponsored by the nice folks at Datasoft)
 
 ttfn,
 	Mike
