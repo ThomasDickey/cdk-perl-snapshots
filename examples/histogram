@@ -1,5 +1,5 @@
-#!../../../perl -w
-# $Id: histogram,v 1.2 2001/01/08 01:42:30 tom Exp $
+#!/usr/bin/perl -w
+# $Id: histogram,v 1.3 2002/07/24 10:04:32 tom Exp $
 
 #
 # Purpose:

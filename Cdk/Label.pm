@@ -1,3 +1,5 @@
+# $Id: Label.pm,v 1.2 2002/07/28 19:29:24 tom Exp $
+
 package Cdk::Label;
 
 @ISA	= qw (Cdk);
@@ -117,9 +119,13 @@ sub wait
 
    # Set up the parameters passed in.
    my $key = Cdk::checkDef ($name, "Key", $params{'Key'}, '');
+   my $code = 0;
+   if ($key ne '') {
+      $code = ord $key;
+   }
 
    # Sit and wait.
-   Cdk::Label::Wait ($self->{'Me'}, $key);
+   Cdk::Label::Wait ($self->{'Me'}, $code);
 }
 
 #

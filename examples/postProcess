@@ -1,5 +1,5 @@
-#!../../../perl -w
-# $Id: postProcess,v 1.2 2001/01/08 02:08:38 tom Exp $
+#!/usr/bin/perl -w
+# $Id: postProcess,v 1.3 2002/07/27 20:15:12 tom Exp $
 
 #
 # Purpose:
@@ -30,7 +30,8 @@ my @initMessage = ("******************************************************");
 
 # Create the title.
 my $title = new Cdk::Label ('Message' => ["<C></B/5>Unix System Admin Interface."],
-				'Xpos' => "TOP");
+				'Ypos' => "TOP",
+				'Xpos' => "LEFT");
 
 # Create the scrolling list object.
 my $scroll = new Cdk::Scroll ('Title' => "<C></U/5>Pick An Option",
@@ -44,7 +45,7 @@ my $scroll = new Cdk::Scroll ('Title' => "<C></U/5>Pick An Option",
 $scroll->postProcess ('Function' => sub { setInfoLabelCB();} );
 
 # Create the scrolling list item label.
-my $infoLabel = new Cdk::Label ('Message' => \@initMessage, 'Xpos' => 17);
+my $infoLabel = new Cdk::Label ('Message' => \@initMessage, 'Xpos' => 1, 'Ypos' => 3);
 
 # Set the contents of the info label.
 $infoLabel->set ('Message' => ["$commandInfo[0]"]);

@@ -1,5 +1,5 @@
-#!../../../perl -w
-# $Id: cdkdemo,v 1.3 2001/01/08 00:41:11 tom Exp $
+#!/usr/bin/perl -w
+# $Id: cdkdemo,v 1.5 2002/07/28 19:06:32 tom Exp $
 #
 # Purpose:
 #	This script demonstrates the Cdk widget set and how you can use them.
@@ -306,6 +306,7 @@ sub viewerDemo
 					'Lattrib' => "</39>",
 					'Fattrib' => "</40>");
    my $fname	= $fselect->activate ();
+   $fselect->erase ();
 
    # Check if the person hit escape.
    if (!defined $fname)
@@ -342,6 +343,7 @@ sub entryDemo
 					'Max' => 125,
 					'Width' => 30);
    $continue = $entry->activate ();
+   $entry->erase ();
 
    # Check if they hit escape.
    if (! defined $continue)
@@ -370,7 +372,7 @@ sub itemlistDemo
    my $row;
 
    # Create the list.
-   my @months = ("<C>January", "<C>Feburary", "<C>March", "<C>April",
+   my @months = ("<C>January", "<C>February", "<C>March", "<C>April",
 		"<C>May", "<C>June", "<C></2>July<!2>", "<C>August",
 		"<C>September", "<C></32>October<!32>", "<C>November",
 		"<C></18>December<!18>");
@@ -446,7 +448,7 @@ sub itemlistDemo
 sub templateDemo
 {
    # Create the template widget.
-   my $birthday = new Cdk::Template ('Label' => 'Enter in your birthday',
+   my $birthday = new Cdk::Template ('Label' => 'Enter your birthday: ',
 					'Plate' => '##/##/####',
 					'Overlay' => '</5>DD<!5>-</15>MM<!15>-</20>YYYY<!20>');
 
@@ -503,7 +505,7 @@ sub matrixDemo
    my @colTypes		= ("VIEWONLY", "VIEWONLY", "INT");
    my @matrixValues	= (["Flabberit", "10.99", ""],
 				["Whatzit", "102.99", ""],
-				["Albatros", "99.99", ""]);
+				["Albatross", "99.99", ""]);
    my (@newlist, $x);
 
    # Create the matrix widget.
@@ -568,6 +570,7 @@ sub dialogDemo
 
    # Activate the dialog box.
    my $pick	= $dialog->activate ();
+   $dialog->erase ();
 
    # Did the user hit escape?
    return if ! defined $pick;
@@ -589,7 +592,7 @@ sub dialogDemo
    }
    else
    {
-      # We want to tun anything but ls -l
+      # We want to run anything but ls -l
       my $result = qx ($buttons[$pick]); chomp $result;
 
       # Display the result.
@@ -790,6 +793,7 @@ sub marqueeDemo
 
    # Activate the widget to get the message.
    my $message	= $entry->activate ();
+   $entry->erase ();
    return if ! defined $message;
 
    # Create the widget to get the number times to repeat the message.
@@ -800,6 +804,7 @@ sub marqueeDemo
 
    # Get the repeat value from the user.
    my $repeat	= $rvalue->activate();
+   $rvalue->erase ();
 
    # Create the widget to get the delay.
    my $dvalue	= new Cdk::Scale ('Label' => 'Delay Value:',
@@ -809,6 +814,7 @@ sub marqueeDemo
 
    # Get the delay value.
    my $delay	= $dvalue->activate() * 10;
+   $dvalue->erase ();
 
    # Create the widget to get the width of the marquee widget.
    my $mWidth	= new Cdk::Scale ('Label' => 'Marquee Width:',
@@ -818,6 +824,7 @@ sub marqueeDemo
 
    # Get the width of the marquee widget.
    my $width	= $mWidth->activate();
+   $mWidth->erase ();
 
    # Create the marquee widget.
    my $marquee	= new Cdk::Marquee ('Width' => $width);
@@ -925,6 +932,7 @@ sub alphalistDemo
 
    # Activate the widget.
    my $acct = $alpha->activate();
+   $alpha->erase();
 
    # Display the results.
    my @mesg = ("<C>You chose $acct.", "<C>$CONTINUE");
