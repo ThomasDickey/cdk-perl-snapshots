@@ -1,17 +1,33 @@
-#include "EXTERN.h"
-#include "perl.h"
-#include "XSUB.h"
+/*
+ * $Author: tom $
+ * $Date: 2001/01/07 20:11:10 $
+ * $Revision: 1.3 $
+ */
 
-#include "cdk.h"
+#include <EXTERN.h>
+#include <perl.h>
+#include <XSUB.h>
+
+#include <cdk.h>
+
+/* Prior to perl5.005, the PL_ prefix wasn't used for things such
+   as PL_rs.  Define the PL_ macros that we use if necessary. */
+
+#include <patchlevel.h>		/* This is perl's patchlevel.h */
+
+#if PATCHLEVEL < 5
+#define PL_na na
+#define PL_sv_undef sv_undef
+#endif
 
 char *checkChtypeKey(chtype key);
 
-CDKSCREEN * 	GCDKSCREEN	= (CDKSCREEN *)NULL;
+CDKSCREEN *	GCDKSCREEN	= (CDKSCREEN *)NULL;
 WINDOW *	GCWINDOW	= (WINDOW *)NULL;
 
 #define MAKE_CHAR_MATRIX(START,INPUT,NEWARRAY,ARRAYSIZE,ARRAYLEN)	\
 	do {								\
-      	   AV *array	= (AV *)SvRV((INPUT));				\
+	   AV *array	= (AV *)SvRV((INPUT));				\
 	   int x, y;							\
 									\
 	   (ARRAYLEN)	= av_len (array);				\
@@ -25,14 +41,14 @@ WINDOW *	GCWINDOW	= (WINDOW *)NULL;
 									\
 	      for (y=0; y <= subLen; y++)				\
 	      {								\
-	         SV *sv	= *av_fetch(subArray,y,FALSE);			\
-	         (NEWARRAY)[x+(START)][y+(START)] = copyChar((char *)SvPV(sv,na));	\
+		 SV *sv = *av_fetch(subArray,y,FALSE);			\
+		 (NEWARRAY)[x+(START)][y+(START)] = copyChar((char *)SvPV(sv,PL_na));	\
 	      }								\
 	   }								\
 	   (ARRAYLEN)++;						\
 	} while (0)
-	
-#define	MAKE_INT_ARRAY(START,INPUT,DEST,LEN)				\
+
+#define MAKE_INT_ARRAY(START,INPUT,DEST,LEN)				\
 	do {								\
 	   AV *src	= (AV *)SvRV((INPUT));				\
 	   int x;							\
@@ -42,12 +58,12 @@ WINDOW *	GCWINDOW	= (WINDOW *)NULL;
 	   for (x=0; x <= (LEN); x++)					\
 	   {								\
 	      SV *foo		= *av_fetch(src, x, FALSE);		\
-	      (DEST)[x+(START)]	= sv2int (foo);				\
+	      (DEST)[x+(START)] = sv2int (foo);				\
 	   }								\
 	   (LEN)++;							\
 	} while (0)
 
-#define	MAKE_DTYPE_ARRAY(START,INPUT,DEST,LEN)				\
+#define MAKE_DTYPE_ARRAY(START,INPUT,DEST,LEN)				\
 	do {								\
 	   AV *src	= (AV *)SvRV((INPUT));				\
 	   int x;							\
@@ -57,27 +73,12 @@ WINDOW *	GCWINDOW	= (WINDOW *)NULL;
 	   for (x=0; x <= (LEN); x++)					\
 	   {								\
 	      SV *foo		= *av_fetch(src, x, FALSE);		\
-	      (DEST)[x+(START)]	= sv2dtype (foo);			\
+	      (DEST)[x+(START)] = sv2dtype (foo);			\
 	   }								\
 	   (LEN)++;							\
 	} while (0)
 
-#define	MAKE_CHTYPE_ARRAY(START,INPUT,DEST,LEN)				\
-	do {								\
-   	   AV *src	= (AV *)SvRV((INPUT));				\
-	   int x;							\
-									\
-	   (LEN)	= av_len(src);					\
-									\
-	   for (x=0; x <= (LEN); x++)					\
-	   {								\
-	      SV *foo		= *av_fetch(src, x, FALSE);		\
-	      (DEST)[x+(START)]	= (chtype)sv2chtype (foo);		\
-	   }								\
-	   (LEN)++;							\
-	} while (0)
-
-#define	MAKE_CHAR_ARRAY(START,INPUT,DEST,LEN)				\
+#define MAKE_CHTYPE_ARRAY(START,INPUT,DEST,LEN)				\
 	do {								\
 	   AV *src	= (AV *)SvRV((INPUT));				\
 	   int x;							\
@@ -87,50 +88,65 @@ WINDOW *	GCWINDOW	= (WINDOW *)NULL;
 	   for (x=0; x <= (LEN); x++)					\
 	   {								\
 	      SV *foo		= *av_fetch(src, x, FALSE);		\
-	      (DEST)[x+(START)]	= copyChar((char *)SvPV(foo,na));	\
+	      (DEST)[x+(START)] = (chtype)sv2chtype (foo);		\
 	   }								\
 	   (LEN)++;							\
 	} while (0)
 
-#define	MAKE_TITLE(INPUT,DEST)						\
+#define MAKE_CHAR_ARRAY(START,INPUT,DEST,LEN)				\
+	do {								\
+	   AV *src	= (AV *)SvRV((INPUT));				\
+	   int x;							\
+									\
+	   (LEN)	= av_len(src);					\
+									\
+	   for (x=0; x <= (LEN); x++)					\
+	   {								\
+	      SV *foo		= *av_fetch(src, x, FALSE);		\
+	      (DEST)[x+(START)] = copyChar((char *)SvPV(foo,PL_na));	\
+	   }								\
+	   (LEN)++;							\
+	} while (0)
+
+#define MAKE_TITLE(INPUT,DEST)						\
 	do {								\
 	   if (SvTYPE(SvRV(INPUT)) == SVt_PVAV)				\
 	   {								\
 	      AV *src	= (AV *)SvRV((INPUT));				\
-	      int lines	= 0;						\
+	      int lines = 0;						\
 	      int x, len;						\
 									\
 	      len = av_len(src);					\
 									\
 	      for (x=0; x <= len; x++)					\
 	      {								\
-	         SV *foo		= *av_fetch(src, x, FALSE);	\
-	         if (lines == 0)					\
-	         {							\
-	            sprintf ((DEST), "%s", (char *)SvPV(foo,na));	\
-	         }							\
-	         else							\
-	         {							\
-	            sprintf ((DEST), "%s\n%s", (DEST), (char *)SvPV(foo,na));	\
-	         }							\
-	         lines++;						\
+		 SV *foo		= *av_fetch(src, x, FALSE);	\
+		 if (lines == 0)					\
+		 {							\
+		    sprintf ((DEST), "%s", (char *)SvPV(foo,PL_na));	\
+		 }							\
+		 else							\
+		 {							\
+		    sprintf ((DEST), "%s\n%s", (DEST), (char *)SvPV(foo,PL_na));	\
+		 }							\
+		 lines++;						\
 	      }								\
 									\
 	      if (lines == 0)						\
 	      {								\
-	         strcpy ((DEST), "");					\
+		 strcpy ((DEST), "");					\
 	      }								\
 	   }								\
 	   else								\
 	   {								\
-              sprintf ((DEST), "%s", (char *)SvPV(INPUT,na));		\
+	      sprintf ((DEST), "%s", (char *)SvPV(INPUT,PL_na));		\
 	   }								\
 	} while (0)
 
 /*
  * The callback callback to run Perl callback routines. Are you confused???
  */
-void PerlBindCB (EObjectType cdktype, void *object, void *data, chtype input)
+int PerlBindCB (EObjectType cdktype, void *object, void *data, chtype input)
 {
    dSP ;
 
@@ -167,7 +183,7 @@ void PerlBindCB (EObjectType cdktype, void *object, void *data, chtype input)
       PUTBACK;
       FREETMPS;
       LEAVE;
-      return;
+      return 1;
    }
 
    /* They returned something, lets find out what it is. */
@@ -176,7 +192,7 @@ void PerlBindCB (EObjectType cdktype, void *object, void *data, chtype input)
    PUTBACK;
    FREETMPS;
    LEAVE;
-   return;
+   return 1;
 }
 
 /*
@@ -299,299 +315,299 @@ SV *sv;
 {
    if (SvPOK(sv))
    {
-      char *name = SvPV(sv,na);
+      char *name = SvPV(sv,PL_na);
       chtype *fillerChtype;
       chtype filler;
       int j1, j2;
 
       if (strEQ(name, "ACS_BTEE"))
-          return ACS_BTEE;
+	  return ACS_BTEE;
       if (strEQ(name, "ACS_HLINE"))
-          return ACS_HLINE;
+	  return ACS_HLINE;
       if (strEQ(name, "ACS_LLCORNER"))
-          return ACS_LLCORNER;
+	  return ACS_LLCORNER;
       if (strEQ(name, "ACS_LRCORNER"))
-          return ACS_LRCORNER;
+	  return ACS_LRCORNER;
       if (strEQ(name, "ACS_LTEE"))
-          return ACS_LTEE;
+	  return ACS_LTEE;
       if (strEQ(name, "ACS_PLUS"))
-          return ACS_PLUS;
+	  return ACS_PLUS;
       if (strEQ(name, "ACS_RTEE"))
-          return ACS_RTEE;
+	  return ACS_RTEE;
       if (strEQ(name, "ACS_TTEE"))
-          return ACS_TTEE;
+	  return ACS_TTEE;
       if (strEQ(name, "ACS_ULCORNER"))
-          return ACS_ULCORNER;
+	  return ACS_ULCORNER;
       if (strEQ(name, "ACS_URCORNER"))
-          return ACS_URCORNER;
+	  return ACS_URCORNER;
       if (strEQ(name, "ACS_VLINE"))
-          return ACS_VLINE;
+	  return ACS_VLINE;
       if (strEQ(name, "A_ALTCHARSET"))
-          return A_ALTCHARSET;
+	  return A_ALTCHARSET;
       if (strEQ(name, "A_ATTRIBUTES"))
-          return A_ATTRIBUTES;
+	  return A_ATTRIBUTES;
       if (strEQ(name, "A_BLINK"))
-          return A_BLINK;
+	  return A_BLINK;
       if (strEQ(name, "A_BOLD"))
-          return A_BOLD;
+	  return A_BOLD;
       if (strEQ(name, "A_CHARTEXT"))
-          return A_CHARTEXT;
+	  return A_CHARTEXT;
       if (strEQ(name, "A_COLOR"))
-          return A_COLOR;
+	  return A_COLOR;
       if (strEQ(name, "A_DIM"))
-          return A_DIM;
+	  return A_DIM;
       if (strEQ(name, "A_INVIS"))
-          return A_INVIS;
+	  return A_INVIS;
       if (strEQ(name, "A_NORMAL"))
-          return A_NORMAL;
+	  return A_NORMAL;
       if (strEQ(name, "A_PROTECT"))
-          return A_PROTECT;
+	  return A_PROTECT;
       if (strEQ(name, "A_REVERSE"))
-          return A_REVERSE;
+	  return A_REVERSE;
       if (strEQ(name, "A_STANDOUT"))
-          return A_STANDOUT;
+	  return A_STANDOUT;
       if (strEQ(name, "A_UNDERLINE"))
-          return A_UNDERLINE;
+	  return A_UNDERLINE;
       if (strEQ(name, "CDK_COPY"))
-          return CDK_COPY;
+	  return CDK_COPY;
       if (strEQ(name, "CDK_CUT"))
-          return CDK_CUT;
+	  return CDK_CUT;
       if (strEQ(name, "CDK_ERASE"))
-          return CDK_ERASE;
+	  return CDK_ERASE;
       if (strEQ(name, "CDK_PASTE"))
-          return CDK_PASTE;
+	  return CDK_PASTE;
       if (strEQ(name, "CDK_REFRESH"))
-          return CDK_REFRESH;
+	  return CDK_REFRESH;
 #ifdef COLOR
       if (strEQ(name, "COLOR_BLACK"))
-         return COLOR_BLACK;
+	 return COLOR_BLACK;
       if (strEQ(name, "COLOR_BLUE"))
-         return COLOR_BLUE;
+	 return COLOR_BLUE;
       if (strEQ(name, "COLOR_CYAN"))
-         return COLOR_CYAN;
+	 return COLOR_CYAN;
       if (strEQ(name, "COLOR_GREEN"))
-         return COLOR_GREEN;
+	 return COLOR_GREEN;
       if (strEQ(name, "COLOR_MAGENTA"))
-         return COLOR_MAGENTA;
+	 return COLOR_MAGENTA;
       if (strEQ(name, "COLOR_RED"))
-         return COLOR_RED;
+	 return COLOR_RED;
       if (strEQ(name, "COLOR_WHITE"))
-         return COLOR_WHITE;
+	 return COLOR_WHITE;
       if (strEQ(name, "COLOR_YELLOW"))
-         return COLOR_YELLOW;
+	 return COLOR_YELLOW;
 #endif
       if (strEQ(name, "DELETE"))
-          return DELETE;
+	  return DELETE;
       if (strEQ(name, "KEY_A1"))
-          return KEY_A1;
+	  return KEY_A1;
       if (strEQ(name, "KEY_A3"))
-          return KEY_A3;
+	  return KEY_A3;
       if (strEQ(name, "KEY_B2"))
-          return KEY_B2;
+	  return KEY_B2;
       if (strEQ(name, "KEY_BACKSPACE"))
-          return KEY_BACKSPACE;
+	  return KEY_BACKSPACE;
       if (strEQ(name, "KEY_BEG"))
-          return KEY_BEG;
+	  return KEY_BEG;
       if (strEQ(name, "KEY_BREAK"))
-          return KEY_BREAK;
+	  return KEY_BREAK;
       if (strEQ(name, "KEY_BTAB"))
-          return KEY_BTAB;
+	  return KEY_BTAB;
       if (strEQ(name, "KEY_C1"))
-          return KEY_C1;
+	  return KEY_C1;
       if (strEQ(name, "KEY_C3"))
-          return KEY_C3;
+	  return KEY_C3;
       if (strEQ(name, "KEY_CANCEL"))
-          return KEY_CANCEL;
+	  return KEY_CANCEL;
       if (strEQ(name, "KEY_CATAB"))
-          return KEY_CATAB;
+	  return KEY_CATAB;
       if (strEQ(name, "KEY_CLEAR"))
-          return KEY_CLEAR;
+	  return KEY_CLEAR;
       if (strEQ(name, "KEY_CLOSE"))
-          return KEY_CLOSE;
+	  return KEY_CLOSE;
       if (strEQ(name, "KEY_COMMAND"))
-          return KEY_COMMAND;
+	  return KEY_COMMAND;
       if (strEQ(name, "KEY_COPY"))
-          return KEY_COPY;
+	  return KEY_COPY;
       if (strEQ(name, "KEY_CREATE"))
-          return KEY_CREATE;
+	  return KEY_CREATE;
       if (strEQ(name, "KEY_CTAB"))
-          return KEY_CTAB;
+	  return KEY_CTAB;
       if (strEQ(name, "KEY_DC"))
-          return KEY_DC;
+	  return KEY_DC;
       if (strEQ(name, "KEY_DL"))
-          return KEY_DL;
+	  return KEY_DL;
       if (strEQ(name, "KEY_DOWN"))
-          return KEY_DOWN;
+	  return KEY_DOWN;
       if (strEQ(name, "KEY_EIC"))
-          return KEY_EIC;
+	  return KEY_EIC;
       if (strEQ(name, "KEY_END"))
-          return KEY_END;
+	  return KEY_END;
       if (strEQ(name, "KEY_ENTER"))
-          return KEY_ENTER;
+	  return KEY_ENTER;
       if (strEQ(name, "KEY_EOL"))
-          return KEY_EOL;
+	  return KEY_EOL;
       if (strEQ(name, "KEY_EOS"))
-          return KEY_EOS;
+	  return KEY_EOS;
       if (strEQ(name, "KEY_ESC"))
-          return KEY_ESC;
+	  return KEY_ESC;
       if (strEQ(name, "KEY_EXIT"))
-          return KEY_EXIT;
+	  return KEY_EXIT;
       if (strEQ(name, "KEY_F0"))
-          return KEY_F0;
+	  return KEY_F0;
       if (strEQ(name, "KEY_F1"))
-          return KEY_F1;
+	  return KEY_F1;
       if (strEQ(name, "KEY_F10"))
-          return KEY_F10;
+	  return KEY_F10;
       if (strEQ(name, "KEY_F11"))
-          return KEY_F11;
+	  return KEY_F11;
       if (strEQ(name, "KEY_F12"))
-          return KEY_F12;
+	  return KEY_F12;
       if (strEQ(name, "KEY_F2"))
-          return KEY_F2;
+	  return KEY_F2;
       if (strEQ(name, "KEY_F3"))
-          return KEY_F3;
+	  return KEY_F3;
       if (strEQ(name, "KEY_F4"))
-          return KEY_F4;
+	  return KEY_F4;
       if (strEQ(name, "KEY_F5"))
-          return KEY_F5;
+	  return KEY_F5;
       if (strEQ(name, "KEY_F6"))
-          return KEY_F6;
+	  return KEY_F6;
       if (strEQ(name, "KEY_F7"))
-          return KEY_F7;
+	  return KEY_F7;
       if (strEQ(name, "KEY_FIND"))
-          return KEY_FIND;
+	  return KEY_FIND;
       if (strEQ(name, "KEY_HELP"))
-          return KEY_HELP;
+	  return KEY_HELP;
       if (strEQ(name, "KEY_HOME"))
-          return KEY_HOME;
+	  return KEY_HOME;
       if (strEQ(name, "KEY_IC"))
-          return KEY_IC;
+	  return KEY_IC;
       if (strEQ(name, "KEY_IL"))
-          return KEY_IL;
+	  return KEY_IL;
       if (strEQ(name, "KEY_LEFT"))
-          return (chtype)KEY_LEFT;
+	  return (chtype)KEY_LEFT;
       if (strEQ(name, "KEY_LL"))
-          return KEY_LL;
+	  return KEY_LL;
       if (strEQ(name, "KEY_MARK"))
-          return KEY_MARK;
+	  return KEY_MARK;
       if (strEQ(name, "KEY_MAX"))
-          return KEY_MAX;
+	  return KEY_MAX;
       if (strEQ(name, "KEY_MESSAGE"))
-          return KEY_MESSAGE;
+	  return KEY_MESSAGE;
       if (strEQ(name, "KEY_MIN"))
-          return KEY_MIN;
+	  return KEY_MIN;
       if (strEQ(name, "KEY_MOVE"))
-          return KEY_MOVE;
+	  return KEY_MOVE;
       if (strEQ(name, "KEY_NPAGE"))
-          return KEY_NPAGE;
+	  return KEY_NPAGE;
       if (strEQ(name, "KEY_OPEN"))
-          return KEY_OPEN;
+	  return KEY_OPEN;
       if (strEQ(name, "KEY_OPTIONS"))
-          return KEY_OPTIONS;
+	  return KEY_OPTIONS;
       if (strEQ(name, "KEY_PPAGE"))
-          return KEY_PPAGE;
+	  return KEY_PPAGE;
       if (strEQ(name, "KEY_PREVIOUS"))
-          return KEY_PREVIOUS;
+	  return KEY_PREVIOUS;
       if (strEQ(name, "KEY_PRINT"))
-          return KEY_PRINT;
+	  return KEY_PRINT;
       if (strEQ(name, "KEY_REDO"))
-          return KEY_REDO;
+	  return KEY_REDO;
       if (strEQ(name, "KEY_REFERENCE"))
-          return KEY_REFERENCE;
+	  return KEY_REFERENCE;
       if (strEQ(name, "KEY_REFRESH"))
-          return KEY_REFRESH;
+	  return KEY_REFRESH;
       if (strEQ(name, "KEY_REPLACE"))
-          return KEY_REPLACE;
+	  return KEY_REPLACE;
       if (strEQ(name, "KEY_RESET"))
-          return KEY_RESET;
+	  return KEY_RESET;
       if (strEQ(name, "KEY_RESTART"))
-          return KEY_RESTART;
+	  return KEY_RESTART;
       if (strEQ(name, "KEY_RESUME"))
-          return KEY_RESUME;
+	  return KEY_RESUME;
       if (strEQ(name, "KEY_RETURN"))
-          return KEY_RETURN;
+	  return KEY_RETURN;
       if (strEQ(name, "KEY_RIGHT"))
-          return KEY_RIGHT;
+	  return KEY_RIGHT;
       if (strEQ(name, "KEY_SAVE"))
-          return KEY_SAVE;
+	  return KEY_SAVE;
       if (strEQ(name, "KEY_SBEG"))
-          return KEY_SBEG;
+	  return KEY_SBEG;
       if (strEQ(name, "KEY_SCANCEL"))
-          return KEY_SCANCEL;
+	  return KEY_SCANCEL;
       if (strEQ(name, "KEY_SCOMMAND"))
-          return KEY_SCOMMAND;
+	  return KEY_SCOMMAND;
       if (strEQ(name, "KEY_SCOPY"))
-          return KEY_SCOPY;
+	  return KEY_SCOPY;
       if (strEQ(name, "KEY_SCREATE"))
-          return KEY_SCREATE;
+	  return KEY_SCREATE;
       if (strEQ(name, "KEY_SDC"))
-          return KEY_SDC;
+	  return KEY_SDC;
       if (strEQ(name, "KEY_SDL"))
-          return KEY_SDL;
+	  return KEY_SDL;
       if (strEQ(name, "KEY_SELECT"))
-          return KEY_SELECT;
+	  return KEY_SELECT;
       if (strEQ(name, "KEY_SEND"))
-          return KEY_SEND;
+	  return KEY_SEND;
       if (strEQ(name, "KEY_SEOL"))
-          return KEY_SEOL;
+	  return KEY_SEOL;
       if (strEQ(name, "KEY_SEXIT"))
-          return KEY_SEXIT;
+	  return KEY_SEXIT;
       if (strEQ(name, "KEY_SF"))
-          return KEY_SF;
+	  return KEY_SF;
       if (strEQ(name, "KEY_SFIND"))
-          return KEY_SFIND;
+	  return KEY_SFIND;
       if (strEQ(name, "KEY_SHELP"))
-          return KEY_SHELP;
+	  return KEY_SHELP;
       if (strEQ(name, "KEY_SHOME"))
-          return KEY_SHOME;
+	  return KEY_SHOME;
       if (strEQ(name, "KEY_SIC"))
-          return KEY_SIC;
+	  return KEY_SIC;
       if (strEQ(name, "KEY_SLEFT"))
-          return KEY_SLEFT;
+	  return KEY_SLEFT;
       if (strEQ(name, "KEY_SMESSAGE"))
-          return KEY_SMESSAGE;
+	  return KEY_SMESSAGE;
       if (strEQ(name, "KEY_SMOVE"))
-          return KEY_SMOVE;
+	  return KEY_SMOVE;
       if (strEQ(name, "KEY_SNEXT"))
-          return KEY_SNEXT;
+	  return KEY_SNEXT;
       if (strEQ(name, "KEY_SOPTIONS"))
-          return KEY_SOPTIONS;
+	  return KEY_SOPTIONS;
       if (strEQ(name, "KEY_SPREVIOUS"))
-          return KEY_SPREVIOUS;
+	  return KEY_SPREVIOUS;
       if (strEQ(name, "KEY_SPRINT"))
-          return KEY_SPRINT;
+	  return KEY_SPRINT;
       if (strEQ(name, "KEY_SR"))
-          return KEY_SR;
+	  return KEY_SR;
       if (strEQ(name, "KEY_SREDO"))
-          return KEY_SREDO;
+	  return KEY_SREDO;
       if (strEQ(name, "KEY_SREPLACE"))
-          return KEY_SREPLACE;
+	  return KEY_SREPLACE;
       if (strEQ(name, "KEY_SRESET"))
-          return KEY_SRESET;
+	  return KEY_SRESET;
       if (strEQ(name, "KEY_SRIGHT"))
-          return KEY_SRIGHT;
+	  return KEY_SRIGHT;
       if (strEQ(name, "KEY_SRSUME"))
-          return KEY_SRSUME;
+	  return KEY_SRSUME;
       if (strEQ(name, "KEY_SSAVE"))
-          return KEY_SSAVE;
+	  return KEY_SSAVE;
       if (strEQ(name, "KEY_SSUSPEND"))
-          return KEY_SSUSPEND;
+	  return KEY_SSUSPEND;
       if (strEQ(name, "KEY_STAB"))
-          return KEY_STAB;
+	  return KEY_STAB;
       if (strEQ(name, "KEY_SUNDO"))
-          return KEY_SUNDO;
+	  return KEY_SUNDO;
       if (strEQ(name, "KEY_SUSPEND"))
-          return KEY_SUSPEND;
+	  return KEY_SUSPEND;
       if (strEQ(name, "KEY_TAB"))
-          return KEY_TAB;
+	  return KEY_TAB;
       if (strEQ(name, "KEY_UNDO"))
-          return KEY_UNDO;
+	  return KEY_UNDO;
       if (strEQ(name, "KEY_UP"))
-          return KEY_UP;
+	  return KEY_UP;
       if (strEQ(name, "SPACE"))
-         return SPACE;
+	 return SPACE;
       if (strEQ(name, "TAB"))
-         return TAB;
+	 return TAB;
 
       /* Else they used a format of </X> to specify a chtype. */
       fillerChtype = char2Chtype (name, &j1, &j2);
@@ -608,36 +624,37 @@ SV * sv;
 {
    if (SvPOK(sv))
    {
-      char *name = SvPV(sv,na);
+      char *name = SvPV(sv,PL_na);
       if (strEQ (name, "vENTRY"))
-         return vENTRY;
+	 return vENTRY;
       if (strEQ (name, "vMENTRY"))
-         return vMENTRY;
+	 return vMENTRY;
       if (strEQ (name, "vLABEL"))
-         return vLABEL;
+	 return vLABEL;
       if (strEQ (name, "vSCROLL"))
-         return vSCROLL;
+	 return vSCROLL;
       if (strEQ (name, "vDIALOG"))
-         return vDIALOG;
+	 return vDIALOG;
       if (strEQ (name, "vSCALE"))
-         return vSCALE;
+	 return vSCALE;
       if (strEQ (name, "vMARQUEE"))
-         return vMARQUEE;
+	 return vMARQUEE;
       if (strEQ (name, "vMENU"))
-         return vMENU;
+	 return vMENU;
       if (strEQ (name, "vMATRIX"))
-         return vMATRIX;
+	 return vMATRIX;
       if (strEQ (name, "vHISTOGRAM"))
-         return vHISTOGRAM;
+	 return vHISTOGRAM;
       if (strEQ (name, "vSELECTION"))
-         return vSELECTION;
+	 return vSELECTION;
       if (strEQ (name, "vVIEWER"))
-         return vVIEWER;
+	 return vVIEWER;
       if (strEQ (name, "vGRAPH"))
-         return vGRAPH;
+	 return vGRAPH;
       if (strEQ (name, "vRADIO"))
-         return vRADIO;
+	 return vRADIO;
    }
+   return vNULL;
 }
 
 int
@@ -646,47 +663,47 @@ SV * sv;
 {
    if (SvPOK(sv))
    {
-      char *name = SvPV(sv,na);
+      char *name = SvPV(sv,PL_na);
       if (strEQ (name, "CHAR"))
-         return vCHAR;
+	 return vCHAR;
       if (strEQ (name, "HCHAR"))
-         return vHCHAR;
+	 return vHCHAR;
       if (strEQ (name, "INT"))
-         return vINT;
+	 return vINT;
       if (strEQ (name, "HINT"))
-         return vHINT;
+	 return vHINT;
       if (strEQ (name, "MIXED"))
-         return vMIXED;
+	 return vMIXED;
       if (strEQ (name, "HMIXED"))
-         return vHMIXED;
+	 return vHMIXED;
       if (strEQ (name, "UCHAR"))
-         return vUCHAR;
+	 return vUCHAR;
       if (strEQ (name, "LCHAR"))
-         return vLCHAR;
+	 return vLCHAR;
       if (strEQ (name, "UHCHAR"))
-         return vUHCHAR;
+	 return vUHCHAR;
       if (strEQ (name, "LHCHAR"))
-         return vLHCHAR;
+	 return vLHCHAR;
       if (strEQ (name, "UMIXED"))
-         return vUMIXED;
+	 return vUMIXED;
       if (strEQ (name, "LMIXED"))
-         return vLMIXED;
+	 return vLMIXED;
       if (strEQ (name, "UHMIXED"))
-         return vUHMIXED;
+	 return vUHMIXED;
       if (strEQ (name, "LHMIXED"))
-         return vLHMIXED;
+	 return vLHMIXED;
       if (strEQ (name, "VIEWONLY"))
-         return vVIEWONLY;
+	 return vVIEWONLY;
       if (strEQ (name, "NONE"))
-         return vNONE;
+	 return vNONE;
       if (strEQ (name, "PERCENT"))
-         return vPERCENT;
+	 return vPERCENT;
       if (strEQ (name, "REAL"))
-         return vREAL;
+	 return vREAL;
       if (strEQ (name, "PLOT"))
-         return vPLOT;
+	 return vPLOT;
       if (strEQ (name, "LINE"))
-         return vLINE;
+	 return vLINE;
    }
    return (int)SvIV(sv);
 }
@@ -697,37 +714,37 @@ SV *sv;
 {
    if (SvPOK(sv))
    {
-      char *name = SvPV(sv,na);
+      char *name = SvPV(sv,PL_na);
       if (strEQ(name, "BOTTOM"))
-         return BOTTOM;
+	 return BOTTOM;
       if (strEQ(name, "CENTER"))
-         return CENTER;
+	 return CENTER;
       if (strEQ(name, "COL"))
-         return COL;
+	 return COL;
       if (strEQ(name, "FALSE"))
-         return FALSE;
+	 return FALSE;
       if (strEQ(name, "FULL"))
-         return FULL;
+	 return FULL;
       if (strEQ(name, "HORIZONTAL"))
-         return HORIZONTAL;
+	 return HORIZONTAL;
       if (strEQ(name, "LEFT"))
-         return LEFT;
+	 return LEFT;
       if (strEQ(name, "NONE"))
-         return NONE;
+	 return NONE;
       if (strEQ(name, "NONUMBERS"))
-         return NONUMBERS;
+	 return NONUMBERS;
       if (strEQ(name, "NUMBERS"))
-         return NUMBERS;
+	 return NUMBERS;
       if (strEQ(name, "RIGHT"))
-         return RIGHT;
+	 return RIGHT;
       if (strEQ(name, "ROW"))
-         return ROW;
+	 return ROW;
       if (strEQ(name, "TRUE"))
-         return TRUE;
+	 return TRUE;
       if (strEQ(name, "TOP"))
-         return TOP;
+	 return TOP;
       if (strEQ(name, "VERTICAL"))
-         return VERTICAL;
+	 return VERTICAL;
    }
    return (int)SvIV(sv);
 }
@@ -736,7 +753,7 @@ static char *
 sv2CharPtr(inp)
 SV *inp;
 {
-   char *name = (char *)SvPV(inp,na);
+   char *name = (char *)SvPV(inp,PL_na);
    return (name);
 }
 
@@ -816,7 +833,7 @@ not_there:
     return 0;
 }
 
-MODULE	= Cdk	PACKAGE	= Cdk
+MODULE	= Cdk	PACKAGE = Cdk
 
 double
 constant(name,arg)
@@ -836,7 +853,7 @@ init()
 	{
 	   int x	= 0;
 	   GCWINDOW	= initscr();
-	   GCDKSCREEN 	= initCDKScreen (GCWINDOW);
+	   GCDKSCREEN	= initCDKScreen (GCWINDOW);
 
 	   /* Start the colors. */
 	   initCDKColor();
@@ -941,7 +958,7 @@ noraw()
 
 PROTOTYPES: DISABLE
 
-MODULE	= Cdk	PACKAGE	= Cdk::Label
+MODULE	= Cdk	PACKAGE = Cdk::Label
 
 CDKLABEL *
 New(mesg,xPos=CENTER,yPos=CENTER,box=TRUE,shadow=FALSE)
@@ -954,7 +971,7 @@ New(mesg,xPos=CENTER,yPos=CENTER,box=TRUE,shadow=FALSE)
 	{
 	   CDKLABEL *	widget = (CDKLABEL *)NULL;
 	   char *	message[MAX_LINES];
-	   int	 	messageLines;
+	   int		messageLines;
 
 	   checkCdkInit();
 
@@ -967,7 +984,7 @@ New(mesg,xPos=CENTER,yPos=CENTER,box=TRUE,shadow=FALSE)
 	   /* Check the return value. */
 	   if (widget == (CDKLABEL *)NULL)
 	   {
-  	      croak ("Cdk::Label Could not create widget. Is the window too small?\n");
+	      croak ("Cdk::Label Could not create widget. Is the window too small?\n");
 	   }
 	   else
 	   {
@@ -1142,7 +1159,7 @@ GetWindow(object)
 	OUTPUT:
 	   RETVAL
 
-MODULE	= Cdk	PACKAGE	= Cdk::Dialog
+MODULE	= Cdk	PACKAGE = Cdk::Dialog
 
 CDKDIALOG *
 New(message,buttons,xPos=CENTER,yPos=CENTER,highlight=A_REVERSE,seperator=TRUE,Box=TRUE,shadow=FALSE)
@@ -1159,14 +1176,14 @@ New(message,buttons,xPos=CENTER,yPos=CENTER,highlight=A_REVERSE,seperator=TRUE,B
 	   CDKDIALOG *	dialogWidget = (CDKDIALOG *)NULL;
 	   char *	Message[MAX_DIALOG_ROWS];
 	   char *	Buttons[MAX_DIALOG_BUTTONS];
-	   int 		buttonCount;
+	   int		buttonCount;
 	   int		rowCount;
-	   
+
 	   checkCdkInit();
 
 	   MAKE_CHAR_ARRAY (0,message,Message,rowCount);
 	   MAKE_CHAR_ARRAY (0,buttons,Buttons,buttonCount);
-	   
+
 	   dialogWidget = newCDKDialog (GCDKSCREEN,xPos,yPos,
 					Message,rowCount,
 					Buttons,buttonCount,
@@ -1209,8 +1226,8 @@ Activate(object,...)
 	   if (object->exitType == vEARLY_EXIT ||
 	       object->exitType == vESCAPE_HIT)
 	   {
-              XSRETURN_UNDEF;
- 	   }
+	      XSRETURN_UNDEF;
+	   }
 	   RETVAL = value;
 	}
 	OUTPUT:
@@ -1269,12 +1286,12 @@ PostProcess(object,functionRef)
 
 void
 Draw(object,Box=TRUE)
-        CDKDIALOG *	object
-        int		Box = sv2int ($arg);
-        CODE:
-        {
-           drawCDKDialog (object,Box);
-        }
+	CDKDIALOG *	object
+	int		Box = sv2int ($arg);
+	CODE:
+	{
+	   drawCDKDialog (object,Box);
+	}
 
 void
 Erase(object)
@@ -1425,11 +1442,11 @@ GetWindow(object)
 	OUTPUT:
 	   RETVAL
 
-MODULE	= Cdk	PACKAGE	= Cdk::Scroll
+MODULE	= Cdk	PACKAGE = Cdk::Scroll
 
 CDKSCROLL *
 New (title,mesg,height,width,xPos=CENTER,yPos=CENTER,sPos=RIGHT,numbers=TRUE,highlight=A_REVERSE,Box=TRUE,shadow=FALSE)
-	SV * 	title
+	SV *	title
 	SV *	mesg
 	int	height
 	int	width
@@ -1450,7 +1467,7 @@ New (title,mesg,height,width,xPos=CENTER,yPos=CENTER,sPos=RIGHT,numbers=TRUE,hig
 	   checkCdkInit();
 
 	   MAKE_CHAR_ARRAY(0,mesg,Message,mesglen);
-           Message[mesglen] = "";
+	   Message[mesglen] = "";
 	   MAKE_TITLE (title,Title);
 
 	   scrollWidget = newCDKScroll (GCDKSCREEN,xPos,yPos,sPos,
@@ -1495,8 +1512,8 @@ Activate(object,...)
 	   if (object->exitType == vEARLY_EXIT ||
 	       object->exitType == vESCAPE_HIT)
 	   {
-              XSRETURN_UNDEF;
- 	   }
+	      XSRETURN_UNDEF;
+	   }
 	   RETVAL = value;
 	}
 	OUTPUT:
@@ -1573,12 +1590,12 @@ PostProcess(object,functionRef)
 
 void
 Draw(object,Box=TRUE)
-        CDKSCROLL *	object
-        int		Box = sv2int ($arg);
-        CODE:
-        {
-           drawCDKScroll (object,Box);
-        }
+	CDKSCROLL *	object
+	int		Box = sv2int ($arg);
+	CODE:
+	{
+	   drawCDKScroll (object,Box);
+	}
 
 void
 Erase(object)
@@ -1609,7 +1626,7 @@ SetItems(object,items,numbers=FALSE)
 	{
 	   char *Items[MAX_ITEMS];
 	   int itemLength;
- 
+
 	   MAKE_CHAR_ARRAY(0,items,Items,itemLength);
 	   Items[itemLength] = "";
 
@@ -1748,7 +1765,7 @@ GetWindow(object)
 	OUTPUT:
 	   RETVAL
 
-MODULE	= Cdk	PACKAGE	= Cdk::Scale
+MODULE	= Cdk	PACKAGE = Cdk::Scale
 
 CDKSCALE *
 New(title,label,start,low,high,inc,fastinc,fieldwidth,xPos=CENTER,yPos=CENTER,fieldattr=A_NORMAL,Box=TRUE,shadow=FALSE)
@@ -1800,8 +1817,8 @@ Activate(object,...)
 	{
 	   chtype Keys[300];
 	   int arrayLen;
-           int value;
-	   
+	   int value;
+
 	   if (items > 1)
 	   {
 	      MAKE_CHTYPE_ARRAY(0,ST(1),Keys,arrayLen);
@@ -1834,7 +1851,7 @@ Inject(object,key)
 	   {
 	      XSRETURN_UNDEF;
 	   }
-           RETVAL = value;
+	   RETVAL = value;
 	}
 	OUTPUT:
 	   RETVAL
@@ -1876,12 +1893,12 @@ PostProcess(object,functionRef)
 
 void
 Draw(object,Box=TRUE)
-        CDKSCALE *	object
-        int		Box = sv2int ($arg);
-        CODE:
-        {
-           drawCDKScale (object,Box);
-        }
+	CDKSCALE *	object
+	int		Box = sv2int ($arg);
+	CODE:
+	{
+	   drawCDKScale (object,Box);
+	}
 
 void
 Erase(object)
@@ -2033,7 +2050,7 @@ GetWindow(object)
 	OUTPUT:
 	   RETVAL
 
-MODULE	= Cdk	PACKAGE	= Cdk::Histogram
+MODULE	= Cdk	PACKAGE = Cdk::Histogram
 
 CDKHISTOGRAM *
 New(title,height,width,orient=HORIZONTAL,xPos=CENTER,yPos=CENTER,Box=TRUE,shadow=FALSE)
@@ -2093,9 +2110,9 @@ SetDisplayType(object,value="vPERCENT")
 void
 SetValue(object,value,low,high)
 	CDKHISTOGRAM *	object
-	int 		value
-	int 		low
-	int 		high
+	int		value
+	int		low
+	int		high
 	CODE:
 	{
 	   setCDKHistogramValue (object,value,low,high);
@@ -2104,7 +2121,7 @@ SetValue(object,value,low,high)
 void
 SetFillerChar(object,value)
 	CDKHISTOGRAM *	object
-	chtype 		value = sv2chtype ($arg);
+	chtype		value = sv2chtype ($arg);
 	CODE:
 	{
 	   setCDKHistogramFillerChar (object,value);
@@ -2113,7 +2130,7 @@ SetFillerChar(object,value)
 void
 SetStatsPos(object,value)
 	CDKHISTOGRAM *	object
-	int 		value = sv2int ($arg);
+	int		value = sv2int ($arg);
 	CODE:
 	{
 	   setCDKHistogramStatsPos (object,value);
@@ -2122,7 +2139,7 @@ SetStatsPos(object,value)
 void
 SetStatsAttr(object,value)
 	CDKHISTOGRAM *	object
-	chtype 		value = sv2chtype ($arg);
+	chtype		value = sv2chtype ($arg);
 	CODE:
 	{
 	   setCDKHistogramStatsAttr (object,value);
@@ -2268,7 +2285,7 @@ GetWindow(object)
 	OUTPUT:
 	   RETVAL
 
-MODULE	= Cdk	PACKAGE	= Cdk::Menu
+MODULE	= Cdk	PACKAGE = Cdk::Menu
 
 CDKMENU *
 New(menulist,menuloc,titleattr=A_REVERSE,subtitleattr=A_REVERSE,menuPos=TOP)
@@ -2284,11 +2301,11 @@ New(menulist,menuloc,titleattr=A_REVERSE,subtitleattr=A_REVERSE,menuPos=TOP)
 	   int	subSize[MAX_SUB_ITEMS];
 	   int	menuLoc[MAX_MENU_ITEMS];
 	   int	menuItems;
-	   int 	menulen, loclen;
+	   int	menulen, loclen;
 	   int	x;
 
 	   checkCdkInit();
-	   
+
 	   MAKE_CHAR_MATRIX(0,menulist,menuList,subSize,menulen);
 
 	   MAKE_INT_ARRAY (0,menuloc,menuLoc,loclen);
@@ -2326,10 +2343,10 @@ Activate(object,...)
 	   if (object->exitType == vEARLY_EXIT ||
 	       object->exitType == vESCAPE_HIT)
 	   {
-              XSRETURN_UNDEF;
- 	   }
+	      XSRETURN_UNDEF;
+	   }
 	   RETVAL = value;
-        }
+	}
 	OUTPUT:
 	   RETVAL
 
@@ -2386,11 +2403,11 @@ PostProcess(object,functionRef)
 
 void
 Draw(object)
-        CDKMENU *	object
-        CODE:
-        {
-           drawCDKMenu (object, 0);
-        }
+	CDKMENU *	object
+	CODE:
+	{
+	   drawCDKMenu (object);
+	}
 
 void
 Erase(object)
@@ -2413,7 +2430,7 @@ SetCurrentItem(object,menuitem,submenuitem)
 void
 SetTitleHighlight(object,value)
 	CDKMENU *	object
-	chtype 		value
+	chtype		value
 	CODE:
 	{
 	   setCDKMenuTitleHighlight (object,value);
@@ -2422,7 +2439,7 @@ SetTitleHighlight(object,value)
 void
 SetSubTitleHighlight(object,value)
 	CDKMENU *	object
-	chtype 		value
+	chtype		value
 	CODE:
 	{
 	   setCDKMenuSubTitleHighlight (object,value);
@@ -2469,7 +2486,7 @@ Lower(object)
 	   lowerCDKObject (vMENU, object);
 	}
 
-MODULE	= Cdk	PACKAGE	= Cdk::Entry
+MODULE	= Cdk	PACKAGE = Cdk::Entry
 
 CDKENTRY *
 New(title,label,min,max,fieldWidth,filler=".",disptype=vMIXED,xPos=CENTER,yPos=CENTER,fieldattr=A_NORMAL,Box=TRUE,shadow=FALSE)
@@ -2536,7 +2553,7 @@ Activate(object,...)
 	   if (object->exitType != vNORMAL)
 	   {
 	      XSRETURN_UNDEF;
- 	   }
+	   }
 	   RETVAL = value;
 	}
 	OUTPUT:
@@ -2623,7 +2640,7 @@ SetValue(object,value)
 void
 SetMin(object,value)
 	CDKENTRY *	object
-	int 		value
+	int		value
 	CODE:
 	{
 	   setCDKEntryMin (object, value);
@@ -2632,7 +2649,7 @@ SetMin(object,value)
 void
 SetMax(object,value)
 	CDKENTRY *	object
-	int 		value
+	int		value
 	CODE:
 	{
 	   setCDKEntryMax (object, value);
@@ -2641,7 +2658,7 @@ SetMax(object,value)
 void
 SetFillerChar(object,value)
 	CDKENTRY *	object
-	chtype 		value = sv2chtype ($arg);
+	chtype		value = sv2chtype ($arg);
 	CODE:
 	{
 	   setCDKEntryFillerChar (object, value);
@@ -2650,7 +2667,7 @@ SetFillerChar(object,value)
 void
 SetHiddenChar(object,value)
 	CDKENTRY *	object
-	chtype 		value = sv2chtype ($arg);
+	chtype		value = sv2chtype ($arg);
 	CODE:
 	{
 	   setCDKEntryHiddenChar (object, value);
@@ -2797,7 +2814,7 @@ GetWindow(object)
 	OUTPUT:
 	   RETVAL
 
-MODULE	= Cdk	PACKAGE	= Cdk::Mentry
+MODULE	= Cdk	PACKAGE = Cdk::Mentry
 
 CDKMENTRY *
 New(title,label,min,physical,logical,fieldWidth,disptype=vMIXED,filler=".",xPos=CENTER,yPos=CENTER,fieldattr=A_NORMAL,Box=TRUE,shadow=FALSE)
@@ -2866,8 +2883,8 @@ Activate(object,...)
 	   if (object->exitType == vEARLY_EXIT ||
 	       object->exitType == vESCAPE_HIT)
 	   {
-              XSRETURN_UNDEF;
- 	   }
+	      XSRETURN_UNDEF;
+	   }
 	   RETVAL = value;
 	}
 	OUTPUT:
@@ -2927,12 +2944,12 @@ PostProcess(object,functionRef)
 
 void
 Draw(object,Box=TRUE)
-        CDKMENTRY *	object
-        int		Box = sv2int ($arg);
-        CODE:
-        {
-           drawCDKMentry (object,Box);
-        }
+	CDKMENTRY *	object
+	int		Box = sv2int ($arg);
+	CODE:
+	{
+	   drawCDKMentry (object,Box);
+	}
 
 void
 Erase(object)
@@ -2970,7 +2987,7 @@ SetMin(object,value)
 void
 SetFillerChar(object,value)
 	CDKMENTRY *	object
-	chtype 		value = sv2chtype ($arg);
+	chtype		value = sv2chtype ($arg);
 	CODE:
 	{
 	   setCDKMentryFillerChar (object,value);
@@ -3117,7 +3134,7 @@ GetWindow(object)
 	OUTPUT:
 	   RETVAL
 
-MODULE	= Cdk	PACKAGE	= Cdk::Matrix
+MODULE	= Cdk	PACKAGE = Cdk::Matrix
 
 CDKMATRIX *
 New(title,rowtitles,coltitles,colwidths,coltypes,vrows,vcols,xPos=CENTER,yPos=CENTER,rowspace=1,colspace=1,filler=".",dominant=NONE,boxMatrix=FALSE,boxCell=TRUE,shadow=FALSE)
@@ -3140,7 +3157,7 @@ New(title,rowtitles,coltitles,colwidths,coltypes,vrows,vcols,xPos=CENTER,yPos=CE
 	CODE:
 	{
 	   CDKMATRIX * matrixWidget = (CDKMATRIX *)NULL;
-	   char	*colTitles[MAX_MATRIX_COLS+1];
+	   char *colTitles[MAX_MATRIX_COLS+1];
 	   char *rowTitles[MAX_MATRIX_ROWS+1];
 	   int	colWidths[MAX_MATRIX_COLS+1];
 	   int	colTypes[MAX_MATRIX_COLS+1];
@@ -3175,7 +3192,7 @@ New(title,rowtitles,coltitles,colwidths,coltypes,vrows,vcols,xPos=CENTER,yPos=CE
 						xPos, yPos,
 						rows, cols,
 						vrows, vcols,
-						Title, rowTitles, 
+						Title, rowTitles,
 						colTitles,
 						colWidths, colTypes,
 						rowspace, colspace, filler,
@@ -3200,7 +3217,7 @@ Activate(object,...)
 	CDKMATRIX *	object
 	PPCODE:
 	{
-	   AV *cellInfo	= newAV();
+	   AV *cellInfo = newAV();
 	   char *info[MAX_MATRIX_ROWS][MAX_MATRIX_COLS];
 	   int subSize[MAX_MATRIX_ROWS];
 	   int x, y, value, arrayLen, matrixlen;
@@ -3220,9 +3237,9 @@ Activate(object,...)
 	   /* Check the exit status.	*/
 	   if (object->exitType == vESCAPE_HIT ||
 	       object->exitType == vEARLY_EXIT)
-           {
+	   {
 	      XSRETURN_UNDEF;
-           }
+	   }
 
 	   /* Take the info from the matrix and make an array out of it. */
 	   for (x=1; x <= object->rows; x++)
@@ -3231,12 +3248,12 @@ Activate(object,...)
 
 	      for (y=1; y <= object->cols; y++)
 	      {
-	         av_push (av, newSVpv (object->info[x][y], strlen (object->info[x][y])));
+		 av_push (av, newSVpv (object->info[x][y], strlen (object->info[x][y])));
 	      }
 
 	      av_push (cellInfo, newRV((SV *)av));
 	   }
-	   
+
 	   /* Push the values on the return stack.	*/
 	   XPUSHs (sv_2mortal(newSViv(object->rows)));
 	   XPUSHs (sv_2mortal(newSViv(object->cols)));
@@ -3305,12 +3322,12 @@ GetDim(object)
 
 void
 Draw(object,Box=TRUE)
-        CDKMATRIX *	object
-        int		Box = sv2int ($arg);
-        CODE:
-        {
-           drawCDKMatrix (object,Box);
-        }
+	CDKMATRIX *	object
+	int		Box = sv2int ($arg);
+	CODE:
+	{
+	   drawCDKMatrix (object,Box);
+	}
 
 void
 Erase(object)
@@ -3500,7 +3517,7 @@ Unregister(object)
 	   unregisterCDKObject (vMATRIX, object);
 	}
 
-MODULE	= Cdk	PACKAGE	= Cdk::Marquee
+MODULE	= Cdk	PACKAGE = Cdk::Marquee
 
 CDKMARQUEE *
 New(width,xPos=CENTER,yPos=CENTER,box=TRUE,shadow=FALSE)
@@ -3637,12 +3654,12 @@ Bind(object,key,functionRef)
 
 void
 Draw(object,Box=TRUE)
-        CDKMARQUEE *	object
-        int		Box = sv2int ($arg);
-        CODE:
-        {
-           drawCDKMarquee (object,Box);
-        }
+	CDKMARQUEE *	object
+	int		Box = sv2int ($arg);
+	CODE:
+	{
+	   drawCDKMarquee (object,Box);
+	}
 
 void
 Erase(object)
@@ -3694,7 +3711,7 @@ GetWindow(object)
 	OUTPUT:
 	   RETVAL
 
-MODULE	= Cdk	PACKAGE	= Cdk::Selection
+MODULE	= Cdk	PACKAGE = Cdk::Selection
 
 CDKSELECTION *
 New(title,list,choices,height,width,xPos=CENTER,yPos=CENTER,sPos=RIGHT,highlight=A_REVERSE,Box=TRUE,shadow=FALSE)
@@ -3763,14 +3780,14 @@ Activate(object,...)
 	   if (object->exitType == vEARLY_EXIT ||
 	       object->exitType == vESCAPE_HIT)
 	   {
-              XSRETURN_UNDEF;
- 	   }
+	      XSRETURN_UNDEF;
+	   }
 
 	   /* Push the values on the return stack.	*/
 	   for (x=0; x < object->listSize ; x++)
 	   {
 	      XPUSHs (sv_2mortal(newSViv(object->selections[x])));
- 	   }
+	   }
 	}
 
 int
@@ -3826,12 +3843,12 @@ PostProcess(object,functionRef)
 
 void
 Draw(object,Box=TRUE)
-        CDKSELECTION *	object
-        int		Box = sv2int ($arg);
-        CODE:
-        {
-           drawCDKSelection (object,Box);
-        }
+	CDKSELECTION *	object
+	int		Box = sv2int ($arg);
+	CODE:
+	{
+	   drawCDKSelection (object,Box);
+	}
 
 void
 Erase(object)
@@ -4021,7 +4038,7 @@ GetWindow(object)
 	OUTPUT:
 	   RETVAL
 
-MODULE	= Cdk	PACKAGE	= Cdk::Viewer
+MODULE	= Cdk	PACKAGE = Cdk::Viewer
 
 CDKVIEWER *
 New(buttons,height,width,buttonHighlight=A_REVERSE,xpos=CENTER,ypos=CENTER,Box=TRUE,shadow=FALSE)
@@ -4071,8 +4088,8 @@ Activate(object)
 	   if (object->exitType == vEARLY_EXIT ||
 	       object->exitType == vESCAPE_HIT)
 	   {
-              XSRETURN_UNDEF;
- 	   }
+	      XSRETURN_UNDEF;
+	   }
 	   RETVAL = value;
 	}
 	OUTPUT:
@@ -4089,7 +4106,7 @@ SetInfo(object,info,interpret=TRUE)
 	   int infolen;
 
 	   MAKE_CHAR_ARRAY(0,info, Info, infolen);
-           Info[infolen] = "";
+	   Info[infolen] = "";
 
 	   setCDKViewerInfo (object,Info,infolen,interpret);
 	}
@@ -4106,7 +4123,7 @@ SetTitle(object,value)
 void
 SetHighlight(object,value)
 	CDKVIEWER *	object
-	chtype 		value
+	chtype		value
 	CODE:
 	{
 	   setCDKViewerHighlight (object,value);
@@ -4115,7 +4132,7 @@ SetHighlight(object,value)
 void
 SetInfoLine(object,value)
 	CDKVIEWER *	object
-	int 		value
+	int		value
 	CODE:
 	{
 	   setCDKViewerInfoLine (object,value);
@@ -4215,12 +4232,12 @@ Bind(object,key,functionRef)
 
 void
 Draw(object,Box=TRUE)
-        CDKVIEWER *	object
-        int		Box = sv2int ($arg);
-        CODE:
-        {
-           drawCDKViewer (object,Box);
-        }
+	CDKVIEWER *	object
+	int		Box = sv2int ($arg);
+	CODE:
+	{
+	   drawCDKViewer (object,Box);
+	}
 
 void
 Erase(object)
@@ -4272,7 +4289,7 @@ GetWindow(object)
 	OUTPUT:
 	   RETVAL
 
-MODULE	= Cdk	PACKAGE	= Cdk::Graph
+MODULE	= Cdk	PACKAGE = Cdk::Graph
 
 CDKGRAPH *
 New(title,xtitle,ytitle,height,width,xpos=CENTER,ypos=CENTER)
@@ -4314,12 +4331,12 @@ SetValues(object,values,startAtZero=TRUE)
 	int			startAtZero = sv2int ($arg);
 	CODE:
 	{
-           int 	Values[MAX_LINES];
-           int 	valueCount;
+	   int	Values[MAX_LINES];
+	   int	valueCount;
 
 	   MAKE_INT_ARRAY (0,values,Values,valueCount);
-	   
-           RETVAL = setCDKGraphValues (object,Values,valueCount,startAtZero);
+
+	   RETVAL = setCDKGraphValues (object,Values,valueCount,startAtZero);
 	}
 	OUTPUT:
 	   RETVAL
@@ -4432,12 +4449,12 @@ SetBackgroundColor(object,color)
 
 void
 Draw(object,Box=FALSE)
-        CDKGRAPH *	object
-        int		Box = sv2int ($arg);
-        CODE:
-        {
-           drawCDKGraph (object,Box);
-        }
+	CDKGRAPH *	object
+	int		Box = sv2int ($arg);
+	CODE:
+	{
+	   drawCDKGraph (object,Box);
+	}
 
 void
 Erase(object)
@@ -4489,7 +4506,7 @@ GetWindow(object)
 	OUTPUT:
 	   RETVAL
 
-MODULE	= Cdk	PACKAGE	= Cdk::Radio
+MODULE	= Cdk	PACKAGE = Cdk::Radio
 
 CDKRADIO *
 New(title,list,height,width,xPos=CENTER,yPos=CENTER,sPos=RIGHT,choice="X",defaultItem=0,highlight=A_REVERSE,Box=TRUE,shadow=FALSE)
@@ -4513,7 +4530,7 @@ New(title,list,height,width,xPos=CENTER,yPos=CENTER,sPos=RIGHT,choice="X",defaul
 	   int listlen;
 
 	   MAKE_CHAR_ARRAY(0,list,List,listlen);
-           List[listlen] = "";
+	   List[listlen] = "";
 
 	   MAKE_TITLE (title,Title);
 
@@ -4559,8 +4576,8 @@ Activate(object,...)
 	   if (object->exitType == vEARLY_EXIT ||
 	       object->exitType == vESCAPE_HIT)
 	   {
-              XSRETURN_UNDEF;
- 	   }
+	      XSRETURN_UNDEF;
+	   }
 	   RETVAL = value;
 	}
 	OUTPUT:
@@ -4619,12 +4636,12 @@ PostProcess(object,functionRef)
 
 void
 Draw(object,Box=TRUE)
-        CDKRADIO *	object
-        int		Box = sv2int ($arg);
-        CODE:
-        {
-           drawCDKRadio (object,Box);
-        }
+	CDKRADIO *	object
+	int		Box = sv2int ($arg);
+	CODE:
+	{
+	   drawCDKRadio (object,Box);
+	}
 
 void
 Erase(object)
@@ -4646,7 +4663,7 @@ SetHighlight(object,highlight)
 void
 SetChoiceCharacter(object,value)
 	CDKRADIO *	object
-	chtype 		value = sv2chtype ($arg);
+	chtype		value = sv2chtype ($arg);
 	CODE:
 	{
 	   setCDKRadioChoiceCharacter (object,value);
@@ -4655,7 +4672,7 @@ SetChoiceCharacter(object,value)
 void
 SetLeftBrace(object,value)
 	CDKRADIO *	object
-	chtype 		value = sv2chtype ($arg);
+	chtype		value = sv2chtype ($arg);
 	CODE:
 	{
 	   setCDKRadioLeftBrace (object,value);
@@ -4664,7 +4681,7 @@ SetLeftBrace(object,value)
 void
 SetRightBrace(object,value)
 	CDKRADIO *	object
-	chtype 		value = sv2chtype ($arg);
+	chtype		value = sv2chtype ($arg);
 	CODE:
 	{
 	   setCDKRadioRightBrace (object,value);
@@ -4793,7 +4810,7 @@ GetWindow(object)
 	OUTPUT:
 	   RETVAL
 
-MODULE	= Cdk	PACKAGE	= Cdk::Template
+MODULE	= Cdk	PACKAGE = Cdk::Template
 
 CDKTEMPLATE *
 New(title,label,plate,overlay,xpos=CENTER,ypos=CENTER,Box=TRUE,shadow=FALSE)
@@ -4855,8 +4872,8 @@ Activate(object,...)
 	   if (object->exitType == vEARLY_EXIT ||
 	       object->exitType == vESCAPE_HIT)
 	   {
-              XSRETURN_UNDEF;
- 	   }
+	      XSRETURN_UNDEF;
+	   }
 	   RETVAL = value;
 	}
 	OUTPUT:
@@ -5100,7 +5117,7 @@ GetWindow(object)
 	OUTPUT:
 	   RETVAL
 
-MODULE	= Cdk	PACKAGE	= Cdk::Swindow
+MODULE	= Cdk	PACKAGE = Cdk::Swindow
 CDKSWINDOW *
 New(title,savelines,height,width,xpos=CENTER,ypos=CENTER,box=TRUE,shadow=FALSE)
 	SV *	title
@@ -5143,7 +5160,7 @@ Activate(object,...)
 	{
 	   chtype Keys[300];
 	   int arrayLen;
-	   
+
 	   if (items > 1)
 	   {
 	      MAKE_CHTYPE_ARRAY(0,ST(1),Keys,arrayLen);
@@ -5214,7 +5231,7 @@ SetContents(object,info)
 	{
 	   char *Loginfo[MAX_ITEMS];
 	   int infolen;
- 
+
 	   MAKE_CHAR_ARRAY(0,info,Loginfo,infolen);
 	   Loginfo[infolen] = "";
 
@@ -5333,7 +5350,7 @@ Exec(object,command,insertPos=BOTTOM)
 	}
 	OUTPUT:
 	   RETVAL
-	
+
 void
 Get(object)
 	CDKSWINDOW *	object
@@ -5342,13 +5359,13 @@ Get(object)
 	   int x;
 	   char *temp;
 
-           /* Push each item onto the stack.		*/
+	   /* Push each item onto the stack.		*/
 	   for (x=0; x < object->itemCount ; x++)
 	   {
-	      /* We need to convert from chtype to char	*/
+	      /* We need to convert from chtype to char */
 	      temp = chtype2Char (object->info[x]);
 
-              /* Push it on the stack.			*/
+	      /* Push it on the stack.			*/
 	      XPUSHs (sv_2mortal(newSVpv(temp, strlen(temp))));
 	      freeChar (temp);
 	   }
@@ -5359,7 +5376,7 @@ Save(object)
 	CDKSWINDOW *	object
 	CODE:
 	{
-           saveCDKSwindowInformation (object);
+	   saveCDKSwindowInformation (object);
 	}
 
 void
@@ -5367,7 +5384,7 @@ Load(object)
 	CDKSWINDOW *	object
 	CODE:
 	{
-           loadCDKSwindowInformation (object);
+	   loadCDKSwindowInformation (object);
 	}
 
 int
@@ -5448,7 +5465,7 @@ GetWindow(object)
 	OUTPUT:
 	   RETVAL
 
-MODULE	= Cdk	PACKAGE	= Cdk::Itemlist
+MODULE	= Cdk	PACKAGE = Cdk::Itemlist
 CDKITEMLIST *
 New(title,label,itemlist,defaultItem=0,xpos=CENTER,ypos=CENTER,box=TRUE,shadow=FALSE)
 	SV *	title
@@ -5463,11 +5480,11 @@ New(title,label,itemlist,defaultItem=0,xpos=CENTER,ypos=CENTER,box=TRUE,shadow=F
 	{
 	   CDKITEMLIST * itemlistWidget = (CDKITEMLIST *)NULL;
 	   char		Title[1000];
-	   char *       Itemlist[MAX_LINES];
-	   int          itemLength;
- 
+	   char *	Itemlist[MAX_LINES];
+	   int		itemLength;
+
 	   checkCdkInit();
- 
+
 	   MAKE_CHAR_ARRAY (0,itemlist,Itemlist,itemLength);
 	   MAKE_TITLE (title,Title);
 
@@ -5512,8 +5529,8 @@ Activate(object,...)
 	   if (object->exitType == vEARLY_EXIT ||
 	       object->exitType == vESCAPE_HIT)
 	   {
-              XSRETURN_UNDEF;
- 	   }
+	      XSRETURN_UNDEF;
+	   }
 	   RETVAL = value;
 	}
 	OUTPUT:
@@ -5578,7 +5595,7 @@ SetValues(object,values)
 	{
 	   char *Values[MAX_ITEMS];
 	   int valueLength;
- 
+
 	   MAKE_CHAR_ARRAY(0,values,Values,valueLength);
 
 	   setCDKItemlistValues (object,Values,valueLength,object->defaultItem);
@@ -5587,7 +5604,7 @@ SetValues(object,values)
 void
 SetDefaultItem(object,value)
 	CDKITEMLIST *	object
-	int 		value
+	int		value
 	CODE:
 	{
 	   setCDKItemlistDefaultItem (object,value);
@@ -5596,7 +5613,7 @@ SetDefaultItem(object,value)
 void
 SetCurrentItem(object,value)
 	CDKITEMLIST *	object
-	int 		value
+	int		value
 	CODE:
 	{
 	   setCDKItemlistCurrentItem (object,value);
@@ -5752,17 +5769,17 @@ GetWindow(object)
 	OUTPUT:
 	   RETVAL
 
-MODULE	= Cdk	PACKAGE	= Cdk::Fselect
+MODULE	= Cdk	PACKAGE = Cdk::Fselect
 CDKFSELECT *
 New(title,label,height,width,dAttrib="</N>",fAttrib="</N>",lAttrib="</N>",sAttrib="</N>",highlight="</R>",fieldAttribute=A_NORMAL,filler=".",xPos=CENTER,yPos=CENTER,box=TRUE,shadow=FALSE)
 	SV *	title
 	char *	label
 	int	height
 	int	width
-	char * 	dAttrib
-	char * 	fAttrib
-	char * 	lAttrib
-	char * 	sAttrib
+	char *	dAttrib
+	char *	fAttrib
+	char *	lAttrib
+	char *	sAttrib
 	chtype	highlight = sv2chtype ($arg);
 	chtype	fieldAttribute = sv2chtype ($arg);
 	chtype	filler = sv2chtype ($arg);
@@ -5822,8 +5839,8 @@ Activate(object,...)
 	   if (object->exitType == vEARLY_EXIT ||
 	       object->exitType == vESCAPE_HIT)
 	   {
-              XSRETURN_UNDEF;
- 	   }
+	      XSRETURN_UNDEF;
+	   }
 	   RETVAL = value;
 	}
 	OUTPUT:
@@ -5867,7 +5884,7 @@ SetFillerChar(object,value)
 void
 SetHighlight(object,value)
 	CDKFSELECT *	object
-	chtype 		value
+	chtype		value
 	CODE:
 	{
 	   setCDKFselectHighlight (object,value);
@@ -6084,7 +6101,7 @@ GetWindow(object)
 	OUTPUT:
 	   RETVAL
 
-MODULE	= Cdk	PACKAGE	= Cdk::Slider
+MODULE	= Cdk	PACKAGE = Cdk::Slider
 CDKSLIDER *
 New(title,label,start,low,high,inc,fastInc,fieldWidth,xPos,yPos,filler,Box,shadow)
 	SV *	title
@@ -6153,8 +6170,8 @@ Activate(object,...)
 	   if (object->exitType == vEARLY_EXIT ||
 	       object->exitType == vESCAPE_HIT)
 	   {
-              XSRETURN_UNDEF;
- 	   }
+	      XSRETURN_UNDEF;
+	   }
 	   RETVAL = value;
 	}
 	OUTPUT:
@@ -6172,7 +6189,7 @@ Inject(object,key)
 	   {
 	      XSRETURN_UNDEF;
 	   }
-           RETVAL = value;
+	   RETVAL = value;
 	}
 	OUTPUT:
 	   RETVAL
@@ -6371,7 +6388,7 @@ GetWindow(object)
 	OUTPUT:
 	   RETVAL
 
-MODULE	= Cdk	PACKAGE	= Cdk::Alphalist
+MODULE	= Cdk	PACKAGE = Cdk::Alphalist
 CDKALPHALIST *
 New(title,label,list,height,width,xPos,yPos,highlight,filler,box,shadow)
 	SV *	title
@@ -6395,7 +6412,7 @@ New(title,label,list,height,width,xPos,yPos,highlight,filler,box,shadow)
 	   checkCdkInit();
 
 	   MAKE_CHAR_ARRAY(0,list,List,listSize);
-           List[listSize] = "";
+	   List[listSize] = "";
 
 	   MAKE_TITLE(title,Title);
 
@@ -6424,7 +6441,7 @@ Activate(object,...)
 	CDKALPHALIST *	object
 	PPCODE:
 	{
-	   SV *sv = (SV *)&sv_undef;
+	   SV *sv = (SV *)&PL_sv_undef;
 	   chtype Keys[300];
 	   int arrayLen;
 	   char *value;
@@ -6443,7 +6460,7 @@ Activate(object,...)
 	   if (object->exitType == vNORMAL)
 	   {
 	      sv = newSVpv (value, strlen (value));
- 	   }
+	   }
 	   XPUSHs (sv);
 	}
 
@@ -6474,7 +6491,7 @@ SetContents(object,list)
 	   int listSize;
 
 	   MAKE_CHAR_ARRAY(0,list,List,listSize);
-           List[listSize] = "";
+	   List[listSize] = "";
 
 	   setCDKAlphalistContents (object, List, listSize);
 	}
@@ -6482,7 +6499,7 @@ SetContents(object,list)
 void
 SetFillerChar(object,fille)
 	CDKALPHALIST*	object
-	chtype  filler = sv2chtype ($arg);
+	chtype	filler = sv2chtype ($arg);
 	CODE:
 	{
 	   setCDKAlphalistFillerChar (object,filler);
@@ -6491,7 +6508,7 @@ SetFillerChar(object,fille)
 void
 SetHighlight(object,highlight)
 	CDKALPHALIST*	object
-	chtype  filler = sv2chtype ($arg);
+	chtype	filler = sv2chtype ($arg);
 	CODE:
 	{
 	   setCDKAlphalistHighlight (object,filler);
@@ -6682,7 +6699,7 @@ GetWindow(object)
 	OUTPUT:
 	   RETVAL
 
-MODULE	= Cdk	PACKAGE	= Cdk::Calendar
+MODULE	= Cdk	PACKAGE = Cdk::Calendar
 
 CDKCALENDAR *
 New(title,day,month,year,dayAttrib,monthAttrib,yearAttrib,highlight,xPos=CENTER,yPos=CENTER,Box=TRUE,shadow=FALSE)
@@ -6732,7 +6749,7 @@ Activate(object,...)
 	{
 	   chtype Keys[300];
 	   int arrayLen;
-	   
+
 	   if (items > 1)
 	   {
 	      MAKE_CHTYPE_ARRAY(0,ST(1),Keys,arrayLen);
@@ -6746,8 +6763,8 @@ Activate(object,...)
 	   if (object->exitType == vEARLY_EXIT ||
 	       object->exitType == vESCAPE_HIT)
 	   {
-              XSRETURN_UNDEF;
- 	   }
+	      XSRETURN_UNDEF;
+	   }
 
 	   XPUSHs (sv_2mortal(newSViv(object->day)));
 	   XPUSHs (sv_2mortal(newSViv(object->month)));
@@ -6761,11 +6778,11 @@ Inject(object,key)
 	PPCODE:
 	{
 	   int value = injectCDKCalendar (object,key);
-           if (object->exitType == vESCAPE_HIT ||
+	   if (object->exitType == vESCAPE_HIT ||
 	       object->exitType == vEARLY_EXIT)
-           {
+	   {
 	      XSRETURN_UNDEF;
-           }
+	   }
 
 	   XPUSHs (sv_2mortal(newSViv(object->day)));
 	   XPUSHs (sv_2mortal(newSViv(object->month)));
@@ -6862,12 +6879,12 @@ PostProcess(object,functionRef)
 
 void
 Draw(object,Box=TRUE)
-        CDKCALENDAR *	object
-        int		Box = sv2int ($arg);
-        CODE:
-        {
-           drawCDKCalendar (object,Box);
-        }
+	CDKCALENDAR *	object
+	int		Box = sv2int ($arg);
+	CODE:
+	{
+	   drawCDKCalendar (object,Box);
+	}
 
 void
 Erase(object)
@@ -6887,7 +6904,7 @@ Set(object,year,month,day,yearAttrib,monthAttrib,dayAttrib,highlight,Box)
 	chtype		monthAttrib = sv2chtype ($arg);
 	chtype		yearAttrib = sv2chtype ($arg);
 	chtype		highlight = sv2chtype ($arg);
-	int 		Box = sv2int ($arg);
+	int		Box = sv2int ($arg);
 	CODE:
 	{
 	   setCDKCalendar (object,day,month,year,yearAttrib,monthAttrib,dayAttrib,highlight,Box);
@@ -6935,7 +6952,7 @@ GetWindow(object)
 	OUTPUT:
 	   RETVAL
 
-MODULE	= Cdk	PACKAGE	= Cdk::Buttonbox
+MODULE	= Cdk	PACKAGE = Cdk::Buttonbox
 
 CDKBUTTONBOX *
 New(title,buttons,rows,cols,height,width,xPos=CENTER,yPos=CENTER,highlight=A_REVERSE,Box=TRUE,shadow=FALSE)
@@ -6954,15 +6971,15 @@ New(title,buttons,rows,cols,height,width,xPos=CENTER,yPos=CENTER,highlight=A_REV
 	{
 	   CDKBUTTONBOX *	widget = (CDKBUTTONBOX *)NULL;
 	   char *		Buttons[MAX_BUTTONS];
-	   char 		Title[1000];
-	   int 			buttonCount;
+	   char			Title[1000];
+	   int			buttonCount;
 	   int			rowCount;
-	   
+
 	   checkCdkInit();
 
 	   MAKE_CHAR_ARRAY (0,buttons,Buttons,buttonCount);
 	   MAKE_TITLE (title,Title);
-	   
+
 	   widget = newCDKButtonbox (GCDKSCREEN,xPos,yPos,
 					height,width,Title,
 					rows,cols,
@@ -7005,8 +7022,8 @@ Activate(object,...)
 	   if (object->exitType == vEARLY_EXIT ||
 	       object->exitType == vESCAPE_HIT)
 	   {
-              XSRETURN_UNDEF;
- 	   }
+	      XSRETURN_UNDEF;
+	   }
 	   RETVAL = value;
 	}
 	OUTPUT:
@@ -7065,12 +7082,12 @@ PostProcess(object,functionRef)
 
 void
 Draw(object,Box=TRUE)
-        CDKBUTTONBOX *	object
-        int		Box = sv2int ($arg);
-        CODE:
-        {
-           drawCDKButtonbox (object,Box);
-        }
+	CDKBUTTONBOX *	object
+	int		Box = sv2int ($arg);
+	CODE:
+	{
+	   drawCDKButtonbox (object,Box);
+	}
 
 void
 Erase(object)
@@ -7212,7 +7229,7 @@ GetWindow(object)
 	OUTPUT:
 	   RETVAL
 
-MODULE	= Cdk	PACKAGE	= CDKLABELPtr	PREFIX	= cdk_
+MODULE	= Cdk	PACKAGE = CDKLABELPtr	PREFIX	= cdk_
 void
 cdk_DESTROY(object)
 	CDKLABEL *	object
@@ -7221,7 +7238,7 @@ cdk_DESTROY(object)
 	   destroyCDKLabel (object);
 	}
 
-MODULE	= Cdk	PACKAGE	= CDKBUTTONBOXPtr	PREFIX	= cdk_
+MODULE	= Cdk	PACKAGE = CDKBUTTONBOXPtr	PREFIX	= cdk_
 void
 cdk_DESTROY(object)
 	CDKBUTTONBOX *	object
@@ -7230,7 +7247,7 @@ cdk_DESTROY(object)
 	   destroyCDKButtonbox (object);
 	}
 
-MODULE	= Cdk	PACKAGE	= CDKDIALOGPtr	PREFIX	= cdk_
+MODULE	= Cdk	PACKAGE = CDKDIALOGPtr	PREFIX	= cdk_
 void
 cdk_DESTROY(object)
 	CDKDIALOG *	object
@@ -7239,7 +7256,7 @@ cdk_DESTROY(object)
 	   destroyCDKDialog (object);
 	}
 
-MODULE	= Cdk	PACKAGE	= CDKENTRYPtr	PREFIX	= cdk_
+MODULE	= Cdk	PACKAGE = CDKENTRYPtr	PREFIX	= cdk_
 void
 cdk_DESTROY(object)
 	CDKENTRY *	object
@@ -7248,7 +7265,7 @@ cdk_DESTROY(object)
 	   destroyCDKEntry (object);
 	}
 
-MODULE	= Cdk	PACKAGE	= CDKSCROLLPtr	PREFIX	= cdk_
+MODULE	= Cdk	PACKAGE = CDKSCROLLPtr	PREFIX	= cdk_
 void
 cdk_DESTROY(object)
 	CDKSCROLL *	object
@@ -7257,7 +7274,7 @@ cdk_DESTROY(object)
 	   destroyCDKScroll (object);
 	}
 
-MODULE	= Cdk	PACKAGE	= CDKSCALEPtr	PREFIX	= cdk_
+MODULE	= Cdk	PACKAGE = CDKSCALEPtr	PREFIX	= cdk_
 void
 cdk_DESTROY(object)
 	CDKSCALE *	object
@@ -7266,7 +7283,7 @@ cdk_DESTROY(object)
 	   destroyCDKScale (object);
 	}
 
-MODULE	= Cdk	PACKAGE	= CDKHISTOGRAMPtr	PREFIX	= cdk_
+MODULE	= Cdk	PACKAGE = CDKHISTOGRAMPtr	PREFIX	= cdk_
 void
 cdk_DESTROY(object)
 	CDKHISTOGRAM *	object
@@ -7275,7 +7292,7 @@ cdk_DESTROY(object)
 	   destroyCDKHistogram (object);
 	}
 
-MODULE	= Cdk	PACKAGE	= CDKMENUPtr	PREFIX	= cdk_
+MODULE	= Cdk	PACKAGE = CDKMENUPtr	PREFIX	= cdk_
 void
 cdk_DESTROY(object)
 	CDKMENU *	object
@@ -7284,7 +7301,7 @@ cdk_DESTROY(object)
 	   destroyCDKMenu (object);
 	}
 
-MODULE	= Cdk	PACKAGE	= CDKMENTRYPtr	PREFIX	= cdk_
+MODULE	= Cdk	PACKAGE = CDKMENTRYPtr	PREFIX	= cdk_
 void
 cdk_DESTROY(object)
 	CDKMENTRY *	object
@@ -7293,7 +7310,7 @@ cdk_DESTROY(object)
 	   destroyCDKMentry (object);
 	}
 
-MODULE	= Cdk	PACKAGE	= CDKMATRIXPtr	PREFIX	= cdk_
+MODULE	= Cdk	PACKAGE = CDKMATRIXPtr	PREFIX	= cdk_
 void
 cdk_DESTROY(object)
 	CDKMATRIX *	object
@@ -7302,7 +7319,7 @@ cdk_DESTROY(object)
 	   destroyCDKMatrix (object);
 	}
 
-MODULE	= Cdk	PACKAGE	= CDKMARQUEEPtr	PREFIX	= cdk_
+MODULE	= Cdk	PACKAGE = CDKMARQUEEPtr PREFIX	= cdk_
 void
 cdk_DESTROY(object)
 	CDKMARQUEE *	object
@@ -7311,7 +7328,7 @@ cdk_DESTROY(object)
 	   destroyCDKMarquee (object);
 	}
 
-MODULE	= Cdk	PACKAGE	= CDKSELECTIONPtr	PREFIX	= cdk_
+MODULE	= Cdk	PACKAGE = CDKSELECTIONPtr	PREFIX	= cdk_
 void
 cdk_DESTROY(object)
 	CDKSELECTION *	object
@@ -7320,7 +7337,7 @@ cdk_DESTROY(object)
 	   destroyCDKSelection (object);
 	}
 
-MODULE	= Cdk	PACKAGE	= CDKVIEWERPtr	PREFIX	= cdk_
+MODULE	= Cdk	PACKAGE = CDKVIEWERPtr	PREFIX	= cdk_
 void
 cdk_DESTROY(object)
 	CDKVIEWER *	object
@@ -7329,7 +7346,7 @@ cdk_DESTROY(object)
 	   destroyCDKViewer (object);
 	}
 
-MODULE	= Cdk	PACKAGE	= CDKGRAPHPtr	PREFIX	= cdk_
+MODULE	= Cdk	PACKAGE = CDKGRAPHPtr	PREFIX	= cdk_
 void
 cdk_DESTROY(object)
 	CDKGRAPH *	object
@@ -7338,7 +7355,7 @@ cdk_DESTROY(object)
 	   destroyCDKGraph (object);
 	}
 
-MODULE	= Cdk	PACKAGE	= CDKRADIOPtr	PREFIX	= cdk_
+MODULE	= Cdk	PACKAGE = CDKRADIOPtr	PREFIX	= cdk_
 void
 cdk_DESTROY(object)
 	CDKRADIO *	object
@@ -7347,7 +7364,7 @@ cdk_DESTROY(object)
 	   destroyCDKRadio (object);
 	}
 
-MODULE	= Cdk	PACKAGE	= CDKTEMPLATEPtr	PREFIX	= cdk_
+MODULE	= Cdk	PACKAGE = CDKTEMPLATEPtr	PREFIX	= cdk_
 void
 cdk_DESTROY(object)
 	CDKTEMPLATE *	object
@@ -7356,7 +7373,7 @@ cdk_DESTROY(object)
 	   destroyCDKTemplate (object);
 	}
 
-MODULE	= Cdk	PACKAGE	= CDKSWINDOWPtr		PREFIX	= cdk_
+MODULE	= Cdk	PACKAGE = CDKSWINDOWPtr		PREFIX	= cdk_
 void
 cdk_DESTROY(object)
 	CDKSWINDOW *	object
@@ -7365,7 +7382,7 @@ cdk_DESTROY(object)
 	   destroyCDKSwindow (object);
 	}
 
-MODULE	= Cdk	PACKAGE	= CDKITEMLISTPtr	PREFIX	= cdk_
+MODULE	= Cdk	PACKAGE = CDKITEMLISTPtr	PREFIX	= cdk_
 void
 cdk_DESTROY(object)
 	CDKITEMLIST *	object
@@ -7374,7 +7391,7 @@ cdk_DESTROY(object)
 	   destroyCDKItemlist (object);
 	}
 
-MODULE	= Cdk	PACKAGE	= CDKFSELECTPtr		PREFIX	= cdk_
+MODULE	= Cdk	PACKAGE = CDKFSELECTPtr		PREFIX	= cdk_
 void
 cdk_DESTROY(object)
 	CDKFSELECT *	object
@@ -7383,7 +7400,7 @@ cdk_DESTROY(object)
 	   destroyCDKFselect (object);
 	}
 
-MODULE	= Cdk	PACKAGE	= CDKSLIDERPtr		PREFIX	= cdk_
+MODULE	= Cdk	PACKAGE = CDKSLIDERPtr		PREFIX	= cdk_
 void
 cdk_DESTROY(object)
 	CDKSLIDER *	object
@@ -7392,7 +7409,7 @@ cdk_DESTROY(object)
 	   destroyCDKSlider (object);
 	}
 
-MODULE	= Cdk	PACKAGE	= CDKALPHALISTPtr	PREFIX	= cdk_
+MODULE	= Cdk	PACKAGE = CDKALPHALISTPtr	PREFIX	= cdk_
 void
 cdk_DESTROY(object)
 	CDKALPHALIST *	object
@@ -7401,7 +7418,7 @@ cdk_DESTROY(object)
 	   destroyCDKAlphalist (object);
 	}
 
-MODULE	= Cdk	PACKAGE	= CDKCALENDARPtr	PREFIX	= cdk_
+MODULE	= Cdk	PACKAGE = CDKCALENDARPtr	PREFIX	= cdk_
 void
 cdk_DESTROY(object)
 	CDKCALENDAR *	object

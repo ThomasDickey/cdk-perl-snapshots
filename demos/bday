@@ -1,4 +1,5 @@
 #!../../../perl -w
+# $Id: bday,v 1.2 2001/01/08 00:43:03 tom Exp $
 
 #
 # Purpose:
@@ -56,7 +57,7 @@ sub checkDatePP
 #
 # This allows the user to create a marker.
 #
-sub setMarkerCB 
+sub setMarkerCB
 {
    my $calendar = shift;
    my @mesg = ("<C></B/5>What type of a marker is it?");
@@ -75,7 +76,7 @@ sub setMarkerCB
    {
       popupLabel (["Escape Hit. No marker set."]);
       $calendar->draw();
-      return;
+      return 1;
    }
 
    # Check the choice.
@@ -91,6 +92,7 @@ sub setMarkerCB
    {
       addAppointmentMarker ($day, $month, $year);
    }
+   return 1;
 }
 
 #

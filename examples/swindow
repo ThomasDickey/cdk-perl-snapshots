@@ -1,4 +1,5 @@
 #!../../../perl -w
+# $Id: swindow,v 1.2 2001/01/08 02:02:56 tom Exp $
 
 #
 # Purpose:
@@ -20,6 +21,7 @@ my $swindow = new Cdk::Swindow ('Title' => "<C></U>Scrolling Window",
 my @info = qx (cat $0); chomp @info;
 my $line;
 
+$swindow->draw();
 # Line by line, add the info.
 foreach $line (@info)
 {

@@ -1,3 +1,5 @@
+# $Id: Graph.pm,v 1.2 2001/01/08 01:54:15 tom Exp $
+
 package Cdk::Graph;
 
 @ISA	= qw (Cdk);
@@ -44,7 +46,7 @@ sub set
    if (defined $params{'Values'})
    {
       my $startAtZero = $params{'StartAtZero'} || 1;
-      Cdk::Graph::SetValues ($self->{'Me'}, $params{'Values'}, $params{'StartAtZero'});
+      Cdk::Graph::SetValues ($self->{'Me'}, $params{'Values'}, $startAtZero);
    }
    if (defined $params{'GraphChars'})
    {
@@ -106,6 +108,7 @@ sub draw
 
    # Draw the object.
    Cdk::Graph::Draw ($self->{'Me'}, $box);
+   return 1;
 }
 
 #

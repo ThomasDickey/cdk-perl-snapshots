@@ -1,4 +1,5 @@
 #!../../../perl -w
+# $Id: bind,v 1.2 2001/01/08 00:39:13 tom Exp $
 
 #
 # Purpose:
@@ -33,11 +34,12 @@ sub callback
 
    # Redraw the entry field.
    $entryObj->draw();
+   return 1;
 }
 
 # Create a new entry object.
 my $title = ["", "<C>Type in a filename or",
-		"<C>Press </B>?<!B> to get a list.", ""];
+		"<C>Press </R>tab<!R> to get a list.", ""];
 $filename = new Cdk::Entry ('Label' => "Filename: ",
 				'Title' => $title,
 				'Width' => 20,

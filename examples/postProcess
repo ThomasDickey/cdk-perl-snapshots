@@ -1,4 +1,5 @@
 #!../../../perl -w
+# $Id: postProcess,v 1.2 2001/01/08 02:08:38 tom Exp $
 
 #
 # Purpose:
@@ -74,4 +75,5 @@ sub setInfoLabelCB
    # Set the info in the label.
    $infoLabel->set ('Message' => ["$commandInfo[$currentItem]"]);
    $infoLabel->draw();
+   return 1;
 }

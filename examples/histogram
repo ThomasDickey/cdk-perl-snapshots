@@ -1,4 +1,5 @@
 #!../../../perl -w
+# $Id: histogram,v 1.2 2001/01/08 01:42:30 tom Exp $
 
 #
 # Purpose:
@@ -25,7 +26,7 @@ my $histogram = new Cdk::Histogram ('Title' => "<C>Dum De Dummmm",
 #
 $histogram->set ('StatsType' => "PERCENT",
 			'StatsPos' => "CENTER",
-			'FillerChar' => "</R> ");
+			'FillerChar' => "</R>.");
 
 # Set the values.
 for ($x=1; $x <= 100; $x += 2)
