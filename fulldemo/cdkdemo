@@ -1,4 +1,5 @@
 #!../../../perl -w
+# $Id: cdkdemo,v 1.3 2001/01/08 00:41:11 tom Exp $
 #
 # Purpose:
 #	This script demonstrates the Cdk widget set and how you can use them.
@@ -251,7 +252,7 @@ for (;;)
       # Pop up a message about this script.
       my @mesg	= ("<C></U/40>Cdk Perl 5 Extension<!U!40>",
 			"<C></32>Written by Mike Glover<!32>", "",
-			"</16>Created     : December, 1995<!16>", 
+			"</16>Created     : December, 1995<!16>",
 			"</16>Last Updated: April, 1997<!16>", "",
 			$CONTINUE);
       my $label	= new Cdk::Label ('Message' => \@mesg, 'Shadow' => "TRUE");
@@ -278,7 +279,7 @@ for (;;)
 ##############################################################################
 #
 # This demonstrates the Cdk label widget.
-# 
+#
 sub labelDemo
 {
    my @mesg = @_;
@@ -511,7 +512,7 @@ sub matrixDemo
 					'ColTitles' => \@colTitles,
 					'ColWidths' => \@colWidths,
 					'ColTypes' => \@colTypes,
-					'Vrows' => 3, 
+					'Vrows' => 3,
 					'Vcols' => 3);
 
    # Set the values of the matrix.
@@ -567,7 +568,7 @@ sub dialogDemo
 
    # Activate the dialog box.
    my $pick	= $dialog->activate ();
- 
+
    # Did the user hit escape?
    return if ! defined $pick;
 
@@ -622,7 +623,7 @@ sub scrollDemo
    my $entry	= new Cdk::Entry ('Label' => 'Title: ',
 					'Max' => 100,
 					'Min' => 2,
-					'Width' => 20); 
+					'Width' => 20);
 
    # Get whether they want numbers or not.
    my $nums	= $boolean->activate ();
@@ -639,7 +640,7 @@ sub scrollDemo
    {
       push (@items, "This is item #</U>$x");
    }
-   
+
    # Create the scrolling list.
    my $scrollDemo = new Cdk::Scroll ('Title' => "$title",
 					'Highlight' => "</B/5>",
@@ -785,8 +786,8 @@ sub marqueeDemo
    my $entry	= new Cdk::Entry ('Label' => 'Enter a Message: ',
 					'Max' => 100,
 					'Min' => 2,
-					'Width' => 20); 
-  
+					'Width' => 20);
+
    # Activate the widget to get the message.
    my $message	= $entry->activate ();
    return if ! defined $message;
@@ -987,7 +988,7 @@ sub generalHelp
 
       # Get the choice from the user.
       my $choice = $helplist->activate();
-   
+
       # Exit if we have to .
       return if ! defined $choice;
       return if $choice == $#conceptList;
@@ -1034,7 +1035,7 @@ sub widgetHelp
 			"dialog.help",
 			"entry.help",
 			"fselect.help",
-			"graph.help",	
+			"graph.help",
 			"histogram.help",
 			"itemlist.help",
 			"label.help",
@@ -1093,7 +1094,7 @@ sub widgetHelp
       Cdk::refreshCdkScreen();
 
       my $choice = $helplist->activate();
-   
+
       # Exit if we have to .
       return if ! defined $choice;
       return if ($choice == $#widgetList);
@@ -1101,7 +1102,7 @@ sub widgetHelp
       # Create the help filename
       $helpfile = "${helpdir}/$helpFiles[$choice]";
       $topic = "$widgetList[$choice]";
-   
+
       # Does the help file exist?
       if (! -e $helpfile)
       {
@@ -1139,4 +1140,5 @@ sub menuCallback
 
    # Refresh the screen.
    Cdk::refreshCdkScreen();
+   return 1;
 }

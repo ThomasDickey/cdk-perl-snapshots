@@ -1,4 +1,5 @@
 #!../../../perl -w
+# $Id: itemlist,v 1.2 2001/01/08 00:40:14 tom Exp $
 
 #
 # Purpose:
@@ -12,7 +13,7 @@ Cdk::init();
 
 # Create a list of the months of the year.
 my @months = (
-	"<C></B>January",	"<C></B>Feburary",	"<C></B>March",
+	"<C></B>January",	"<C></B>February",	"<C></B>March",
 	"<C></U>April",		"<C></U>May",		"<C></U>June",
 	"<C></K>July",		"<C></K>August",	"<C></K>September",
 	"<C></R>October",	"<C></R>November",	"<C></R>December");

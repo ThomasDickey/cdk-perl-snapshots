@@ -1,4 +1,5 @@
 #!../../../perl
+# $Id: rolodex,v 1.2 2001/01/08 00:43:18 tom Exp $
 
 #
 # Initialize Cdk.
@@ -8,7 +9,7 @@ Cdk::init();
 
 # Declare global variables.
 $GGroupInfoChanged = 0;
-@GLineType = ("Voice", "Cell", "Pager", 
+@GLineType = ("Voice", "Cell", "Pager",
 			"First FAX", "Second FAX", "Third FAX",
 			"First Data Line", "Second Data Line", "Third Data Line");
 
@@ -60,7 +61,7 @@ for (;;)
 {
    # Activate the object.
    my ($menuItem, $submenuItem) = $menu->activate();
-  
+
    # Make sure they didn't hit escape.
    next if ! defined $menuItem;
 
@@ -84,7 +85,7 @@ for (;;)
             # Check the results.
             if (! defined %tmpGroup)
             {
-               my $mesg = ["<C></16>There were too many errors in the file", 
+               my $mesg = ["<C></16>There were too many errors in the file",
 				"<C></16>$file.",
 				"<C></16>Are you sure it is a rolodex RC file?"];
                popupLabel ($mesg);
@@ -180,7 +181,7 @@ for (;;)
 #
 # This reads an RC file.
 #
-sub readRCFile 
+sub readRCFile
 {
    my $filename = shift;
    my %groupList = ();
@@ -198,7 +199,7 @@ sub readRCFile
 
       # Split the line.
       my @tmp = split (//, $row);
-      
+
       # Check if the file is in the correct format.
       if ($#tmp == 2)
       {
@@ -211,7 +212,7 @@ sub readRCFile
 #
 # This saves the group information to a RC file.
 #
-sub saveRCFile 
+sub saveRCFile
 {
    my ($filename, %info) = @_;
    my $date = qx (date);
@@ -254,7 +255,7 @@ sub saveRCFile
 			"<C>$filename", "<C>Press any key to continue."];
       popupLabel ($mesg);
    }
-   
+
    # Reset the global flag.
    $GGroupInfoChanged = 0;
    return;
@@ -267,7 +268,7 @@ sub addRolodexGroup
 {
    my (%info) = @_;
    my $description;
-   
+
    # Create the entry fields.
    my $name = new Cdk::Entry ('Label' => "</R>   New Group Name",
 				'Width' => 20,
@@ -302,7 +303,7 @@ sub addRolodexGroup
          return %info;
       }
    }
-				
+
    # Get the group description.
    while (!defined $description)
    {
@@ -355,7 +356,7 @@ sub useRolodexGroup
    my $helpMesg = ["<C><#HL(30)",
 			"Press </B>?<!B> to get detailed help.",
 			"<C><#HL(30)>"];
-   my $helpWindow = new Cdk::Label ('Message' => $helpMesg, 
+   my $helpWindow = new Cdk::Label ('Message' => $helpMesg,
 					'Box' => "FALSE",
 					'Xpos' => "BOTTOM");
    $helpWindow->draw('Box' => "FALSE");
@@ -446,14 +447,14 @@ sub deleteRolodexGroup
    # Pick which group to delete.
    my $name = pickRolodexGroup ("<C></U>Delete Which Rolodex Group?", %info);
    if (! defined $name)
-   { 
+   {
       my $mesg = ["<C>   Delete Canceled   ", "<C>No Group Deleted"];
       popupLabel ($mesg);
       return;
    }
 
    # Confirm the delete
-   my $mesg = ["<C></U>Confirm Delete", 
+   my $mesg = ["<C></U>Confirm Delete",
 		"<C>Are you sure you want to delete the group",
 		"<C></R>$name<!R>?"];
    my $buttons = ["<<No>>", "<<Yes>>"];
@@ -497,7 +498,7 @@ sub pickRolodexGroup
 					'Width' => 50,
 					'List' => \@list);
    my $item = $scroll->activate();
-   
+
    return $items[$item] if (defined $item);
    return;
 }
@@ -520,7 +521,7 @@ sub readPhoneDataFile
       popupLabel ($mesg);
       return;
    }
-   
+
    # Start scanning through the file.
    foreach $row (<DB>)
    {
@@ -546,6 +547,7 @@ sub rolodexHelpCB
 		"</B>Escape <!B> Exits the scrolling list.",
 		"</B>?      <!B> Pops up this help window."];
    popupLabel ($mesg);
+   return 1;
 }
 
 #
@@ -595,11 +597,11 @@ sub getNewPhoneRecord
 
    # Create the title label.
    my $mesg = ["<C></R>Add New Phone Record"];
-   my $title = new Cdk::Label ('Message' => $mesg, 
+   my $title = new Cdk::Label ('Message' => $mesg,
 				'Box' => "FALSE",
 				'Xpos' => "TOP");
    $title->draw ('Box' => "FALSE");
- 
+
    # Ask the user what type of line it it.
    my $itemList = new Cdk::Itemlist ('Label' => "What Type Of Line Is It?",
 					'List' => \@list);
@@ -633,7 +635,7 @@ sub getNewPhoneRecord
 sub getSmallPhoneRecord
 {
    my $type = shift;
-   my $mesg = ["<C></U>Confirm New Phone Entry", 
+   my $mesg = ["<C></U>Confirm New Phone Entry",
 		"<C>Do you want to add this phone number?"];
    my $buttons = ["<<Add Phone Number>>",
 			"<<Cancel>>", "<<Modify Information>>"];
@@ -689,7 +691,7 @@ sub getSmallPhoneRecord
 sub getLargePhoneRecord
 {
    my $type = shift;
-   my $mesg = ["<C></U>Confirm New Phone Entry", 
+   my $mesg = ["<C></U>Confirm New Phone Entry",
 		"<C>Do you want to add this phone number?"];
    my $buttons = ["<<Add Phone Number>>",
 			"<<Cancel>>", "<<Modify Information>>"];
@@ -763,7 +765,7 @@ sub getLargePhoneRecord
 #
 # This inserts an entry into the phone scrolling list.
 #
-sub insertPhoneEntryCB 
+sub insertPhoneEntryCB
 {
    my ($scroll, $data, $list) = @_;
    my ($size, $currentItem) = $scroll->info();
@@ -779,7 +781,7 @@ sub insertPhoneEntryCB
    if (!defined $newRecord)
    {
       $scroll->draw();
-      return;
+      return 1;
    }
 
    # Push the information onto the record array.
@@ -794,12 +796,13 @@ sub insertPhoneEntryCB
    # Add it to the scrolling list.
    $scroll->add ('Item' => $temp);
    $scroll->draw();
+   return 1;
 }
 
 #
 # This deletes an entry from a scrolling list.
 #
-sub deletePhoneEntryCB 
+sub deletePhoneEntryCB
 {
    my ($scroll, $data, $list) = @_;
    my ($size, $currentItem) = $scroll->info();
@@ -814,7 +817,7 @@ sub deletePhoneEntryCB
    {
       # Nuke it.
       $scroll->delete ('Position' => $currentItem);
- 
+
       # Remove it from the arrays.
       for ($x=$currentItem; $x < $#array; $x++)
       {
@@ -826,6 +829,7 @@ sub deletePhoneEntryCB
    }
    $scroll->erase();
    $scroll->draw();
+   return 1;
 }
 
 #
@@ -858,7 +862,7 @@ sub printRolodexGroups
    # Get the selections to print.
    my @answer = $select->activate();
    undef $select;
-   
+
    # check if the user canceled.
    if (!defined @answer)
    {
@@ -886,7 +890,7 @@ sub printRolodexGroups
 						'Width' => 20,
 						'Min' => 2,
 						'Max' => 256);
-         
+
          # Set the default value as the PRINTER ENV variable.
          if (defined $ENV{'PRINTER'})
          {
@@ -1005,7 +1009,7 @@ sub new
    $self->{'Province'}		= $prov;
    $self->{'Postal Code'}	= $postal;
    $self->{'Description'}	= $desc;
-   
+
    return bless $self;
 }
 

@@ -1,3 +1,8 @@
+#
+# $Author: tom $
+# $Date: 2001/01/08 00:03:21 $
+# $Revision: 1.4 $
+#
 use ExtUtils::MakeMaker;
 
 #
@@ -5,19 +10,11 @@ use ExtUtils::MakeMaker;
 # the contents of the Makefile that is written.
 #
 
-#
-# Variables you may need to set:
-#
-#	-DHAVE_COLOR		Set this if your curses has colour.
-#	-DHAVE_NCURSES		Set this if you have ncurses installed.
-#	-DHAVE_USLEEP		Set this if you have usleep.
-#	-DCDK_PERL_EXT		Set this always. :)
-#
 WriteMakefile(
     'NAME'	=> 'Cdk',
-    'VERSION'	=> '4.9.8',
+    'VERSION'	=> '4.9.10',
     'LIBS'	=> ['-L/usr/local/lib -lcdk -lncurses'],
-    'DEFINE'	=> '-DHAVE_USLEEP -DHAVE_NCURSES -DHAVE_COLOR -DCDK_PERL_EXT',
+    'DEFINE'	=> '-DCDK_PERL_EXT',
     'INC'	=> '-I/usr/include/ncurses -I/usr/local/include/cdk',
     'clean'	=> {FILES => 'Makefile.old'},
 );
