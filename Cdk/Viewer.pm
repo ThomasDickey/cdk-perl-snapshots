@@ -151,7 +151,7 @@ sub bind
    # Set the values.
    my $key = Cdk::checkReq ($name, "Key", $params{'Key'});
    my $function = Cdk::checkReq ($name, "Function", $params{'Function'});
-   Cdk::Entry::Bind ($self->{'Me'}, $key, $params{'Function'});
+   Cdk::Viewer::Bind ($self->{'Me'}, $key, $params{'Function'});
 }
 
 #
