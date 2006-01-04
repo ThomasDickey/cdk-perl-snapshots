@@ -1,9 +1,11 @@
 #!/usr/bin/perl -w
-# $Id: bday,v 1.3 2002/07/24 10:04:30 tom Exp $
+# $Id: bday,v 1.4 2006/01/03 21:06:58 tom Exp $
 
 #
 # Purpose:
 #	To demonstrate the Perl5 Cdk Calendar Widget
+
+use strict;
 
 # Set some global variables.
 my %birthdays = ();
@@ -40,7 +42,10 @@ $swindow->draw();
 for (;;)
 {
    # Activate the object.
-   my $ret = $calendar->activate();
+   my ( $day, $month, $year ) = $calendar->activate();
+   last if not defined $day;
+   my $msg = sprintf "%d:%d:%d", $day, $month, $year;
+   $swindow->addline('Info' => $msg);
 }
 
 # Exit Cdk.

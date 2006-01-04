@@ -1,4 +1,9 @@
--- $Id: CHANGES,v 1.4 2003/12/10 02:11:52 tom Exp $
+-- $Id: CHANGES,v 1.6 2006/01/03 21:05:45 tom Exp $
+
+2006/01/03 - Thomas Dickey <dickey@his.com>
+===========================================
+	+ completed demos/bday
+	+ correct a typo in Cdk::Viewer (report/patch from Debian #312733).
 
 2003/12/10 - Thomas Dickey <dickey@herndon4.his.com>
 ====================================================
