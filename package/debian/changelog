@@ -1,0 +1,135 @@
+libcdk-perl (20120318) unstable; urgency=low
+
+  * Add package scripts
+
+ -- Thomas E. Dickey <dickey@invisible-island.net>  Sun, 18 Mar 2012 14:25:35 -0400
+
+libcdk-perl (4.9.10-5) unstable; urgency=low
+
+  [ Ansgar Burchardt ]
+  * debian/control: Convert Vcs-* fields to Git.
+
+  [ Dominic Hargreaves ]
+  * Add Depends on libperl4-corelibs-perl (will fix lintian warning
+    perl-module-uses-perl4-libs-without-dep once #648532 has been fixed)
+  * Update Standards-Version (no changes)
+  * Switch to dpkg-source 3.0 (quilt) format, restoring the application
+    of patches lost in 4.9.10-4
+
+ -- Dominic Hargreaves <dom@earth.li>  Sat, 12 Nov 2011 16:43:21 +0000
+
+libcdk-perl (4.9.10-4) unstable; urgency=low
+
+  * Move changes to upstream code under debian/patches; add quilt framework.
+  * Add debian/README.source to document quilt usage, as required by
+    Debian Policy since 3.8.0.
+  * debian/control: Changed: Switched Vcs-Browser field to ViewSVN
+    (source stanza).
+  * debian/control: Added: ${misc:Depends} to Depends: field.
+  * New patch cdkdemo_help.patch to change default path for help system in
+    cdkdemo; thanks to Rafael Laboissiere for the bug report (closes: #519820).
+  * Don't install README anymore.
+  * Switch to debhelper 7, adjust debian/{rules,compat,control}.
+  * Set Standards-Version to 3.8.2 (no further changes).
+  * Add /me to Uploaders.
+  * debian/copyright: switch to new format.
+
+ -- gregor herrmann <gregoa@debian.org>  Sun, 09 Aug 2009 16:36:30 +0200
+
+libcdk-perl (4.9.10-3) unstable; urgency=low
+
+  [ gregor herrmann ]
+  * debian/control: Added: Vcs-Svn field (source stanza); Vcs-Browser
+    field (source stanza); Homepage field (source stanza). Removed:
+    Homepage pseudo-field (Description); XS-Vcs-Svn fields.
+  * debian/rules: delete /usr/share/perl5 only if it exists.
+
+  [ Damyan Ivanov ]
+  * Standards-Version: 3.7.3 (no changes)
+  * debhelper compatibility level 6
+  * debian/rules:
+    + make it like the current dh-make-perl templates
+  * add myself to Uploaders
+
+ -- Damyan Ivanov <dmn@debian.org>  Mon, 21 Jan 2008 11:41:29 +0200
+
+libcdk-perl (4.9.10-2) unstable; urgency=low
+
+  * Adopted orphaned package for Debian Perl Group (Closes: #279778)
+  * Added myself to Uploaders
+  * Do not ignore $(MAKE) clean errors in debian/rules
+  * Corrected Homepage in debian/control
+  * Removed emtpy /usr/share/perl5
+  * Fixed debian/watch
+  * Bumped debhelper version in debian/compat to 5
+  * Changed >> to >= in Build-Depends
+  * Updated Standards-Version to 3.7.2 from 3.6.2 (no changes)
+
+ -- Jeremiah Foster <jeremiah@jeremiahfoster.com>  Tue, 14 Aug 2007 12:39:04 +0000
+
+libcdk-perl (4.9.10-1) unstable; urgency=low
+
+  * QA upload.
+  * Package is orphaned (see #279778); set maintainer to Debian QA Group.
+  * New upstream release.
+    - Links against libcdk5 rather than libcdk4.
+    - Fixes the matrix widget.  Closes: #179540.
+  * Cdk/Viewer.pm: Fix copy-paste error that prevented bind() from working.
+    Thanks to Mathew White for the patch.  Closes: #312733.
+  * Change section to perl in accordance with the override file.
+  * Update description.  Closes: #205877.
+  * debian/copyright:
+    - Include original copyright and license.  Closes: #236488.
+    - Update upstream URL.
+  * debian/rules: Leave examples uncompressed.
+  * debian/watch: Add.
+  * Conforms to Standards version 3.6.2.
+
+ -- Matej Vela <vela@debian.org>  Mon, 31 Oct 2005 13:09:31 +0100
+
+libcdk-perl (4.9.7-6) unstable; urgency=low
+
+  * Redo the hppa specific inclusion of -ffunction-sections as
+    $Config::Config{archname} has changed.
+
+ -- Stephen Zander <gibreel@debian.org>  Tue,  5 Nov 2002 01:37:34 -0800
+
+libcdk-perl (4.9.7-5) unstable; urgency=low
+
+  * Rebuild for perl 5.8; adjust Build-Depends appropriately
+
+ -- Stephen Zander <gibreel@debian.org>  Tue,  3 Sep 2002 07:32:33 -0700
+
+libcdk-perl (4.9.7-4) unstable; urgency=low
+
+  * Add -ffunction-sections for hppa architecture,
+  Closes: #134027
+
+ -- Stephen Zander <gibreel@debian.org>  Fri, 17 May 2002 16:23:35 -0700
+
+libcdk-perl (4.9.7-3) unstable; urgency=high
+
+  * Fix Section: override.
+  * Set urgency=high to ensure package moves to testing more quickly
+
+ -- Stephen Zander <gibreel@debian.org>  Fri, 28 Dec 2001 12:43:36 -0800
+
+libcdk-perl (4.9.7-2) unstable; urgency=low
+
+  * New maintainer,
+  Closes: #123489
+  * Updated for policy 3.5.6 and the new perl packaging policy,
+  Closes: #80683, #95406
+  * Builds cleanly on sparc & hppa,
+  Closes: #89292, #104886
+  * No longer build libcdk-perl-examples,
+  Closes: #118225
+
+ -- Stephen Zander <gibreel@debian.org>  Fri, 28 Dec 2001 09:57:48 -0800
+
+libcdk-perl (4.9.7-1) unstable; urgency=low
+
+  * New upstream version.
+
+ -- Raphael Bossek <bossekr@debian.org>  Sat, 15 Jan 2000 12:51:09 +0100
+

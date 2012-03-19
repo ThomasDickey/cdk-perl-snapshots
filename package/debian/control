@@ -1,0 +1,25 @@
+Source: libcdk-perl
+Section: perl
+Priority: optional
+Maintainer: Debian Perl Group <pkg-perl-maintainers@lists.alioth.debian.org>
+Uploaders: Jeremiah Foster <jeremiah@jeremiahfoster.com>,
+ Damyan Ivanov <dmn@debian.org>, gregor herrmann <gregoa@debian.org>,
+ Dominic Hargreaves <dom@earth.li>
+Standards-Version: 3.9.2
+Homepage: http://invisible-island.net/cdk/
+Vcs-Git: git://git.debian.org/pkg-perl/packages/libcdk-perl.git
+Vcs-Browser: http://anonscm.debian.org/gitweb/?p=pkg-perl/packages/libcdk-perl.git
+Build-Depends: debhelper (>= 7.0.50), libcdk5-dev, perl (>= 5.8)
+
+Package: libcdk-perl
+Architecture: any
+Depends: ${misc:Depends}, ${perl:Depends}, ${shlibs:Depends},
+ libperl4-corelibs-perl | perl (<< 5.12.3-7)
+Description: Perl interface for a curses widget library
+ CDK stands for "Curses Development Kit".  CDK sits on top of the curses
+ library and provides 22 ready to use widgets for rapid application
+ development of text-based interfaces.  CDK delivers many of the common
+ widget types required for a robust interface.  Widgets can be combined
+ to create complex widgets if needed.
+ .
+ This package provides a Perl interface for the CDK library.
