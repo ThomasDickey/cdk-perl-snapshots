@@ -1,0 +1,19 @@
+#
+# $Author: tom $
+# $Date: 2012/03/18 19:57:06 $
+# $Revision: 1.2 $
+#
+use ExtUtils::MakeMaker;
+
+#
+# See README and Perl's MakeMaker.pm for guidance in modifying the
+# LIBS and INC strings.
+#
+
+WriteMakefile(
+    'NAME'	=> 'Cdk',
+    'VERSION'	=> '@VERSION@',
+    'LIBS'	=> ['@LIBS@'],
+    'INC'	=> '@CPPFLAGS@',
+    'clean'	=> {FILES => 'Makefile.old'},
+);

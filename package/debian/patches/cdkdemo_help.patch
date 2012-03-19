@@ -1,0 +1,25 @@
+Author: gregor herrmann <gregoa@debian.org>
+Bug-Debian: #519820
+Description: make default path for help system "dynamic"
+
+--- a/fulldemo/cdkdemo
++++ b/fulldemo/cdkdemo
+@@ -5,6 +5,9 @@
+ #	This script demonstrates the Cdk widget set and how you can use them.
+ #
+ 
++# for dirname()
++use File::Basename;
++
+ #
+ # Use the Cdk module.
+ #
+@@ -946,7 +949,7 @@
+ sub generalHelp
+ {
+    my $choice	= 0;
+-   my $helpdir	= $ENV{'CDKHELPDIR'}	|| "./help";
++   my $helpdir	= $ENV{'CDKHELPDIR'}	|| dirname($0) . "/help";
+ 
+    # Define the names of the help files.
+    my @helpFiles = ("general.help",

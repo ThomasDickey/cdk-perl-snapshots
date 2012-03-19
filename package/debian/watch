@@ -1,0 +1,4 @@
+version=3
+
+	opts=uversionmangle=s/20031210/4.9.10/ \
+ftp://invisible-island.net/cdk/ cdk-perl-(.*)\.tgz debian

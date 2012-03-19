@@ -1,0 +1,15 @@
+Author: Mathew White
+Description: Cdk/Viewer.pm: Fix copy-paste error that prevented bind() from working.
+Bug: #312733
+
+--- a/Cdk/Viewer.pm
++++ b/Cdk/Viewer.pm
+@@ -151,7 +151,7 @@ sub bind
+    # Set the values.
+    my $key = Cdk::checkReq ($name, "Key", $params{'Key'});
+    my $function = Cdk::checkReq ($name, "Function", $params{'Function'});
+-   Cdk::Entry::Bind ($self->{'Me'}, $key, $params{'Function'});
++   Cdk::Viewer::Bind ($self->{'Me'}, $key, $params{'Function'});
+ }
+ 
+ #

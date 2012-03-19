@@ -1,0 +1,19 @@
+Author: Stephen Zander <gibreel@debian.org>
+Description: Add -ffunction-sections for hppa architecture
+Bug: #134027
+
+--- a/Makefile.PL
++++ b/Makefile.PL
+@@ -12,8 +12,10 @@ use ExtUtils::MakeMaker;
+ 
+ WriteMakefile(
+     'NAME'	=> 'Cdk',
++    ($Config::Config{archname} =~ /^hppa-linux/ ?
++     (CCFLAGS => $Config::Config{ccflags}.' -ffunction-sections') : ()),
+     'VERSION'	=> '4.09010',
+-    'LIBS'	=> ['-L/usr/local/lib -lcdk -lcurses'],
+-    'INC'	=> '-I/usr/include/ncurses -I/usr/local/include/cdk',
++    'LIBS'	=> ['-lcdk -lncurses'],
++    'INC'	=> '-I/usr/include/cdk',
+     'clean'	=> {FILES => 'Makefile.old'},
+ );
