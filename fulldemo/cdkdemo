@@ -1,9 +1,12 @@
 #!/usr/bin/perl -w
-# $Id: cdkdemo,v 1.5 2002/07/28 19:06:32 tom Exp $
+# $Id: cdkdemo,v 1.7 2012/03/24 14:31:18 tom Exp $
 #
 # Purpose:
 #	This script demonstrates the Cdk widget set and how you can use them.
 #
+
+# for dirname()
+use File::Basename;
 
 #
 # Use the Cdk module.
@@ -251,9 +254,10 @@ for (;;)
    {
       # Pop up a message about this script.
       my @mesg	= ("<C></U/40>Cdk Perl 5 Extension<!U!40>",
-			"<C></32>Written by Mike Glover<!32>", "",
+			"<C></32>Written by Mike Glover<!32>",
+			"<C></32>and Thomas E. Dickey<!32>", "",
 			"</16>Created     : December, 1995<!16>",
-			"</16>Last Updated: April, 1997<!16>", "",
+			"</16>Last Updated: March, 2012<!16>", "",
 			$CONTINUE);
       my $label	= new Cdk::Label ('Message' => \@mesg, 'Shadow' => "TRUE");
       $label->draw();
@@ -946,7 +950,7 @@ sub alphalistDemo
 sub generalHelp
 {
    my $choice	= 0;
-   my $helpdir	= $ENV{'CDKHELPDIR'}	|| "./help";
+   my $helpdir	= $ENV{'CDKHELPDIR'}	|| dirname($0) . "/help";
 
    # Define the names of the help files.
    my @helpFiles = ("general.help",

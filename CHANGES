@@ -1,7 +1,15 @@
--- $Id: CHANGES,v 1.7 2012/03/18 18:27:44 tom Exp $
+-- $Id: CHANGES,v 1.10 2012/03/24 23:05:08 tom Exp $
 
-2012/03/18 - Thomas Dickey <dickey@invisible-island.net>
+2012/03/24 - Thomas Dickey <dickey@invisible-island.net>
 ========================================================
+	+ fix boxes in help-messages, which had top/bottom segments too short.
+	+ modified Debian package scripts to copy "examples" directory under
+	  package's "examples" directory since the fulldemo scripts expect
+	  this layout.
+	+ modified Debian package scripts to make exclusion from compressing
+	  examples work for Debian 5.0
+	+ make default path for help system "dynamic" (report/patch from
+	  Debian #519820)
 	+ add Debian package script, for testing
 
 2006/01/03 - Thomas Dickey <dickey@his.com>

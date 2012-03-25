@@ -47,7 +47,7 @@ Shadow      Required             Scalar     The character to inject into the wid
 If you are injecting a special character into the widget, then you can
 use a pre-defined value to represent the key.
 
-<C><#UL><#HL(11)><#TT><#HL(14)><#UR>
+<C><#UL><#HL(12)><#TT><#HL(15)><#UR>
 <C><#VL></U>Key         <#VL>Key Value      <!U><#VL>
 <C><#VL>Left Arrow  <#VL>KEY_LEFT       <#VL>
 <C><#VL>Right Arrow <#VL>KEY_RIGHT      <#VL>
@@ -60,7 +60,7 @@ use a pre-defined value to represent the key.
 <C><#VL>Home        <#VL>KEY_HOME       <#VL>
 <C><#VL>End         <#VL>KEY_END        <#VL>
 <C><#VL>Escape      <#VL>KEY_ESC        <#VL>
-<C><#LL><#HL(11)><#BT><#HL(14)><#LR>
+<C><#LL><#HL(12)><#BT><#HL(15)><#LR>
 
 </B>set<!B>
 Sets or resets certain attributes or features of the widget. The following
@@ -180,3 +180,4 @@ Maximum number of buttons.      50
 <C>Document Created: June,     1995
 <C>Document Revised: November, 1995
 <C>Document Revised: March,    1996
+<C>Document Revised: March,    2012

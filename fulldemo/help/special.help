@@ -7,7 +7,7 @@ To turn on highlighting the format command \<\/XX> is used. To turn off
 formatting the command \<\!XX> is used. The following table lists all of the
 display attributes available through Cdk, and how to turn them on.
 
-<C><#UL><#HL(7)><#TT><#HL(10)><#UR>
+<C><#UL><#HL(8)><#TT><#HL(11)><#UR>
 <C><#VL></U>Command <#VL> Attribute <!U><#VL>
 <C><#VL>\<\/N>    <#VL> </N>Normal<!N>    <#VL>
 <C><#VL>\<\/B>    <#VL> </B>Bold<!B>      <#VL>
@@ -16,7 +16,8 @@ display attributes available through Cdk, and how to turn them on.
 <C><#VL>\<\/K>    <#VL> </K>Blink<!K>     <#VL>
 <C><#VL>\<\/S>    <#VL> </S>Standout<!S>  <#VL>
 <C><#VL>\<\/D>    <#VL> </D>Dim<!D>       <#VL>
-<C><#LL><#HL(7)><#BT><#HL(10)><#LR>
+<C><#LL><#HL(8)><#BT><#HL(11)><#LR>
 
 <C><#HL(70)>
 <C>Document Created: January, 1996
+<C>Document Revised: March,   2012

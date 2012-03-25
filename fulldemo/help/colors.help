@@ -11,7 +11,7 @@ a numeric value from 0 to 64.
 
 The following table lists all the color pairs defined.
 
-<C><#UL><#HL(4)><#TT><#HL(11)><#TT><#HL(11)><#UR>
+<C><#UL><#HL(5)><#TT><#HL(12)><#TT><#HL(12)><#UR>
 <C><#VL></U>Pair <#VL> Foreground <#VL> Background <!U><#VL>
 <C><#VL>   0 <#VL></B/0> Default    <!B!0><#VL></B/0> Default    <!B!0><#VL>
 <C><#VL>   1 <#VL></B/1> White      <!B!1><#VL></B/1> White      <!B!1><#VL>
@@ -78,8 +78,9 @@ The following table lists all the color pairs defined.
 <C><#VL>  62 <#VL></B/62> Black      <!B!62><#VL></B/62> Purple     <!B!62><#VL>
 <C><#VL>  63 <#VL></B/63> Black      <!B!63><#VL></B/63> Cyan       <!B!63><#VL>
 <C><#VL>  64 <#VL></B/64> Black      <!B!64><#VL></B/64> Black      <!B!64><#VL>
-<C><#LL><#HL(4)><#BT><#HL(11)><#BT><#HL(11)><#LR>
+<C><#LL><#HL(5)><#BT><#HL(12)><#BT><#HL(12)><#LR>
 
 <C><#HL(70)>
 <C>Document Created: November, 1995
 <C>Document Revised: January,  1996
+<C>Document Revised: March,    2012
