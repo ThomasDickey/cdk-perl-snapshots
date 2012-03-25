@@ -3,5 +3,6 @@
 %:
 	dh $@
 
-override_dh_compress:
-	dh_compress -Xexamples
+# This does not work with Debian 5.0 (use "compress" file instead):
+#override_dh_compress:
+#	dh_compress -Xexamples

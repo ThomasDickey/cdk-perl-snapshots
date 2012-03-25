@@ -1,4 +1,5 @@
 <C></U>Preamble:<!U>
+From Glover's original text:
    The Cdk curses widget set was written by myself (Mike Glover). It started
 as a small pet project to test how compatible my new Linux box was to other
 flavours of Unix. As it turned out I discovered Ncurses, and played with 
@@ -28,11 +29,11 @@ stand for?'. In response I say : (fanfare please)
 There are currently 22 widgets available in Cdk, with more coming. What they 
 are and what they do is in the following table.
 
-<C><#UL><#HL(13)><#TT><#HL(51)><#UR>
+<C><#UL><#HL(14)><#TT><#HL(52)><#UR>
 <C><#VL></R> Widget Name  <!R></U><#VL><!U></R>Purpose                                             <!R><#VL>
 <C><#VL>Alphalist     <#VL>Provides a list of words which the user can select  <#VL>
-<C><#VL>              <#VL>from. Allows you to narrow the seach by entering    <#VL>
-<C><#VL>              <#VL>a few initial characters of thw words being         <#VL>
+<C><#VL>              <#VL>from. Allows you to narrow the search by entering   <#VL>
+<C><#VL>              <#VL>a few initial characters of the words being         <#VL>
 <C><#VL></U>              <#VL>sought after to narrow the search.                  <!U><#VL>
 <C><#VL></U>Buttonbox     <#VL>Creates a widget with numerous buttons.             <!U><#VL>
 <C><#VL></U>Calendar      <#VL>Creates a simple calendar widget.                   <!U><#VL>
@@ -72,7 +73,7 @@ are and what they do is in the following table.
 <C><#VL></U>              <#VL>and phone numbers.                                  <!U><#VL>
 <C><#VL>Viewer        <#VL>Creates an information viewer. You are currently    <#VL>
 <C><#VL>              <#VL>using the viewer by the way.                        <#VL>
-<C><#LL><#HL(13)><#BT><#HL(51)><#LR>
+<C><#LL><#HL(14)><#BT><#HL(52)><#LR>
 
 Each help subsection outlines certain features of each widget. They are 
 broken up into the following sections:
@@ -102,3 +103,4 @@ ttfn,
 <C>Document Revised: January,  1996
 <C>Document Revised: June,     1996
 <C>Document Revised: April,    1997
+<C>Document Revised: March,    2012

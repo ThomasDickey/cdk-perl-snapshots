@@ -7,14 +7,14 @@ There are five pre-defined position names that help location either a
 widget or a widgets title, or any other element of a widget. They are 
 listed in the table below.
 
-<C><#UL><#HL(7)><#TT><#HL(46)><#UR>
+<C><#UL><#HL(8)><#TT><#HL(47)><#UR>
 <C><#VL></U>Name    <#VL>Purpose                                        <!U><#VL>
 <C><#VL>TOP     <#VL>Positions a widget to the top of the screen.   <#VL>
 <C><#VL>BOTTOM  <#VL>Positions a widget to the bottom of the screen.<#VL>
 <C><#VL>LEFT    <#VL>Positions a widget to the left of the screen.  <#VL>
 <C><#VL>RIGHT   <#VL>Positions a widget to the right of the screen. <#VL>
 <C><#VL>CENTER  <#VL>Positions a widget to the center of the screen.<#VL>
-<C><#LL><#HL(7)><#BT><#HL(46)><#LR>
+<C><#LL><#HL(8)><#BT><#HL(47)><#LR>
 
 If the names are not used, then a numeric value can be used for location.
 
@@ -23,7 +23,7 @@ The entry fields, Matrix, Entry and Multiple Line Entry, can define the
 type of input defined. They are specified with the following pre-defined
 display type variables.
 
-<C><#UL><#HL(8)><#TT><#HL(39)><#UR>
+<C><#UL><#HL(9)><#TT><#HL(40)><#UR>
 <C><#VL></U>Name     <#VL>Result                                  <!U><#VL>
 <C><#VL>CHAR     <#VL> Character only.                        <#VL>
 <C><#VL>HCHAR    <#VL> Hidden Character Only.                 <#VL>
@@ -40,7 +40,7 @@ display type variables.
 <C><#VL>UHMIXED  <#VL> Upper Case Hidden Mixed Input.         <#VL>
 <C><#VL>LHMIXED  <#VL> Lower Case Hidden Mixed Input.         <#VL>
 <C><#VL>VIEWONLY <#VL> View only field. (uneditable)          <#VL>
-<C><#LL><#HL(8)><#BT><#HL(39)><#LR>
+<C><#LL><#HL(9)><#BT><#HL(40)><#LR>
 
 </K>NOTE<!K> When the above says Upper/Lower Case that means all the input
      auto-magically gets mapped to Upper/Lower case. When it says hidden
@@ -51,7 +51,7 @@ display type variables.
 Special types exist for certain widgets. Below is a list of the current
 widgets that have a special type, its name and description.
 
-<C><#UL<#HL(9)><#TT><#HL(10)><#TT><#HL(43)><#UR>
+<C><#UL<#HL(10)><#TT><#HL(11)><#TT><#HL(44)><#UR>
 <C><#VL></U>Widget    <#VL>Type Name  <#VL>Result                                      <!U><#VL>
 <C><#VL>Histogram <#VL>NONE       <#VL>Turns off the statistics for the histogram. <#VL>
 <C><#VL>          <#VL>PERCENT    <#VL>Sets the statistics to a percentage.        <#VL>
@@ -60,8 +60,9 @@ widgets that have a special type, its name and description.
 <C><#VL>          <#VL>VERTICAL   <#VL>Specifies a vertical histogram.             <#VL>
 <C><#VL>Graph     <#VL>PLOT       <#VL>Specifies the graph will draw a plot graph. <#VL>
 <C><#VL>          <#VL>LINE       <#VL>Specifies the graph will draw a line graph. <#VL>
-<C><#LL<#HL(9)><#BT><#HL(10)><#BT><#HL(43)><#LR>
+<C><#LL<#HL(10)><#BT><#HL(11)><#BT><#HL(44)><#LR>
 
 <C><#HL(70)>
 <C>Document Created: June,     1995
 <C>Document Revised: November, 1995
+<C>Document Revised: March,    2012

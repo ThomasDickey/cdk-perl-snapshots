@@ -44,7 +44,7 @@ Shadow      Required             Scalar     The character to inject into the wid
 If you are injecting a special character into the widget, then you can
 use a pre-defined value to represent the key.
 
-<C><#UL><#HL(11)><#TT><#HL(14)><#UR>
+<C><#UL><#HL(12)><#TT><#HL(15)><#UR>
 <C><#VL></U>Key         <#VL>Key Value      <!U><#VL>
 <C><#VL>Left Arrow  <#VL>KEY_LEFT       <#VL>
 <C><#VL>Right Arrow <#VL>KEY_RIGHT      <#VL>
@@ -57,7 +57,7 @@ use a pre-defined value to represent the key.
 <C><#VL>Home        <#VL>KEY_HOME       <#VL>
 <C><#VL>End         <#VL>KEY_END        <#VL>
 <C><#VL>Escape      <#VL>KEY_ESC        <#VL>
-<C><#LL><#HL(11)><#BT><#HL(14)><#LR>
+<C><#LL><#HL(12)><#BT><#HL(15)><#LR>
 
 </B>bind<!B>
 The bind method binds keys to events. The binding is specific to the individual
@@ -100,7 +100,7 @@ the key given to the call-back function is a non alphanumeric key
 then a predefined value will be given to the function. The following
 table describes the values passed into the function.
 
-<C><#UL><#HL(11)><#TT><#HL(14)><#UR>
+<C><#UL><#HL(12)><#TT><#HL(15)><#UR>
 <C><#VL></U>Key         <#VL>Key Value      <!U><#VL>
 <C><#VL>Left Arrow  <#VL>KEY_LEFT       <#VL>
 <C><#VL>Right Arrow <#VL>KEY_RIGHT      <#VL>
@@ -113,7 +113,7 @@ table describes the values passed into the function.
 <C><#VL>Home        <#VL>KEY_HOME       <#VL>
 <C><#VL>End         <#VL>KEY_END        <#VL>
 <C><#VL>Escape      <#VL>KEY_ESC        <#VL>
-<C><#LL><#HL(11)><#BT><#HL(14)><#LR>
+<C><#LL><#HL(12)><#BT><#HL(15)><#LR>
 
 If the pre-process function returns a value of 0 the key hit will
 not be injected into the widget. This allows the programmer to
@@ -147,7 +147,7 @@ the key given to the call-back function is a non alphanumeric key
 then a predefined value will be given to the function. The following
 table describes the values passed into the function.
 
-<C><#UL><#HL(11)><#TT><#HL(14)><#UR>
+<C><#UL><#HL(12)><#TT><#HL(15)><#UR>
 <C><#VL></U>Key         <#VL>Key Value      <!U><#VL>
 <C><#VL>Left Arrow  <#VL>KEY_LEFT       <#VL>
 <C><#VL>Right Arrow <#VL>KEY_RIGHT      <#VL>
@@ -160,7 +160,7 @@ table describes the values passed into the function.
 <C><#VL>Home        <#VL>KEY_HOME       <#VL>
 <C><#VL>End         <#VL>KEY_END        <#VL>
 <C><#VL>Escape      <#VL>KEY_ESC        <#VL>
-<C><#LL><#HL(11)><#BT><#HL(14)><#LR>
+<C><#LL><#HL(12)><#BT><#HL(15)><#LR>
 </B>draw<!B>
 This method draws the object on the screen. The following example demonstrates
 how to call the draw method.
@@ -199,3 +199,4 @@ Max number of sub-menu items.  98
 <C>Document Revised: November, 1995
 <C>Document Revised: March,    1996
 <C>Document Revised: June,     1996
+<C>Document Revised: March,    2012

@@ -1,7 +1,7 @@
 /*
  * $Author: tom $
- * $Date: 2003/12/10 20:40:41 $
- * $Revision: 1.18 $
+ * $Date: 2012/03/24 11:42:10 $
+ * $Revision: 1.19 $
  */
 
 #include <EXTERN.h>
@@ -9,7 +9,11 @@
 #include <XSUB.h>
 
 #define CDK_PERL_EXT
+#ifdef HAVE_CDK_CDK_H
 #include <cdk/cdk.h>
+#else
+#include <cdk.h>
+#endif
 
 /* Prior to perl5.005, the PL_ prefix wasn't used for things such
    as PL_rs.  Define the PL_ macros that we use if necessary. */
@@ -843,7 +847,7 @@ not_there:
 
 MODULE	= Cdk	PACKAGE = Cdk
 
-char *
+const char *
 getVersion()
 	CODE:
 	{
@@ -2319,7 +2323,7 @@ New(menulist, menuloc, titleattr=A_REVERSE, subtitleattr=A_REVERSE, menuPos=TOP)
 	int	menuPos = sv2int ($arg);
 	CODE:
 	{
-	   char *	menuList[MAX_MENU_ITEMS][MAX_SUB_ITEMS];
+	   const char *	menuList[MAX_MENU_ITEMS][MAX_SUB_ITEMS];
 	   int		subSize[MAX_SUB_ITEMS];
 	   int *	menuLoc;
 	   int		menulen;
@@ -2334,7 +2338,14 @@ New(menulist, menuloc, titleattr=A_REVERSE, subtitleattr=A_REVERSE, menuPos=TOP)
 	   {
 	      croak ("Cdk::Menu The menu list and menu location arrays are not the same size.");
 	   }
-	   RETVAL = newCDKMenu (GCDKSCREEN,menuList,menulen,subSize,menuLoc,menuPos,titleattr,subtitleattr);
+	   RETVAL = newCDKMenu (GCDKSCREEN,
+				menuList,
+				menulen,
+				subSize,
+				menuLoc,
+				menuPos,
+				titleattr,
+				subtitleattr);
 
 	   free (menuLoc);
 	}
@@ -2358,7 +2369,7 @@ Activate(object,...)
 	   }
 	   else
 	   {
-	      value = activateCDKMenu (object, NULL);
+	      value = activateCDKMenu (object, (void *)0);
 	   }
 
 	   if (object->exitType == vEARLY_EXIT ||

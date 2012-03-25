@@ -1,4 +1,4 @@
-# $Id: Cdk.pm,v 1.5 2002/07/28 18:44:16 tom Exp $
+# $Id: Cdk.pm,v 1.8 2012/03/24 14:25:47 tom Exp $
 
 package Cdk;
 
@@ -12,7 +12,7 @@ use AutoLoader ();
 select (STDIN); $| = 1 ;
 
 # Set the version.
-$VERSION = "4.09010"; # must be a floating-point number
+$VERSION = "5.20120324"; # must be a floating-point number
 
 # Set the diag flag off.
 $DIAGFLAG = 0;
@@ -54,10 +54,10 @@ sub drawMesg
    my %params		= @_;
    my $name		= "${type}::new";
    my ($mesg, $xpos, $ypos, $attrib, $window);
-   
+
    # Retain the type of the object.
    $self->{'Type'}      = $type;
-   
+
    # Set up the parameters passed in.
    $mesg	= Cdk::checkReq ($name, "Message",   $params{'Message'});
    $xpos	= Cdk::checkDef ($name, "Xpos",   $params{'Xpos'},   Cdk::CENTER());
@@ -69,7 +69,7 @@ sub drawMesg
    if ($params{'Object'})
    {
       $window	= $params{'Object'}->getWindow();
-   } 
+   }
    else
    {
       $window	= Cdk::getCdkWindow();
@@ -132,19 +132,19 @@ sub checkReq
 sub popupLabel
 {
    my $mesg = shift;
- 
+
    my $popup = new Cdk::Label ("Message" => $mesg);
    $popup->draw();
    $popup->wait();
 }
- 
+
 #
 # This pops up a question on the screen.
 #
 sub popupDialog
 {
    my ($mesg, $buttons) = @_;
- 
+
    my $popup = new Cdk::Dialog ('Message' => $mesg, 'Buttons' => $buttons);
    return $popup->activate();
 }
@@ -182,7 +182,7 @@ sub scalar2List
    return @info;
 }
 
-# 
+#
 # Load the object modules.
 #
 use Cdk::Alphalist;

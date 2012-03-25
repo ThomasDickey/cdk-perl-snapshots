@@ -3,9 +3,14 @@ CHANGES                         changelog for Perl/Cdk
 COPYING                         copyright notice
 Cdk.pm                          perl module for Cdk
 Cdk.xs                          perl interface to Cdk
-Makefile.PL                     perl makefile template
+Makefile.PL.in                  perl makefile template
 README                          overview (read this first)
+config.guess                    utility script
+config.sub                      utility script
+configure                       configure script
+configure.in                    configure-script template
 fixpaths                        script to fix pathnames of perl in perl-scripts
+install-sh                      utility script
 typemap                         mapping between Perl and C parameter types
 Cdk/Alphalist.pm                Cdk::Alphalist package
 Cdk/Buttonbox.pm                Cdk::Buttonbox package
@@ -103,10 +108,6 @@ package/debian/compat           Debian build script
 package/debian/control          Debian build script
 package/debian/copyright        Debian build script
 package/debian/libcdk-perl.examples  Debian build script
-package/debian/patches/cdk_viewer.patch  Debian build script
-package/debian/patches/cdkdemo_help.patch  Debian build script
-package/debian/patches/makefile.patch  Debian build script
-package/debian/patches/series   Debian build script
 package/debian/rules            Debian build script
 package/debian/source/format    Debian build script
 package/debian/watch            Debian build script

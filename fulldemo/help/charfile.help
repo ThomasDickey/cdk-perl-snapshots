@@ -4,7 +4,7 @@ using format commands. The characters and their respective format commands
 are listed in the following table.
 
 <C></U>Table of Cdk's Drawing Characters
-<C><#UL><#HL(17)><#TT><#HL(4)><#TT><#HL(6)><#UR>
+<C><#UL><#HL(18)><#TT><#HL(5)><#TT><#HL(7)><#UR>
 <C><#VL></U>Description       <#VL>Code <#VL>Display<!U><#VL>
 <C><#VL>Horizontal Line   <#VL>\<\#HL><#VL>   <#HL>   <#VL>
 <C><#VL>Vertical Line     <#VL>\<\#VL><#VL>   <#VL>   <#VL>
@@ -22,7 +22,7 @@ are listed in the following table.
 <C><#VL>Checker Board     <#VL>\<\#CB><#VL>   <#CB>   <#VL>
 <C><#VL>Diamond           <#VL>\<\#DI><#VL>   <#DI>   <#VL>
 <C><#VL>Bullet            <#VL>\<\#BU><#VL>   <#BU>   <#VL>
-<C><#LL><#HL(17)><#BT><#HL(4)><#BT><#HL(6)><#LR>
+<C><#LL><#HL(18)><#BT><#HL(5)><#BT><#HL(7)><#LR>
 
 If you want more than one special character to appear, an optional numeric 
 repeat argument can be used. For example, if you wanted to draw 70 
@@ -33,3 +33,4 @@ drawn.
 
 <C><#HL(70)>
 <C>Document Created: January, 1996
+<C>Document Revised: March,   2012
