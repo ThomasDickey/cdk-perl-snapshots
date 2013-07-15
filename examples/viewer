@@ -1,9 +1,11 @@
 #!/usr/bin/perl -w
-# $Id: viewer,v 1.2 2002/07/27 20:11:17 tom Exp $
+# $Id: viewer,v 1.3 2013/07/14 22:37:55 tom Exp $
 
 #
 # Purpose:
 #	To demonstrate the Perl5 Cdk Viewer Widget.
+
+use strict;
 
 #
 # Initialize Cdk.
@@ -13,38 +15,47 @@ use Getopt::Long;
 
 Cdk::init();
 
+our ( $opt_f, $opt_h, $opt_w );
+
 # Get the screen dimensions.
-my ($rows, $cols) = Cdk::getCdkScreenDim ();
+my ( $rows, $cols ) = Cdk::getCdkScreenDim();
 
 # Parse the command line options.
-my $ret = GetOptions ('f|file:s', 'h|height:i', 'w|width:i');
-my $height	= $opt_h || $rows-2;
-my $width	= $opt_w || $cols;
-my $filename	= $opt_f;
+my $ret = GetOptions( 'f|file:s', 'h|height:i', 'w|width:i' );
+my $height = $opt_h || $rows - 2;
+my $width  = $opt_w || $cols;
+my $filename = $opt_f;
 
 # Activate the object.
-if (!defined $filename)
-{
-   # Create a file selector widget to get the filename.
-   my $fselect = new Cdk::Fselect ('Label' => "Filename:",
-					'Height' => $height,
-					'Width' => $width);
+if ( !defined $filename ) {
 
-   # Get the filename.
-   $filename = $fselect->activate();
+    # Create a file selector widget to get the filename.
+    my $fselect = new Cdk::Fselect(
+        'Label'  => "Filename:",
+        'Height' => $height,
+        'Width'  => $width
+    );
+
+    # Get the filename.
+    $filename = $fselect->activate();
 }
 
 # Open the file and load it up.
-my @info = qx (cat $filename); chomp @info;
+my @info = qx (cat $filename);
+chomp @info;
 
 # Create the viewer object.
-my $viewer = new Cdk::Viewer ('Buttons' => [ "<<OK>>" ],
-				'Height' => $height,
-				'Width' => $width);
+my $viewer = new Cdk::Viewer(
+    'Buttons' => ["<<OK>>"],
+    'Height'  => $height,
+    'Width'   => $width
+);
 
 # Set the contents of the viewer.
-$viewer->set ('Title' => "<C></5>File: $filename",
-		'Info' => \@info);
+$viewer->set(
+    'Title' => "<C></5>File: $filename",
+    'Info'  => \@info
+);
 
 # Activate the viewer.
 my $selection = $viewer->activate();

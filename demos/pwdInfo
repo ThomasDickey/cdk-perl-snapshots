@@ -1,11 +1,12 @@
 #!/usr/bin/perl -w
-# $Id: pwdInfo,v 1.2 2002/07/27 20:07:47 tom Exp $
+# $Id: pwdInfo,v 1.3 2013/07/14 21:22:47 tom Exp $
 
 #
 # This reads the passwd file and creates an interface to browse the
 # information.
 #
 
+use strict;
 use Cdk;
 Cdk::init();
 
@@ -13,62 +14,67 @@ Cdk::init();
 # This function loads up the passwd file and returns a reference to the
 # data structure.
 #
-sub loadPasswd
-{
-   my %passwd = ();
-   my @logins = ();
-   my ($name,$passwd,$uid,$gid,$quota,$comment,$gcos,$dir,$shell);
+sub loadPasswd {
+    my %passwd = ();
+    my @logins = ();
+    my ( $name, $passwd, $uid, $gid, $quota, $comment, $gcos, $dir, $shell );
 
-   # Start reading through the passwd file.
-   while (($name,$passwd,$uid,$gid,$quota,$comment,$gcos,$dir,$shell) = getpwent)
-   {
-      # Store the information.
-      $passwd{$name} = "$uid$gid$comment$gcos$dir$shell";
-      push (@logins, $name);
-   }
+    # Start reading through the passwd file.
+    while (
+        ( $name, $passwd, $uid, $gid, $quota, $comment, $gcos, $dir, $shell ) =
+        getpwent )
+    {
+        # Store the information.
+        $passwd{$name} = "$uid$gid$comment$gcos$dir$shell";
+        push( @logins, $name );
+    }
 
-   return (\@logins, \%passwd);
+    return ( \@logins, \%passwd );
 }
 
 # Load up the passwd file.
-my ($logins, $passwdObject) = loadPasswd();
+my ( $logins, $passwdObject ) = loadPasswd();
 
 # Create a scrolling list of all the names.
-my $mainScroll = new Cdk::Scroll ('Title' => '<C></U>Pick An Account',
-					'Numbers' => "TRUE",
-					'List' => $logins,
-					'Height' => 13,
-					'Width' => 45);
+my $mainScroll = new Cdk::Scroll(
+    'Title'   => '<C></U>Pick An Account',
+    'Numbers' => "TRUE",
+    'List'    => $logins,
+    'Height'  => 13,
+    'Width'   => 45
+);
 
 # Do this forever.
-for (;;)
-{
-   # Let the user select the login to view.
-   my $selected = $mainScroll->activate();
+for ( ; ; ) {
 
-   # Did the user just hit escape?
-   if (!defined $selected)
-   {
-      Cdk::end(); 
-      exit 0;
-   }
+    # Let the user select the login to view.
+    my $selected = $mainScroll->activate();
 
-   # Get the name and display the info.
-   my $name = $logins->[$selected];
+    # Did the user just hit escape?
+    if ( !defined $selected ) {
+        Cdk::end();
+        exit 0;
+    }
 
-   # Display the info.
-   my ($uid, $gid, $comment, $gcos, $dir, $shell) = split (//, $passwdObject->{$name});
-   my $info = ["Account Name   : </R>$name",
-		"UID/GID        : ($uid/$gid)",
-		"Comment        : </R>$comment",
-		"GCOS Value     : </R>$gcos",
-		"Home Directory : </R>$dir",
-		"Shell          : </R>$shell"];
+    # Get the name and display the info.
+    my $name = $logins->[$selected];
 
-   my $title = new Cdk::Label ('Message' => $info);
- 
-   # Draw the label.
-   $title->draw ('Box' => "TRUE");
-   $title->wait();
-   undef $title;
+    # Display the info.
+    my ( $uid, $gid, $comment, $gcos, $dir, $shell ) =
+      split( //, $passwdObject->{$name} );
+    my $info = [
+        "Account Name   : </R>$name",
+        "UID/GID        : ($uid/$gid)",
+        "Comment        : </R>$comment",
+        "GCOS Value     : </R>$gcos",
+        "Home Directory : </R>$dir",
+        "Shell          : </R>$shell"
+    ];
+
+    my $title = new Cdk::Label( 'Message' => $info );
+
+    # Draw the label.
+    $title->draw( 'Box' => "TRUE" );
+    $title->wait();
+    undef $title;
 }

@@ -1,9 +1,11 @@
 #!/usr/bin/perl -w
-# $Id: alphalist,v 1.2 2002/07/27 20:11:17 tom Exp $
+# $Id: alphalist,v 1.3 2013/07/14 22:55:03 tom Exp $
 
 #
 # Purpose:
 #	To demonstrate the Perl5 Cdk Alphalist Widget.
+
+use strict;
 
 #
 # Load in the Cdk Extension.
@@ -16,25 +18,25 @@ my @info = qx (ls);
 chomp @info;
 
 # Create a new alphalist object.
-my $alphalist = new Cdk::Alphalist ('Label' => "Type Anything:",
-					'Filler' => "</R/24>_",
-					'Height' => 20,
-					'Width' => 60,
-					'List' => \@info);
+my $alphalist = new Cdk::Alphalist(
+    'Label'  => "Type Anything:",
+    'Filler' => "</R/24>_",
+    'Height' => 20,
+    'Width'  => 60,
+    'List'   => \@info
+);
 
-$alphalist->set ('BoxAttribute' => "</R>");
+$alphalist->set( 'BoxAttribute' => "</R>" );
 
 # Activate the object.
 my $info = $alphalist->activate();
 
 # Check the results...
-if (! defined $info)
-{
-   popupLabel (["<C>You hit escape to exit the widget."]);
+if ( !defined $info ) {
+    popupLabel( ["<C>You hit escape to exit the widget."] );
 }
-else
-{
-   popupLabel (["<C>You selected ($info)"]);
+else {
+    popupLabel( ["<C>You selected ($info)"] );
 }
 
 # Exit Cdk.

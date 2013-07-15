@@ -1,4 +1,19 @@
--- $Id: CHANGES,v 1.10 2012/03/24 23:05:08 tom Exp $
+-- $Id: CHANGES,v 1.16 2013/07/14 23:59:29 tom Exp $
+
+2013/07/14 - Thomas Dickey <dickey@invisible-island.net>
+========================================================
+	+ indent demos/examples using perltidy.
+	+ reviewed demos/examples, made minor fixes, including using "strict".
+	+ remove unused flush.pl from ButtonBox.pm and Dialog.pm; this is no
+	  longer available with Fedora.
+	+ adapt RPM spec-file from pld.org for test-builds.
+	+ fix build with Perl 5.18 (patch by Niko Tyni, Debian #708593).
+	+ modify configure script to add $(BUILDDIR) variable to makefile,
+	  to help with test-builds which do not rely on chroot, etc.
+	+ use 'key' parameter in _Cdk::Calendar_Inject()
+	+ use attrib parameter in DrawMesg()
+	+ fix compiler warnings
+	+ add configure options to enable compiler warnings
 
 2012/03/24 - Thomas Dickey <dickey@invisible-island.net>
 ========================================================

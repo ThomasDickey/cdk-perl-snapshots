@@ -1,11 +1,13 @@
 #!/usr/bin/perl -w
-# $Id: bind,v 1.3 2002/07/24 10:04:32 tom Exp $
+# $Id: bind,v 1.4 2013/07/14 22:27:47 tom Exp $
 
 #
 # Purpose:
 #	To demonstrate the character binding features of the
 # Perl5/Cdk extension.
 #
+
+use strict;
 
 #
 # Load in the Cdk Extension.
@@ -14,53 +16,57 @@ use Cdk;
 Cdk::init();
 
 # This callback fills the entry field with a filename.
-sub callback
-{
-   my $entryObj = shift @_;
+sub callback {
+    my $entryObj = shift @_;
 
-   # Generate a list of files in the current directory.
-   my @files = <*>;
-   my $filelist	= new Cdk::Scroll ('Title' => "<C></U>Pick A File",
-					'Height' => 10,
-					'Width' => 20,
-					'List' => \@files);
+    # Generate a list of files in the current directory.
+    my @files    = <*>;
+    my $filelist = new Cdk::Scroll(
+        'Title'  => "<C></U>Pick A File",
+        'Height' => 10,
+        'Width'  => 20,
+        'List'   => \@files
+    );
 
-   # Activate the scrolling list.
-   my $itemPicked = $filelist->activate ();
-   undef $filelist;
+    # Activate the scrolling list.
+    my $itemPicked = $filelist->activate();
+    undef $filelist;
 
-   # Set the filename.
-   $entryObj->set ('Min' => 0, 'Max' => 255, 'Value' => $files[$itemPicked]);
+    # Set the filename.
+    $entryObj->set( 'Min' => 0, 'Max' => 255, 'Value' => $files[$itemPicked] );
 
-   # Redraw the entry field.
-   $entryObj->draw();
-   return 1;
+    # Redraw the entry field.
+    $entryObj->draw();
+    return 1;
 }
 
 # Create a new entry object.
-my $title = ["", "<C>Type in a filename or",
-		"<C>Press </R>tab<!R> to get a list.", ""];
-$filename = new Cdk::Entry ('Label' => "Filename: ",
-				'Title' => $title,
-				'Width' => 20,
-				'Min' => 0,
-				'Max' => 256);
+my $title =
+  [ "", "<C>Type in a filename or", "<C>Press </R>tab<!R> to get a list.", "" ];
+my $filename = new Cdk::Entry(
+    'Label' => "Filename: ",
+    'Title' => $title,
+    'Width' => 20,
+    'Min'   => 0,
+    'Max'   => 256
+);
 
 # Create a key binding.
-my @mesg = ("<C>Hi Mike", "<C></U>How Are You?");
-$filename->bind ('Key' => "KEY_TAB", 'Function' => sub {main::callback ($filename);});
+my @mesg = ( "<C>Hi Mike", "<C></U>How Are You?" );
+$filename->bind(
+    'Key'      => "KEY_TAB",
+    'Function' => sub { main::callback($filename); }
+);
 
 # Activate the object.
 my $file = $filename->activate();
 
 # Check the results.
-if (! defined $file)
-{
-   popupLabel (["<C>Escape hit, no filename entered."]);
+if ( !defined $file ) {
+    popupLabel( ["<C>Escape hit, no filename entered."] );
 }
-else
-{
-   popupLabel (["<C>You typed in the filename ($file)"]);
+else {
+    popupLabel( ["<C>You typed in the filename ($file)"] );
 }
 
 # Exit Cdk.

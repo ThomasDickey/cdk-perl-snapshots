@@ -1,7 +1,7 @@
 #
 # $Author: tom $
-# $Date: 2012/03/18 21:06:05 $
-# $Revision: 1.3 $
+# $Date: 2013/07/14 18:11:38 $
+# $Revision: 1.5 $
 #
 use ExtUtils::MakeMaker;
 
@@ -14,7 +14,14 @@ WriteMakefile(
     'NAME'	=> 'Cdk',
     'PREFIX'	=> '@prefix@',
     'VERSION'	=> '@VERSION@',
-    'LIBS'	=> ['@LIBS@'],
+    'EXE_EXT'	=> '@EXEEXT@',
+    'OBJ_EXT'	=> '.@OBJEXT@',
+    'LIB_EXT'	=> '@DFT_LIB_SUFFIX@',
+    'CC'	=> '@CC@ @EXTRA_CFLAGS@',
+    'FULL_AR'	=> '@FULL_AR@',
+    'LD'	=> '@CC@',
     'INC'	=> '@CPPFLAGS@',
+    'LIBS'	=> ['@LIBS@'],
+    'RANLIB'	=> '@RANLIB@',
     'clean'	=> {FILES => 'Makefile.old'},
 );

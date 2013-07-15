@@ -1,3 +1,10 @@
+libcdk-perl (20130714) unstable; urgency=low
+
+  * improvements for packaging
+
+ -- Thomas E. Dickey <dickey@invisible-island.net>  Sat, 13 Jul 2013 07:12:32 -0400
+
+
 libcdk-perl (20120324) unstable; urgency=low
 
   * Add package scripts, make them work with Debian 5/6.

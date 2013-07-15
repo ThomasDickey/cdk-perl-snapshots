@@ -1,9 +1,11 @@
 #!/usr/bin/perl -w
-# $Id: radio,v 1.3 2002/07/24 10:04:33 tom Exp $
+# $Id: radio,v 1.4 2013/07/14 22:34:05 tom Exp $
 
 #
 # Purpose:
 #	To demonstrate the Perl5 Cdk Radio Widget.
+
+use strict;
 
 #
 # Initialize Cdk.
@@ -12,29 +14,29 @@ use Cdk;
 Cdk::init();
 
 # Set up the radio list.
-my @radioList = ("Item 1", "Item 2", "Item 3",
-			"Item 4", "Item 5", "Item 6",
-			"Item 7", "Item 8", "Item 9",
-			"Item 10", "Item 11", "Item 12");
+my @radioList = (
+    "Item 1", "Item 2", "Item 3", "Item 4",  "Item 5",  "Item 6",
+    "Item 7", "Item 8", "Item 9", "Item 10", "Item 11", "Item 12"
+);
 
 # Create the radio list object.
-my $radioWidget = new Cdk::Radio ('Title' => ["<C></5>Radio List"],
-					'List' => \@radioList,
-					'Height' => 10,
-					'Width' => 20);
+my $radioWidget = new Cdk::Radio(
+    'Title'  => ["<C></5>Radio List"],
+    'List'   => \@radioList,
+    'Height' => 10,
+    'Width'  => 20
+);
 
 # Activate the radio object.
-$radioWidget->set ('Choice' => "#");
-my $choice = $radioWidget->activate ();
+$radioWidget->set( 'Choice' => "#" );
+my $choice = $radioWidget->activate();
 
 # Check the results.
-if (!defined $choice)
-{
-   popupLabel (["<C>Escape hit. No item selected."]);
+if ( !defined $choice ) {
+    popupLabel( ["<C>Escape hit. No item selected."] );
 }
-else
-{
-   popupLabel (["<C>You selected $radioList[$choice]."]);
+else {
+    popupLabel( ["<C>You selected $radioList[$choice]."] );
 }
 
 # Exit Cdk.

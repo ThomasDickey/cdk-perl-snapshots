@@ -1,9 +1,11 @@
 #!/usr/bin/perl -w
-# $Id: buttonbox,v 1.2 2002/07/27 20:11:17 tom Exp $
+# $Id: buttonbox,v 1.3 2013/07/14 22:54:32 tom Exp $
 
 #
 # Purpose:
 #	To demonstrate the Perl5 Cdk Buttonbox Widget.
+
+use strict;
 
 #
 # Initialize Cdk.
@@ -12,29 +14,31 @@ use Cdk;
 Cdk::init();
 
 # Create the buttonbox buttons.
-my @buttons = ("</3>Button 0<!3>",
-		"</4>Button 1<!4>",
-		"</5>Button 2<!5>",
-		"</6>Button 3<!6>");
+my @buttons = (
+    "</3>Button 0<!3>",
+    "</4>Button 1<!4>",
+    "</5>Button 2<!5>",
+    "</6>Button 3<!6>"
+);
 
 # Create the buttonbox object.
-my $buttonbox = new Cdk::Buttonbox ( 'Buttons' => \@buttons,
-					'Height' => 1,
-					'Width' => 50,
-					'Cols' => 4,
-					'Rows' => 1);
+my $buttonbox = new Cdk::Buttonbox(
+    'Buttons' => \@buttons,
+    'Height'  => 1,
+    'Width'   => 50,
+    'Cols'    => 4,
+    'Rows'    => 1
+);
 
 # Activate the object.
 my $button = $buttonbox->activate();
 
 # Check the results.
-if (!defined $button)
-{
-   popupLabel (["<C>Escape hit. No button selected."]);
+if ( !defined $button ) {
+    popupLabel( ["<C>Escape hit. No button selected."] );
 }
-else
-{
-   popupLabel (["<C>You selected button $button"]);
+else {
+    popupLabel( ["<C>You selected button $button"] );
 }
 
 # Exit Cdk.
