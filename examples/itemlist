@@ -1,9 +1,11 @@
 #!/usr/bin/perl -w
-# $Id: itemlist,v 1.3 2002/07/24 10:04:33 tom Exp $
+# $Id: itemlist,v 1.4 2013/07/14 22:35:45 tom Exp $
 
 #
 # Purpose:
 #	To demonstrate the Perl5 Cdk Itemlist Widget.
+
+use strict;
 
 #
 # Load in the Cdk Extension.
@@ -13,27 +15,30 @@ Cdk::init();
 
 # Create a list of the months of the year.
 my @months = (
-	"<C></B>January",	"<C></B>February",	"<C></B>March",
-	"<C></U>April",		"<C></U>May",		"<C></U>June",
-	"<C></K>July",		"<C></K>August",	"<C></K>September",
-	"<C></R>October",	"<C></R>November",	"<C></R>December");
+    "<C></B>January",   "<C></B>February",
+    "<C></B>March",     "<C></U>April",
+    "<C></U>May",       "<C></U>June",
+    "<C></K>July",      "<C></K>August",
+    "<C></K>September", "<C></R>October",
+    "<C></R>November",  "<C></R>December"
+);
 
 # Create an itemlist widget.
-my $itemlist = new Cdk::Itemlist ('List' => \@months,
-					'Label' => "Month >>",
-					'Title' => ["<C>Pick A Month"]);
+my $itemlist = new Cdk::Itemlist(
+    'List'  => \@months,
+    'Label' => "Month >>",
+    'Title' => ["<C>Pick A Month"]
+);
 
 # Activate the object.
 my $choice = $itemlist->activate();
 
 # Check the results
-if (!defined $choice)
-{
-   popupLabel (["<C>Escape hit. No item selected."]);
+if ( !defined $choice ) {
+    popupLabel( ["<C>Escape hit. No item selected."] );
 }
-else
-{
-   popupLabel (["<C>You selected ($months[$choice])"]);
+else {
+    popupLabel( ["<C>You selected ($months[$choice])"] );
 }
 
 # Exit Cdk.

@@ -1,7 +1,7 @@
 /*
  * $Author: tom $
- * $Date: 2012/03/24 11:42:10 $
- * $Revision: 1.19 $
+ * $Date: 2013/07/15 00:12:17 $
+ * $Revision: 1.29 $
  */
 
 #include <EXTERN.h>
@@ -14,6 +14,9 @@
 #else
 #include <cdk.h>
 #endif
+
+#undef dNOOP
+#define dNOOP /*EMPTY*/
 
 /* Prior to perl5.005, the PL_ prefix wasn't used for things such
    as PL_rs.  Define the PL_ macros that we use if necessary. */
@@ -63,7 +66,7 @@ static void make_int_array(int start, SV* input, int **dest, int *destlen)
    int length	= av_len(src) + 1;
    int x;
 
-   if ((*dest = (int *)calloc(length + 2, sizeof(int *))) == 0)
+   if ((*dest = (int *)calloc((size_t) length + 2, sizeof(int *))) == 0)
    {
       croak("make_int_array(%d)", length + 2);
    }
@@ -83,7 +86,7 @@ static void make_dtype_array(int start, SV *input, int **dest, int *destlen)
    int length	= av_len(src) + 1;
    int x;
 
-   if ((*dest = (int *)calloc(length + 2, sizeof(int *))) == 0)
+   if ((*dest = (int *)calloc((size_t) length + 2, sizeof(int *))) == 0)
    {
       croak("make_dtype_array(%d)", length + 2);
    }
@@ -103,7 +106,7 @@ static void make_chtype_array(int start, SV *input, chtype **dest, int *destlen)
    int length	= av_len(src) + 1;
    int x;
 
-   if ((*dest = (chtype *)calloc(length + 2, sizeof(chtype *))) == 0)
+   if ((*dest = (chtype *)calloc((size_t) length + 2, sizeof(chtype *))) == 0)
    {
       croak("make_chtype_array(%d)", length + 2);
    }
@@ -123,7 +126,7 @@ static void make_char_array(int start, SV *input, char ***dest, int *destlen)
    int length	= av_len(src) + 1;
    int x;
 
-   if ((*dest = (char **)calloc(length + 2, sizeof(char *))) == 0)
+   if ((*dest = (char **)calloc((size_t) length + 2, sizeof(char *))) == 0)
    {
       croak("make_char_array(%d)", length + 2);
    }
@@ -152,9 +155,9 @@ static void make_title(SV * input, char **dest)
       {
 	 SV *foo = *av_fetch(src, x, FALSE);
 	 data = (char *)SvPV(foo,PL_na);
-	 length += strlen(data) + 1;
+	 length += (int)strlen(data) + 1;
       }
-      *dest = malloc(length);
+      *dest = malloc((size_t)length);
       if (*dest == 0)
 	 croak("make_title");
 
@@ -183,17 +186,20 @@ static void make_title(SV * input, char **dest)
 /*
  * The callback callback to run Perl callback routines. Are you confused???
  */
-int PerlBindCB (EObjectType cdktype, void *object, void *data, chtype input)
+static int PerlBindCB (EObjectType cdktype, void *object, void *data, chtype input)
 {
    dSP ;
 
    SV *foo = (SV*)data;
-   int returnValueCount, returnValue;
+   int returnValueCount;
    char *chtypeKey, temp[10];
 
    ENTER;
    SAVETMPS;
    PUSHMARK (sp);
+
+   (void) cdktype;
+   (void) object;
 
    /* Check which key input is... */
    chtypeKey = checkChtypeKey (input);
@@ -224,7 +230,7 @@ int PerlBindCB (EObjectType cdktype, void *object, void *data, chtype input)
    }
 
    /* They returned something, lets find out what it is. */
-   returnValue = POPi;
+   (void) POPi;
 
    PUTBACK;
    FREETMPS;
@@ -235,7 +241,7 @@ int PerlBindCB (EObjectType cdktype, void *object, void *data, chtype input)
 /*
  * The callback callback to run Perl callback routines. Are you confused???
  */
-int PerlProcessCB (EObjectType cdktype, void *object, void *data, chtype input)
+static int PerlProcessCB (EObjectType cdktype, void *object, void *data, chtype input)
 {
    dSP ;
 
@@ -246,6 +252,9 @@ int PerlProcessCB (EObjectType cdktype, void *object, void *data, chtype input)
    ENTER;
    SAVETMPS;
    PUSHMARK (sp);
+
+   (void) cdktype;
+   (void) object;
 
    /* Check which key input is... */
    chtypeKey = checkChtypeKey (input);
@@ -284,7 +293,7 @@ int PerlProcessCB (EObjectType cdktype, void *object, void *data, chtype input)
    return returnValue;
 }
 
-void checkCdkInit(void)
+static void checkCdkInit(void)
 {
    if (GCDKSCREEN == (CDKSCREEN *)NULL)
    {
@@ -347,7 +356,7 @@ sv2chtype(SV *sv)
    {
       char *name = SvPV(sv,PL_na);
       chtype *fillerChtype;
-      int j1, j2;
+      int c1, c2;
 
       found = TRUE;
       if (strEQ(name, "ACS_BTEE"))
@@ -639,7 +648,7 @@ sv2chtype(SV *sv)
       else if (strEQ(name, "TAB"))
 	 result = TAB;
       /* Else they used a format of </X> to specify a chtype. */
-      else if ((fillerChtype = char2Chtype (name, &j1, &j2)) != 0) {
+      else if ((fillerChtype = char2Chtype (name, &c1, &c2)) != 0) {
 	  result = fillerChtype[0];
 	  freeChtype (fillerChtype);
       }
@@ -765,6 +774,7 @@ sv2int(SV *sv)
    return result;
 }
 
+#if 0
 static char *
 sv2CharPtr(SV *inp)
 {
@@ -778,10 +788,12 @@ not_here(char *s)
     croak("%s not implemented on this architecture", s);
     return -1;
 }
+#endif
 
 static double
 constant(char *name, int arg)
 {
+    (void)arg;
     errno = 0;
     switch (*name) {
     case 'A':
@@ -839,10 +851,11 @@ constant(char *name, int arg)
     }
     errno = EINVAL;
     return 0;
-
+#if 0
 not_there:
     errno = ENOENT;
     return 0;
+#endif
 }
 
 MODULE	= Cdk	PACKAGE = Cdk
@@ -888,8 +901,11 @@ getColor(pair)
 	int	pair
 	CODE:
 	{
+	   (void) targ;
 	   RETVAL = COLOR_PAIR(pair);
 	}
+	OUTPUT:
+	   RETVAL
 
 void
 end()
@@ -929,6 +945,8 @@ getCdkWindow()
 	{
 	   RETVAL = GCDKSCREEN->window;
 	}
+	OUTPUT:
+	   RETVAL
 
 
 void
@@ -962,9 +980,9 @@ DrawMesg(window,mesg,attrib=A_NORMAL,xpos=CENTER,ypos=CENTER,align=HORIZONTAL)
 	int		align = sv2int ($arg);
 	CODE:
 	{
-	   int mesgLen = strlen (mesg);
+	   int mesgLen = (int) strlen (mesg);
 
-	   writeChar (window, xpos, ypos, mesg, align, 0, mesgLen);
+	   writeCharAttrib (window, xpos, ypos, mesg, attrib, align, 0, mesgLen);
 	}
 
 chtype
@@ -981,11 +999,11 @@ PROTOTYPES: DISABLE
 MODULE	= Cdk	PACKAGE = Cdk::Label
 
 CDKLABEL *
-New(mesg,xPos=CENTER,yPos=CENTER,box=TRUE,shadow=FALSE)
+New(mesg,xPos=CENTER,yPos=CENTER,Box=TRUE,shadow=FALSE)
 	SV *	mesg
 	int	xPos = sv2int ($arg);
 	int	yPos = sv2int ($arg);
-	int	box = sv2int ($arg);
+	int	Box = sv2int ($arg);
 	int	shadow = sv2int ($arg);
 	CODE:
 	{
@@ -994,12 +1012,13 @@ New(mesg,xPos=CENTER,yPos=CENTER,box=TRUE,shadow=FALSE)
 	   int		messageLines;
 
 	   checkCdkInit();
+	   RETVAL = 0;
 
 	   MAKE_CHAR_ARRAY (0, mesg, message, messageLines);
 
 	   widget = newCDKLabel (GCDKSCREEN, xPos, yPos,
 					message, messageLines,
-					box, shadow);
+					Box, shadow);
 	   free (message);
 
 	   /* Check the return value. */
@@ -1030,12 +1049,12 @@ SetMessage(object,mesg)
 	}
 
 void
-SetBox(object,box=TRUE)
+SetBox(object,Box=TRUE)
 	CDKLABEL *	object
-	int		box = sv2int ($arg);
+	int		Box = sv2int ($arg);
 	CODE:
 	{
-	   setCDKLabelBox (object,box);
+	   setCDKLabelBox (object,Box);
 	}
 
 void
@@ -1133,7 +1152,7 @@ Wait(object, key=0)
 	chtype		key = sv2chtype ($arg);
 	CODE:
 	{
-	   RETVAL = waitCDKLabel (object, key);
+	   RETVAL = waitCDKLabel (object, (char) key);
 	}
 	OUTPUT:
 	   RETVAL
@@ -1201,6 +1220,7 @@ New(message,buttons,xPos=CENTER,yPos=CENTER,highlight=A_REVERSE,seperator=TRUE,B
 	   int		rowCount;
 
 	   checkCdkInit();
+	   RETVAL = 0;
 
 	   MAKE_CHAR_ARRAY (0, message, Message, rowCount);
 	   MAKE_CHAR_ARRAY (0, buttons, Buttons, buttonCount);
@@ -1290,6 +1310,7 @@ PreProcess(object,functionRef)
 	CODE:
 	{
 	   SV *function = newSVsv (functionRef);
+	   RETVAL = 0;
 	   setCDKDialogPreProcess (object, PerlProcessCB, function);
 	}
 	OUTPUT:
@@ -1302,6 +1323,7 @@ PostProcess(object,functionRef)
 	CODE:
 	{
 	   SV *function = newSVsv (functionRef);
+	   RETVAL = 0;
 	   setCDKDialogPostProcess (object, PerlProcessCB, function);
 	}
 	OUTPUT:
@@ -1343,12 +1365,12 @@ SetSeparator(object,separator=TRUE)
 	}
 
 void
-SetBox(object,box=TRUE)
+SetBox(object,Box=TRUE)
 	CDKDIALOG *	object
-	int		box = sv2int ($arg);
+	int		Box = sv2int ($arg);
 	CODE:
 	{
-	   setCDKDialogBox (object,box);
+	   setCDKDialogBox (object,Box);
 	}
 
 void
@@ -1488,6 +1510,7 @@ New (title,mesg,height,width,xPos=CENTER,yPos=CENTER,sPos=RIGHT,numbers=TRUE,hig
 	   int		mesglen;
 
 	   checkCdkInit();
+	   RETVAL = 0;
 
 	   MAKE_CHAR_ARRAY(0, mesg, Message, mesglen);
 	   MAKE_TITLE (title,Title);
@@ -1595,6 +1618,7 @@ PreProcess(object,functionRef)
 	CODE:
 	{
 	   SV *function = newSVsv (functionRef);
+	   RETVAL = 0;
 	   setCDKScrollPreProcess (object, PerlProcessCB, function);
 	}
 	OUTPUT:
@@ -1607,6 +1631,7 @@ PostProcess(object,functionRef)
 	CODE:
 	{
 	   SV *function = newSVsv (functionRef);
+	   RETVAL = 0;
 	   setCDKScrollPostProcess (object, PerlProcessCB, function);
 	}
 	OUTPUT:
@@ -1642,16 +1667,16 @@ Info(object)
 	}
 
 void
-SetItems(object,items,numbers=FALSE)
+SetItems(object,cItems,numbers=FALSE)
 	CDKSCROLL *	object
-	SV *		items
+	SV *		cItems
 	int		numbers = sv2int ($arg);
 	CODE:
 	{
 	   char **	Items;
 	   int		itemLength;
 
-	   MAKE_CHAR_ARRAY(0, items, Items, itemLength);
+	   MAKE_CHAR_ARRAY(0, cItems, Items, itemLength);
 	   setCDKScrollItems (object, Items, itemLength, numbers);
 	   free (Items);
 	}
@@ -1666,12 +1691,12 @@ SetHighlight(object,highlight)
 	}
 
 void
-SetBox(object,box=TRUE)
+SetBox(object,Box=TRUE)
 	CDKSCROLL *	object
-	int		box = sv2int ($arg);
+	int		Box = sv2int ($arg);
 	CODE:
 	{
-	   setCDKScrollBox (object,box);
+	   setCDKScrollBox (object,Box);
 	}
 
 void
@@ -1811,6 +1836,7 @@ New(title,label,start,low,high,inc,fastinc,fieldwidth,xPos=CENTER,yPos=CENTER,fi
 	   char *	Title;
 
 	   checkCdkInit();
+	   RETVAL = 0;
 
 	   MAKE_TITLE (title,Title);
 
@@ -1899,6 +1925,7 @@ PreProcess(object,functionRef)
 	CODE:
 	{
 	   SV *function = newSVsv (functionRef);
+	   RETVAL = 0;
 	   setCDKScalePreProcess (object, PerlProcessCB, function);
 	}
 	OUTPUT:
@@ -1911,6 +1938,7 @@ PostProcess(object,functionRef)
 	CODE:
 	{
 	   SV *function = newSVsv (functionRef);
+	   RETVAL = 0;
 	   setCDKScalePostProcess (object, PerlProcessCB, function);
 	}
 	OUTPUT:
@@ -1953,12 +1981,12 @@ SetLowHigh(object,low,high)
 	}
 
 void
-SetBox(object,box=TRUE)
+SetBox(object,Box=TRUE)
 	CDKSCALE *	object
-	int		box = sv2int ($arg);
+	int		Box = sv2int ($arg);
 	CODE:
 	{
-	   setCDKScaleBox (object,box);
+	   setCDKScaleBox (object,Box);
 	}
 
 void
@@ -2093,6 +2121,7 @@ New(title,height,width,orient=HORIZONTAL,xPos=CENTER,yPos=CENTER,Box=TRUE,shadow
 	   char *	Title;
 
 	   checkCdkInit();
+	   RETVAL = 0;
 
 	   MAKE_TITLE (title,Title);
 
@@ -2173,12 +2202,12 @@ SetStatsAttr(object,value)
 	}
 
 void
-SetBox(object,box=TRUE)
+SetBox(object,Box=TRUE)
 	CDKHISTOGRAM *	object
-	int		box = sv2int ($arg);
+	int		Box = sv2int ($arg);
 	CODE:
 	{
-	   setCDKHistogramBox (object,box);
+	   setCDKHistogramBox (object,Box);
 	}
 
 void
@@ -2330,6 +2359,7 @@ New(menulist, menuloc, titleattr=A_REVERSE, subtitleattr=A_REVERSE, menuPos=TOP)
 	   int		loclen;
 
 	   checkCdkInit();
+	   RETVAL = 0;
 
 	   MAKE_MENU_MATRIX(0, menulist, menuList, subSize, menulen);
 
@@ -2416,6 +2446,7 @@ PreProcess(object,functionRef)
 	CODE:
 	{
 	   SV *function = newSVsv (functionRef);
+	   RETVAL = 0;
 	   setCDKMenuPreProcess (object, PerlProcessCB, function);
 	}
 	OUTPUT:
@@ -2428,13 +2459,14 @@ PostProcess(object,functionRef)
 	CODE:
 	{
 	   SV *function = newSVsv (functionRef);
+	   RETVAL = 0;
 	   setCDKMenuPostProcess (object, PerlProcessCB, function);
 	}
 	OUTPUT:
 	   RETVAL
 
 void
-Draw(object)
+Draw(object, Box)
 	CDKMENU *	object
 	int		Box = sv2int ($arg);
 	CODE:
@@ -2541,6 +2573,7 @@ New(title,label,min,max,fieldWidth,filler=".",disptype=vMIXED,xPos=CENTER,yPos=C
 	   char *	Title;
 
 	   checkCdkInit();
+	   RETVAL = 0;
 
 	   MAKE_TITLE (title,Title);
 
@@ -2628,6 +2661,7 @@ PreProcess(object,functionRef)
 	CODE:
 	{
 	   SV *function = newSVsv (functionRef);
+	   RETVAL = 0;
 	   setCDKEntryPreProcess (object, PerlProcessCB, function);
 	}
 	OUTPUT:
@@ -2640,6 +2674,7 @@ PostProcess(object,functionRef)
 	CODE:
 	{
 	   SV *function = newSVsv (functionRef);
+	   RETVAL = 0;
 	   setCDKEntryPostProcess (object, PerlProcessCB, function);
 	}
 	OUTPUT:
@@ -2708,12 +2743,12 @@ SetHiddenChar(object,value)
 	}
 
 void
-SetBox(object,box=TRUE)
+SetBox(object,Box=TRUE)
 	CDKENTRY *	object
-	int		box = sv2int ($arg);
+	int		Box = sv2int ($arg);
 	CODE:
 	{
-	   setCDKEntryBox (object,box);
+	   setCDKEntryBox (object,Box);
 	}
 
 void
@@ -2871,6 +2906,7 @@ New(title,label,min,physical,logical,fieldWidth,disptype=vMIXED,filler=".",xPos=
 	   char *	Title;
 
 	   checkCdkInit();
+	   RETVAL = 0;
 
 	   MAKE_TITLE (title,Title);
 
@@ -2960,6 +2996,7 @@ PreProcess(object,functionRef)
 	CODE:
 	{
 	   SV *function = newSVsv (functionRef);
+	   RETVAL = 0;
 	   setCDKMentryPreProcess (object, PerlProcessCB, function);
 	}
 	OUTPUT:
@@ -2972,6 +3009,7 @@ PostProcess(object,functionRef)
 	CODE:
 	{
 	   SV *function = newSVsv (functionRef);
+	   RETVAL = 0;
 	   setCDKMentryPostProcess (object, PerlProcessCB, function);
 	}
 	OUTPUT:
@@ -3029,12 +3067,12 @@ SetFillerChar(object,value)
 	}
 
 void
-SetBox(object,box=TRUE)
+SetBox(object,Box=TRUE)
 	CDKMENTRY *	object
-	int		box = sv2int ($arg);
+	int		Box = sv2int ($arg);
 	CODE:
 	{
-	   setCDKMentryBox (object,box);
+	   setCDKMentryBox (object,Box);
 	}
 
 void
@@ -3200,6 +3238,7 @@ New(title,rowtitles,coltitles,colwidths,coltypes,vrows,vcols,xPos=CENTER,yPos=CE
 	   int	rows, cols, widths, dtype;
 
 	   checkCdkInit();
+	   RETVAL = 0;
 
 	   /* Make the arrays. */
 	   MAKE_CHAR_ARRAY (1, rowtitles, rowTitles, rows);
@@ -3259,17 +3298,17 @@ Activate(object,...)
 	{
 	   AV *		cellInfo = newAV();
 	   chtype *	Keys;
-	   int x, y, value, arrayLen;
+	   int x, y, arrayLen;
 
 	   if (items > 1)
 	   {
 	      MAKE_CHTYPE_ARRAY(0, ST(1), Keys, arrayLen);
-	      value = activateCDKMatrix (object, Keys);
+	      (void) activateCDKMatrix (object, Keys);
 	      free (Keys);
 	   }
 	   else
 	   {
-	      value = activateCDKMatrix (object, NULL);
+	      (void) activateCDKMatrix (object, NULL);
 	   }
 
 	   /* Check the exit status.	*/
@@ -3333,6 +3372,7 @@ PreProcess(object,functionRef)
 	CODE:
 	{
 	   SV *function = newSVsv (functionRef);
+	   RETVAL = 0;
 	   setCDKMatrixPreProcess (object, PerlProcessCB, function);
 	}
 	OUTPUT:
@@ -3345,6 +3385,7 @@ PostProcess(object,functionRef)
 	CODE:
 	{
 	   SV *function = newSVsv (functionRef);
+	   RETVAL = 0;
 	   setCDKMatrixPostProcess (object, PerlProcessCB, function);
 	}
 	OUTPUT:
@@ -3391,7 +3432,7 @@ Set(object,info)
 	   int x, y;
 
 	   matrixlen	= av_len (array) + 1;
-	   subSize	= (int *)calloc(matrixlen + 2, sizeof(int));
+	   subSize	= (int *)calloc((size_t)matrixlen + 2, sizeof(int));
 
 	   if (subSize != 0)
 	   {
@@ -3402,7 +3443,7 @@ Set(object,info)
 		 int subLen	= av_len (subArray) + 1;
 		 width = MAXIMUM(width, subLen);
 	      }
-	      Info = (char **)calloc((width + 1) * (matrixlen + 1), sizeof(char *));
+	      Info = (char **)calloc((size_t)((width + 1) * (matrixlen + 1)), sizeof(char *));
 
 	      if (Info != 0)
 	      {
@@ -3472,12 +3513,12 @@ GetCol(object)
 	   RETVAL
 
 void
-SetBoxAttribute(object,box=TRUE)
+SetBoxAttribute(object,Box=TRUE)
 	CDKMATRIX *	object
-	int		box = sv2int ($arg);
+	int		Box = sv2int ($arg);
 	CODE:
 	{
-	   setCDKMatrixBoxAttribute (object,box);
+	   setCDKMatrixBoxAttribute (object, (chtype)Box);
 	}
 
 void
@@ -3596,19 +3637,20 @@ Unregister(object)
 MODULE	= Cdk	PACKAGE = Cdk::Marquee
 
 CDKMARQUEE *
-New(width,xPos=CENTER,yPos=CENTER,box=TRUE,shadow=FALSE)
+New(width,xPos=CENTER,yPos=CENTER,Box=TRUE,shadow=FALSE)
 	int	width
 	int	xPos = sv2int ($arg);
 	int	yPos = sv2int ($arg);
-	int	box = sv2int ($arg);
+	int	Box = sv2int ($arg);
 	int	shadow = sv2int ($arg);
 	CODE:
 	{
 	   CDKMARQUEE * marqueeWidget = (CDKMARQUEE *)NULL;
 
 	   checkCdkInit();
+	   RETVAL = 0;
 
-	   marqueeWidget = newCDKMarquee (GCDKSCREEN,xPos,yPos,width,box,shadow);
+	   marqueeWidget = newCDKMarquee (GCDKSCREEN,xPos,yPos,width,Box,shadow);
 
 	   /* Check the return type. */
 	   if (marqueeWidget == (CDKMARQUEE *)NULL)
@@ -3646,12 +3688,12 @@ Deactivate(object)
 	}
 
 void
-SetBoxAttribute(object,box=TRUE)
+SetBoxAttribute(object,Box=TRUE)
 	CDKMARQUEE *	object
-	int		box = sv2int ($arg);
+	int		Box = sv2int ($arg);
 	CODE:
 	{
-	   setCDKMarqueeBoxAttribute (object,box);
+	   setCDKMarqueeBoxAttribute (object, (chtype)Box);
 	}
 
 void
@@ -3811,6 +3853,7 @@ New(title,list,choices,height,width,xPos=CENTER,yPos=CENTER,sPos=RIGHT,highlight
 	   int listSize, choiceSize;
 
 	   checkCdkInit();
+	   RETVAL = 0;
 
 	   MAKE_CHAR_ARRAY(0, list, List, listSize);
 	   MAKE_CHAR_ARRAY(0, choices, Choices, choiceSize);
@@ -3845,17 +3888,17 @@ Activate(object,...)
 	{
 	   chtype *	Keys;
 	   int arrayLen;
-	   int value, x;
+	   int x;
 
 	   if (items > 1)
 	   {
 	      MAKE_CHTYPE_ARRAY(0, ST(1), Keys, arrayLen);
-	      value = activateCDKSelection (object, Keys);
+	      (void) activateCDKSelection (object, Keys);
 	      free (Keys);
 	   }
 	   else
 	   {
-	      value = activateCDKSelection (object, NULL);
+	      (void) activateCDKSelection (object, NULL);
 	   }
 
 	   if (object->exitType == vEARLY_EXIT ||
@@ -3905,6 +3948,7 @@ PreProcess(object,functionRef)
 	CODE:
 	{
 	   SV *function = newSVsv (functionRef);
+	   RETVAL = 0;
 	   setCDKSelectionPreProcess (object, PerlProcessCB, function);
 	}
 	OUTPUT:
@@ -3917,6 +3961,7 @@ PostProcess(object,functionRef)
 	CODE:
 	{
 	   SV *function = newSVsv (functionRef);
+	   RETVAL = 0;
 	   setCDKSelectionPostProcess (object, PerlProcessCB, function);
 	}
 	OUTPUT:
@@ -3963,13 +4008,13 @@ SetChoices(object,choices)
 	}
 
 void
-SetChoice(object,choice,index)
+SetChoice(object,choice,cIndex)
 	CDKSELECTION *	object
 	int		choice
-	int		index
+	int		cIndex
 	CODE:
 	{
-	   setCDKSelectionChoice (object,index,choice);
+	   setCDKSelectionChoice (object,cIndex,choice);
 	}
 
 void
@@ -3987,22 +4032,22 @@ SetModes(object,modes)
 	}
 
 void
-SetMode(object,mode,index)
+SetMode(object,mode,cIndex)
 	CDKSELECTION *	object
 	int		mode
-	int		index
+	int		cIndex
 	CODE:
 	{
-	   setCDKSelectionMode (object,index,mode);
+	   setCDKSelectionMode (object,cIndex,mode);
 	}
 
 void
-SetBox(object,box=TRUE)
+SetBox(object,Box=TRUE)
 	CDKSELECTION *	object
-	int		box = sv2int ($arg);
+	int		Box = sv2int ($arg);
 	CODE:
 	{
-	   setCDKSelectionBox (object,box);
+	   setCDKSelectionBox (object,Box);
 	}
 
 void
@@ -4138,6 +4183,7 @@ New(buttons,height,width,buttonHighlight=A_REVERSE,xpos=CENTER,ypos=CENTER,Box=T
 	   int		buttonCount;
 
 	   checkCdkInit();
+	   RETVAL = 0;
 
 	   MAKE_CHAR_ARRAY (0, buttons, Buttons, buttonCount);
 
@@ -4220,12 +4266,12 @@ SetInfoLine(object,value)
 	}
 
 void
-SetBox(object,box=TRUE)
+SetBox(object,Box=TRUE)
 	CDKVIEWER *	object
-	int		box = sv2int ($arg);
+	int		Box = sv2int ($arg);
 	CODE:
 	{
-	   setCDKViewerBox (object,box);
+	   setCDKViewerBox (object,Box);
 	}
 
 void
@@ -4387,6 +4433,7 @@ New(title,xtitle,ytitle,height,width,xpos=CENTER,ypos=CENTER)
 	   char *	Title;
 
 	   checkCdkInit();
+	   RETVAL = 0;
 
 	   MAKE_TITLE (title,Title);
 
@@ -4450,12 +4497,12 @@ SetDisplayType(object,value)
 	}
 
 void
-SetBox(object,box=FALSE)
+SetBox(object,Box=FALSE)
 	CDKGRAPH *	object
-	int		box = sv2int ($arg);
+	int		Box = sv2int ($arg);
 	CODE:
 	{
-	   setCDKGraphBox (object,box);
+	   setCDKGraphBox (object,Box);
 	}
 
 void
@@ -4700,6 +4747,7 @@ PreProcess(object,functionRef)
 	CODE:
 	{
 	   SV *function = newSVsv (functionRef);
+	   RETVAL = 0;
 	   setCDKRadioPreProcess (object, PerlProcessCB, function);
 	}
 	OUTPUT:
@@ -4712,6 +4760,7 @@ PostProcess(object,functionRef)
 	CODE:
 	{
 	   SV *function = newSVsv (functionRef);
+	   RETVAL = 0;
 	   setCDKRadioPostProcess (object, PerlProcessCB, function);
 	}
 	OUTPUT:
@@ -4771,12 +4820,12 @@ SetRightBrace(object,value)
 	}
 
 void
-SetBox(object,box=TRUE)
+SetBox(object,Box=TRUE)
 	CDKRADIO *	object
-	int		box = sv2int ($arg);
+	int		Box = sv2int ($arg);
 	CODE:
 	{
-	   setCDKRadioBox (object,box);
+	   setCDKRadioBox (object,Box);
 	}
 
 void
@@ -4896,11 +4945,11 @@ GetWindow(object)
 MODULE	= Cdk	PACKAGE = Cdk::Template
 
 CDKTEMPLATE *
-New(title,label,plate,overlay,xpos=CENTER,ypos=CENTER,Box=TRUE,shadow=FALSE)
+New(title,label,plate,cOverlay,xpos=CENTER,ypos=CENTER,Box=TRUE,shadow=FALSE)
 	SV *	title
 	char *	label
 	char *	plate
-	char *	overlay
+	char *	cOverlay
 	int	xpos = sv2int ($arg);
 	int	ypos = sv2int ($arg);
 	int	Box = sv2int ($arg);
@@ -4911,12 +4960,13 @@ New(title,label,plate,overlay,xpos=CENTER,ypos=CENTER,Box=TRUE,shadow=FALSE)
 	   char *	Title;
 
 	   checkCdkInit();
+	   RETVAL = 0;
 
 	   MAKE_TITLE (title,Title);
 
 	   templateWidget = newCDKTemplate (GCDKSCREEN,xpos,ypos,
 						Title,label,
-						plate,overlay,
+						plate,cOverlay,
 						Box,shadow);
 	   free (Title);
 
@@ -4998,6 +5048,7 @@ PreProcess(object,functionRef)
 	CODE:
 	{
 	   SV *function = newSVsv (functionRef);
+	   RETVAL = 0;
 	   setCDKTemplatePreProcess (object, PerlProcessCB, function);
 	}
 	OUTPUT:
@@ -5010,6 +5061,7 @@ PostProcess(object,functionRef)
 	CODE:
 	{
 	   SV *function = newSVsv (functionRef);
+	   RETVAL = 0;
 	   setCDKTemplatePostProcess (object, PerlProcessCB, function);
 	}
 	OUTPUT:
@@ -5061,12 +5113,12 @@ SetMin(object,value)
 	}
 
 void
-SetBox(object,box=TRUE)
+SetBox(object,Box=TRUE)
 	CDKTEMPLATE *	object
-	int		box = sv2int ($arg);
+	int		Box = sv2int ($arg);
 	CODE:
 	{
-	   setCDKTemplateBox (object,box);
+	   setCDKTemplateBox (object,Box);
 	}
 
 void
@@ -5203,14 +5255,14 @@ GetWindow(object)
 
 MODULE	= Cdk	PACKAGE = Cdk::Swindow
 CDKSWINDOW *
-New(title,savelines,height,width,xpos=CENTER,ypos=CENTER,box=TRUE,shadow=FALSE)
+New(title,savelines,height,width,xpos=CENTER,ypos=CENTER,Box=TRUE,shadow=FALSE)
 	SV *	title
 	int	savelines
 	int	height
 	int	width
 	int	xpos = sv2int ($arg);
 	int	ypos = sv2int ($arg);
-	int	box = sv2int ($arg);
+	int	Box = sv2int ($arg);
 	int	shadow = sv2int ($arg);
 	CODE:
 	{
@@ -5222,7 +5274,7 @@ New(title,savelines,height,width,xpos=CENTER,ypos=CENTER,box=TRUE,shadow=FALSE)
 	   swindowWidget = newCDKSwindow (GCDKSCREEN,xpos,ypos,
 						height,width,
 						Title,savelines,
-						box,shadow);
+						Box,shadow);
 	   free (Title);
 
 	   /* Check the return type. */
@@ -5292,6 +5344,7 @@ PreProcess(object,functionRef)
 	CODE:
 	{
 	   SV *function = newSVsv (functionRef);
+	   RETVAL = 0;
 	   setCDKSwindowPreProcess (object, PerlProcessCB, function);
 	}
 	OUTPUT:
@@ -5304,6 +5357,7 @@ PostProcess(object,functionRef)
 	CODE:
 	{
 	   SV *function = newSVsv (functionRef);
+	   RETVAL = 0;
 	   setCDKSwindowPostProcess (object, PerlProcessCB, function);
 	}
 	OUTPUT:
@@ -5324,12 +5378,12 @@ SetContents(object,info)
 	}
 
 void
-SetBox(object,box=TRUE)
+SetBox(object,Box=TRUE)
 	CDKSWINDOW *	object
-	int		box = sv2int ($arg);
+	int		Box = sv2int ($arg);
 	CODE:
 	{
-	   setCDKSwindowBox (object,box);
+	   setCDKSwindowBox (object,Box);
 	}
 
 void
@@ -5552,14 +5606,14 @@ GetWindow(object)
 
 MODULE	= Cdk	PACKAGE = Cdk::Itemlist
 CDKITEMLIST *
-New(title,label,itemlist,defaultItem=0,xpos=CENTER,ypos=CENTER,box=TRUE,shadow=FALSE)
+New(title,label,itemlist,defaultItem=0,xpos=CENTER,ypos=CENTER,Box=TRUE,shadow=FALSE)
 	SV *	title
 	char *	label
 	SV *	itemlist
 	int	defaultItem
 	int	xpos = sv2int ($arg);
 	int	ypos = sv2int ($arg);
-	int	box = sv2int ($arg);
+	int	Box = sv2int ($arg);
 	int	shadow = sv2int ($arg);
 	CODE:
 	{
@@ -5569,6 +5623,7 @@ New(title,label,itemlist,defaultItem=0,xpos=CENTER,ypos=CENTER,box=TRUE,shadow=F
 	   int		itemLength;
 
 	   checkCdkInit();
+	   RETVAL = 0;
 
 	   MAKE_CHAR_ARRAY (0, itemlist, Itemlist, itemLength);
 	   MAKE_TITLE (title,Title);
@@ -5576,7 +5631,7 @@ New(title,label,itemlist,defaultItem=0,xpos=CENTER,ypos=CENTER,box=TRUE,shadow=F
 	   itemlistWidget = newCDKItemlist (GCDKSCREEN,xpos,ypos,
 						Title,label,
 						Itemlist,itemLength,
-						defaultItem,box,shadow);
+						defaultItem,Box,shadow);
 	   free (Itemlist);
 	   free (Title);
 
@@ -5657,6 +5712,7 @@ PreProcess(object,functionRef)
 	CODE:
 	{
 	   SV *function = newSVsv (functionRef);
+	   RETVAL = 0;
 	   setCDKItemlistPreProcess (object, PerlProcessCB, function);
 	}
 	OUTPUT:
@@ -5669,6 +5725,7 @@ PostProcess(object,functionRef)
 	CODE:
 	{
 	   SV *function = newSVsv (functionRef);
+	   RETVAL = 0;
 	   setCDKItemlistPostProcess (object, PerlProcessCB, function);
 	}
 	OUTPUT:
@@ -5707,12 +5764,12 @@ SetCurrentItem(object,value)
 	}
 
 void
-SetBox(object,box=TRUE)
+SetBox(object,Box=TRUE)
 	CDKITEMLIST *	object
-	int		box = sv2int ($arg);
+	int		Box = sv2int ($arg);
 	CODE:
 	{
-	   setCDKItemlistBox (object,box);
+	   setCDKItemlistBox (object,Box);
 	}
 
 void
@@ -5858,7 +5915,7 @@ GetWindow(object)
 
 MODULE	= Cdk	PACKAGE = Cdk::Fselect
 CDKFSELECT *
-New(title,label,height,width,dAttrib="</N>",fAttrib="</N>",lAttrib="</N>",sAttrib="</N>",highlight="</R>",fieldAttribute=A_NORMAL,filler=".",xPos=CENTER,yPos=CENTER,box=TRUE,shadow=FALSE)
+New(title,label,height,width,dAttrib="</N>",fAttrib="</N>",lAttrib="</N>",sAttrib="</N>",highlight="</R>",fieldAttribute=A_NORMAL,filler=".",xPos=CENTER,yPos=CENTER,Box=TRUE,shadow=FALSE)
 	SV *	title
 	char *	label
 	int	height
@@ -5872,7 +5929,7 @@ New(title,label,height,width,dAttrib="</N>",fAttrib="</N>",lAttrib="</N>",sAttri
 	chtype	filler = sv2chtype ($arg);
 	int	xPos = sv2int ($arg);
 	int	yPos = sv2int ($arg);
-	int	box = sv2int ($arg);
+	int	Box = sv2int ($arg);
 	int	shadow = sv2int ($arg);
 	CODE:
 	{
@@ -5880,6 +5937,7 @@ New(title,label,height,width,dAttrib="</N>",fAttrib="</N>",lAttrib="</N>",sAttri
 	   char *	Title;
 
 	   checkCdkInit();
+	   RETVAL = 0;
 
 	   MAKE_TITLE (title,Title);
 
@@ -5888,7 +5946,7 @@ New(title,label,height,width,dAttrib="</N>",fAttrib="</N>",lAttrib="</N>",sAttri
 						Title,label,
 						fieldAttribute,filler,highlight,
 						dAttrib,fAttrib,lAttrib,sAttrib,
-						box,shadow);
+						Box,shadow);
 	   free (Title);
 
 	   /* Check the return type. */
@@ -6015,12 +6073,12 @@ SetSocketkAttribute(object,value)
 	}
 
 void
-SetBox(object,box=TRUE)
+SetBox(object,Box=TRUE)
 	CDKFSELECT *	object
-	int		box = sv2int ($arg);
+	int		Box = sv2int ($arg);
 	CODE:
 	{
-	   setCDKFselectBox (object,box);
+	   setCDKFselectBox (object,Box);
 	}
 
 void
@@ -6113,6 +6171,7 @@ PreProcess(object,functionRef)
 	CODE:
 	{
 	   SV *function = newSVsv (functionRef);
+	   RETVAL = 0;
 	   setCDKFselectPreProcess (object, PerlProcessCB, function);
 	}
 	OUTPUT:
@@ -6125,6 +6184,7 @@ PostProcess(object,functionRef)
 	CODE:
 	{
 	   SV *function = newSVsv (functionRef);
+	   RETVAL = 0;
 	   setCDKFselectPostProcess (object, PerlProcessCB, function);
 	}
 	OUTPUT:
@@ -6211,6 +6271,7 @@ New(title,label,start,low,high,inc,fastInc,fieldWidth,xPos,yPos,filler,Box,shado
 	   char *	Title;
 
 	   checkCdkInit();
+	   RETVAL = 0;
 
 	   MAKE_TITLE (title,Title);
 
@@ -6303,12 +6364,12 @@ SetLowHigh(object,low,high)
 	}
 
 void
-SetBox(object,box=TRUE)
+SetBox(object,Box=TRUE)
 	CDKSLIDER *	object
-	int		box = sv2int ($arg);
+	int		Box = sv2int ($arg);
 	CODE:
 	{
-	   setCDKSliderBox (object,box);
+	   setCDKSliderBox (object,Box);
 	}
 
 void
@@ -6401,6 +6462,7 @@ PreProcess(object,functionRef)
 	CODE:
 	{
 	   SV *function = newSVsv (functionRef);
+	   RETVAL = 0;
 	   setCDKSliderPreProcess (object, PerlProcessCB, function);
 	}
 	OUTPUT:
@@ -6413,6 +6475,7 @@ PostProcess(object,functionRef)
 	CODE:
 	{
 	   SV *function = newSVsv (functionRef);
+	   RETVAL = 0;
 	   setCDKSliderPostProcess (object, PerlProcessCB, function);
 	}
 	OUTPUT:
@@ -6479,7 +6542,7 @@ GetWindow(object)
 
 MODULE	= Cdk	PACKAGE = Cdk::Alphalist
 CDKALPHALIST *
-New(title,label,list,height,width,xPos,yPos,highlight,filler,box,shadow)
+New(title,label,list,height,width,xPos,yPos,highlight,filler,Box,shadow)
 	SV *	title
 	char *	label
 	SV *	list
@@ -6489,7 +6552,7 @@ New(title,label,list,height,width,xPos,yPos,highlight,filler,box,shadow)
 	chtype	filler = sv2chtype ($arg);
 	int	xPos = sv2int ($arg);
 	int	yPos = sv2int ($arg);
-	int	box = sv2int ($arg);
+	int	Box = sv2int ($arg);
 	int	shadow = sv2int ($arg);
 	CODE:
 	{
@@ -6499,6 +6562,7 @@ New(title,label,list,height,width,xPos,yPos,highlight,filler,box,shadow)
 	   int listSize;
 
 	   checkCdkInit();
+	   RETVAL = 0;
 
 	   MAKE_CHAR_ARRAY(0, list, List, listSize);
 	   MAKE_TITLE (title,Title);
@@ -6508,7 +6572,7 @@ New(title,label,list,height,width,xPos,yPos,highlight,filler,box,shadow)
 						Title,label,
 						List,listSize,
 						filler,highlight,
-						box,shadow);
+						Box,shadow);
 	   free (List);
 	   free (Title);
 
@@ -6585,7 +6649,7 @@ SetContents(object,list)
 	}
 
 void
-SetFillerChar(object,fille)
+SetFillerChar(object,filler)
 	CDKALPHALIST*	object
 	chtype	filler = sv2chtype ($arg);
 	CODE:
@@ -6596,19 +6660,19 @@ SetFillerChar(object,fille)
 void
 SetHighlight(object,highlight)
 	CDKALPHALIST*	object
-	chtype	filler = sv2chtype ($arg);
+	chtype	highlight = sv2chtype ($arg);
 	CODE:
 	{
-	   setCDKAlphalistHighlight (object,filler);
+	   setCDKAlphalistHighlight (object,highlight);
 	}
 
 void
-SetBox(object,box=TRUE)
+SetBox(object,Box=TRUE)
 	CDKALPHALIST *	object
-	int		box = sv2int ($arg);
+	int		Box = sv2int ($arg);
 	CODE:
 	{
-	   setCDKAlphalistBox (object,box);
+	   setCDKAlphalistBox (object,Box);
 	}
 
 void
@@ -6711,6 +6775,7 @@ PreProcess(object,functionRef)
 	CODE:
 	{
 	   SV *function = newSVsv (functionRef);
+	   RETVAL = 0;
 	   setCDKAlphalistPreProcess (object, PerlProcessCB, function);
 	}
 	OUTPUT:
@@ -6723,6 +6788,7 @@ PostProcess(object,functionRef)
 	CODE:
 	{
 	   SV *function = newSVsv (functionRef);
+	   RETVAL = 0;
 	   setCDKAlphalistPostProcess (object, PerlProcessCB, function);
 	}
 	OUTPUT:
@@ -6809,6 +6875,7 @@ New(title,day,month,year,dayAttrib,monthAttrib,yearAttrib,highlight,xPos=CENTER,
 	   char *	Title;
 
 	   checkCdkInit();
+	   RETVAL = 0;
 
 	   MAKE_TITLE (title,Title);
 
@@ -6867,6 +6934,7 @@ Inject(object,key)
 	chtype		key = sv2chtype ($arg);
 	PPCODE:
 	{
+	   (void) injectCDKCalendar (object,key);
 	   if (object->exitType == vESCAPE_HIT ||
 	       object->exitType == vEARLY_EXIT)
 	   {
@@ -6949,6 +7017,7 @@ PreProcess(object,functionRef)
 	CODE:
 	{
 	   SV *function = newSVsv (functionRef);
+	   RETVAL = 0;
 	   setCDKCalendarPreProcess (object, PerlProcessCB, function);
 	}
 	OUTPUT:
@@ -6961,6 +7030,7 @@ PostProcess(object,functionRef)
 	CODE:
 	{
 	   SV *function = newSVsv (functionRef);
+	   RETVAL = 0;
 	   setCDKCalendarPostProcess (object, PerlProcessCB, function);
 	}
 	OUTPUT:
@@ -7064,6 +7134,7 @@ New(title,buttons,rows,cols,height,width,xPos=CENTER,yPos=CENTER,highlight=A_REV
 	   int			buttonCount;
 
 	   checkCdkInit();
+	   RETVAL = 0;
 
 	   MAKE_CHAR_ARRAY (0, buttons, Buttons, buttonCount);
 	   MAKE_TITLE (title,Title);
@@ -7153,6 +7224,7 @@ PreProcess(object,functionRef)
 	CODE:
 	{
 	   SV *function = newSVsv (functionRef);
+	   RETVAL = 0;
 	   setCDKButtonboxPreProcess (object, PerlProcessCB, function);
 	}
 	OUTPUT:
@@ -7165,6 +7237,7 @@ PostProcess(object,functionRef)
 	CODE:
 	{
 	   SV *function = newSVsv (functionRef);
+	   RETVAL = 0;
 	   setCDKButtonboxPostProcess (object, PerlProcessCB, function);
 	}
 	OUTPUT:
@@ -7197,12 +7270,12 @@ SetHighlight(object,highlight=A_REVERSE)
 	}
 
 void
-SetBox(object,box=TRUE)
+SetBox(object,Box=TRUE)
 	CDKBUTTONBOX *	object
-	int		box = sv2int ($arg);
+	int		Box = sv2int ($arg);
 	CODE:
 	{
-	   setCDKButtonboxBox (object,box);
+	   setCDKButtonboxBox (object,Box);
 	}
 
 void

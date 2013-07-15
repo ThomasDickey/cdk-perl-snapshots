@@ -1,9 +1,11 @@
 #!/usr/bin/perl -w
-# $Id: async,v 1.2 2002/07/27 20:07:47 tom Exp $
+# $Id: async,v 1.3 2013/07/14 23:15:43 tom Exp $
 
 #
 # This demo demonstrates how to use async functions with Cdk...
 #
+
+use strict;
 
 #
 # Initialize Cdk.
@@ -14,52 +16,59 @@ Cdk::init();
 # Set the async function...
 $SIG{'ALRM'} = "littleWeeClock";
 
+our @listItems;
+
 # Set up the scrolling list.
 setpwent();
-while ($item = getpwent())
-{
-   push (@listItems, $item);
+while ( my $item = getpwent() ) {
+    push( @listItems, $item );
 }
 
 # Get the screen dimensions.
-my ($rows, $cols) = Cdk::getCdkScreenDim ();
+my ( $rows, $cols ) = Cdk::getCdkScreenDim();
 
 # Create the scrolling list object.
-my $scroll = new Cdk::Scroll ('Title' => "<C></U/5>Pick An Account",
-				'Height' => 10,
-				'Numbers' => "TRUE",
-				'Highlight' => "</B/29>",
-				'Width' => 25,
-				'List' => \@listItems);
+my $scroll = new Cdk::Scroll(
+    'Title'     => "<C></U/5>Pick An Account",
+    'Height'    => 10,
+    'Numbers'   => "TRUE",
+    'Highlight' => "</B/29>",
+    'Width'     => 25,
+    'List'      => \@listItems
+);
 
 # Create the label...
-my $clock = new Cdk::Label ('Message' => ["Current Time: HH:MM:SS"], 'Xpos' => "TOP");
+my $clock =
+  new Cdk::Label( 'Message' => ["Current Time: HH:MM:SS"], 'Xpos' => "TOP" );
 
 # Draw the scrolling window.
 $clock->draw();
 
 # Set the alarm to go off.
-alarm (1);
+alarm(1);
 
 # Do this forever.
-for (;;)
-{
-   # Activate the scrolling list.
-   my $itemPicked = $scroll->activate();
+for ( ; ; ) {
 
-   # Do we need to exit...
-   exit if ! defined $itemPicked;
+    # Activate the scrolling list.
+    my $itemPicked = $scroll->activate();
 
-   # Get the password info.
-   my ($name,$passwd,$uid,$gid,$quota,$comment,$gcos,$dir,$shell) = getpwnam ($listItems[$itemPicked]);
+    # Do we need to exit...
+    exit if !defined $itemPicked;
 
-   # Display it.
-   my $info = ["</B/5>Account Name<!B!5> $name",
-		"</B/5>UID         <!B!5> $uid",
-		"</B/5>GID         <!B!5> $gid",
-		"</B/5>Directory   <!B!5> $dir",
-		"</B/5>Shell       <!B!5> $shell"];
-   popupLabel ($info);
+    # Get the password info.
+    my ( $name, $passwd, $uid, $gid, $quota, $comment, $gcos, $dir, $shell ) =
+      getpwnam( $listItems[$itemPicked] );
+
+    # Display it.
+    my $info = [
+        "</B/5>Account Name<!B!5> $name",
+        "</B/5>UID         <!B!5> $uid",
+        "</B/5>GID         <!B!5> $gid",
+        "</B/5>Directory   <!B!5> $dir",
+        "</B/5>Shell       <!B!5> $shell"
+    ];
+    popupLabel($info);
 }
 
 # Exit Cdk.
@@ -68,28 +77,27 @@ Cdk::end();
 #
 # This is the async function.
 #
-sub littleWeeClock
-{
-   #
-   # Turn off the alarm
-   #
-   $SIG{'ALRM'} = "IGNORE";
-   alarm (0);
+sub littleWeeClock {
+    #
+    # Turn off the alarm
+    #
+    $SIG{'ALRM'} = "IGNORE";
+    alarm(0);
 
-   #
-   # Get the current time/date.
-   #
-   my ($sec, $min, $hour) = (localtime(time));
-   my $mesg = sprintf ("%02d:%02d:%02d", $hour, $min, $sec);
+    #
+    # Get the current time/date.
+    #
+    my ( $sec, $min, $hour ) = ( localtime(time) );
+    my $mesg = sprintf( "%02d:%02d:%02d", $hour, $min, $sec );
 
-   #
-   # Add the line to the scrolling window.
-   #
-   $clock->set ('Message' => ["Current Time: </B/$sec>$mesg"]);
+    #
+    # Add the line to the scrolling window.
+    #
+    $clock->set( 'Message' => ["Current Time: </B/$sec>$mesg"] );
 
-   #
-   # Reset the alarm.
-   #
-   $SIG{'ALRM'} = "littleWeeClock";
-   alarm (1);
+    #
+    # Reset the alarm.
+    #
+    $SIG{'ALRM'} = "littleWeeClock";
+    alarm(1);
 }

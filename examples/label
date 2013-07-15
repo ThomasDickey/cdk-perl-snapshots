@@ -1,9 +1,11 @@
 #!/usr/bin/perl -w
-# $Id: label,v 1.2 2002/07/27 20:11:17 tom Exp $
+# $Id: label,v 1.3 2013/07/14 22:49:54 tom Exp $
 
 #
 # Purpose:
 #	To demonstrate the Perl5 Cdk Label Widget.
+
+use strict;
 
 #
 # Initialize Cdk.
@@ -12,17 +14,19 @@ use Cdk;
 Cdk::init();
 
 # Set up the label rows.
-my @mesg = ("<C>This is a test of the Perl Cdk extension.",
-		"", "",
-		"<L></22>Written by...",
-		"<C></5/R>Mike Glover");
+my @mesg = (
+    "<C>This is a test of the Perl Cdk extension.",
+    "", "",
+    "<L></22>Written by...",
+    "<C></5/R>Mike Glover"
+);
 
 # Create the label object.
-my $title = new Cdk::Label ('Message' => \@mesg);
+my $title = new Cdk::Label( 'Message' => \@mesg );
 
 # Draw the label.
-$title->set ('BoxAttribute' => "</B>");
-$title->draw ();
+$title->set( 'BoxAttribute' => "</B>" );
+$title->draw();
 $title->wait();
 
 # Exit Cdk.

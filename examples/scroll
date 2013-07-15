@@ -1,9 +1,11 @@
 #!/usr/bin/perl -w
-# $Id: scroll,v 1.2 2002/07/27 20:11:17 tom Exp $
+# $Id: scroll,v 1.3 2013/07/14 22:45:12 tom Exp $
 
 #
 # Purpose:
 #	To demonstrate the Perl5 Cdk Scroll Widget
+
+use strict;
 
 #
 # Initialize Cdk.
@@ -12,30 +14,34 @@ use Cdk;
 Cdk::init();
 
 # Set up the scrolling list.
-@listItems = ("Item 1", "Item 2", "Item 3",
-		"Item 4", "Item 5", "Item 6",
-		"Item 7", "Item 8", "Item 9");
+my @listItems = (
+    "Item 1", "Item 2", "Item 3", "Item 4", "Item 5", "Item 6",
+    "Item 7", "Item 8", "Item 9"
+);
 
 # Create the scrolling list object.
-my $scroll = new Cdk::Scroll ('Title' => "<C>Scroll Title",
-				'Height' => -10,
-				'Width' => -10,
-				'Numbers' => "TRUE",
-				'Spos' => "RIGHT",
-				'List' => \@listItems);
-$scroll->add ('Item' => "HELLO");
+my $scroll = new Cdk::Scroll(
+    'Title'   => "<C>Scroll Title",
+    'Height'  => -10,
+    'Width'   => -10,
+    'Numbers' => "TRUE",
+    'Spos'    => "RIGHT",
+    'List'    => \@listItems
+);
+$scroll->add( 'Item' => "HELLO" );
 
 # Activate the scrolling list.
-my $itemPicked = $scroll->activate ();
+my $itemPicked = $scroll->activate();
 
 # Check the results.
-if (!defined $itemPicked)
-{
-   popupLabel (["<C>Escape hit. No menu item selected."]);
+if ( !defined $itemPicked ) {
+    popupLabel( ["<C>Escape hit. No menu item selected."] );
 }
-else
-{
-   popupLabel (["<C>You selected </R>$listItems[$itemPicked]"]);
+elsif ( $itemPicked > $#listItems ) {
+    popupLabel( ["<C>Hello there!"] );
+}
+else {
+    popupLabel( ["<C>You selected </R>$listItems[$itemPicked]"] );
 }
 
 # Exit Cdk.

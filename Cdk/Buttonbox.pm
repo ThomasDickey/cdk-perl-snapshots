@@ -1,5 +1,4 @@
 package Cdk::Buttonbox;
-require "flush.pl";
 
 @ISA	= qw (Cdk);
 

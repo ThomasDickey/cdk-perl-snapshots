@@ -1,5 +1,4 @@
 package Cdk::Dialog;
-require "flush.pl";
 
 @ISA	= qw (Cdk);
 

@@ -1,9 +1,11 @@
 #!/usr/bin/perl -w
-# $Id: slider,v 1.3 2002/07/24 10:04:32 tom Exp $
+# $Id: slider,v 1.4 2013/07/14 22:24:01 tom Exp $
 
 #
 # Purpose:
 #	To demonstrate the Perl5 Cdk Slider Widget
+
+use strict;
 
 #
 # Initialize Cdk.
@@ -12,23 +14,23 @@ use Cdk;
 Cdk::init();
 
 # Create the slider object.
-my $slider = new Cdk::Slider ('Label' => "</5>Pick A Number: ",
-				'Filler' => "</R>*",
-				'Low' => 1,
-				'High' => 10,
-				'Width' => 50);
+my $slider = new Cdk::Slider(
+    'Label'  => "</5>Pick A Number: ",
+    'Filler' => "</R>*",
+    'Low'    => 1,
+    'High'   => 10,
+    'Width'  => 50
+);
 
 # Activate the object.
-my $number = $slider->activate ();
+my $number = $slider->activate();
 
 # Check the results.
-if (!defined $number)
-{
-   popupLabel (["<C>Escape hit. No menu item selected."]);
+if ( !defined $number ) {
+    popupLabel( ["<C>Escape hit. No menu item selected."] );
 }
-else
-{
-   popupLabel (["<C>You chose $number"]);
+else {
+    popupLabel( ["<C>You chose $number"] );
 }
 
 # Exit Cdk.

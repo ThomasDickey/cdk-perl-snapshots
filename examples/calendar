@@ -1,9 +1,11 @@
 #!/usr/bin/perl -w
-# $Id: calendar,v 1.2 2002/07/27 20:11:17 tom Exp $
+# $Id: calendar,v 1.3 2013/07/14 22:54:04 tom Exp $
 
 #
 # Purpose:
 #	To demonstrate the Perl5 Cdk Calendar Widget
+
+use strict;
 
 #
 # Initialize Cdk.
@@ -12,7 +14,7 @@ use Cdk;
 Cdk::init();
 
 # Create the celendar object.
-my $calendar = new Cdk::Calendar ();
+my $calendar = new Cdk::Calendar();
 
 # Activate the object.
 my $ret = $calendar->activate();

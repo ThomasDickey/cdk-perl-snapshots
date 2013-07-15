@@ -1,9 +1,11 @@
 #!/usr/bin/perl -w
-# $Id: template,v 1.2 2002/07/27 20:11:17 tom Exp $
+# $Id: template,v 1.3 2013/07/14 22:38:48 tom Exp $
 
 #
 # Purpose:
 #	To demonstrate the Perl5 Cdk Template Widget.
+
+use strict;
 
 #
 # Initialize Cdk.
@@ -12,9 +14,11 @@ use Cdk;
 Cdk::init();
 
 # Create the template object.
-my $template = new Cdk::Template ('Label' => 'Type in a date:',
-					'Plate' => '## ## ####',
-					'Overlay' => 'DD-MM-YYYY');
+my $template = new Cdk::Template(
+    'Label'   => 'Type in a date:',
+    'Plate'   => '## ## ####',
+    'Overlay' => 'DD-MM-YYYY'
+);
 
 # Activate the widget.
 my $date = $template->activate();
@@ -23,14 +27,16 @@ my $date = $template->activate();
 my $mixedDate = $template->mix();
 
 # Check the results.
-if (!defined $date)
-{
-   popupLabel (["<C>Escape hit. No information to return."]);
+if ( !defined $date ) {
+    popupLabel( ["<C>Escape hit. No information to return."] );
 }
-else
-{
-   popupLabel (["<C>With Overlay Mixing   : $mixedDate",
-		"<C>Without Overlay Mixing: $date"]);
+else {
+    popupLabel(
+        [
+            "<C>With Overlay Mixing   : $mixedDate",
+            "<C>Without Overlay Mixing: $date"
+        ]
+    );
 }
 
 # Exit Cdk.
