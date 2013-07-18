@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: bday,v 1.6 2013/07/14 20:52:01 tom Exp $
+# $Id: bday,v 1.7 2013/07/17 18:38:10 tom Exp $
 
 #
 # Purpose:
@@ -50,7 +50,7 @@ for ( ; ; ) {
     last if not defined $day;
     last if not defined $month;
     last if not defined $year;
-    my $msg = sprintf "%d:%d:%d", $day, $month, $year;
+    my $msg = sprintf "day %2d, month %2d, year %4d", $day, $month, $year;
     $swindow->addline( 'Info' => $msg );
 }
 

@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: async,v 1.3 2013/07/14 23:15:43 tom Exp $
+# $Id: async,v 1.4 2013/07/17 19:34:06 tom Exp $
 
 #
 # This demo demonstrates how to use async functions with Cdk...
@@ -78,6 +78,7 @@ Cdk::end();
 # This is the async function.
 #
 sub littleWeeClock {
+
     #
     # Turn off the alarm
     #

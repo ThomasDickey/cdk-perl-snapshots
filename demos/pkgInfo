@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: pkgInfo,v 1.4 2013/07/14 23:20:28 tom Exp $
+# $Id: pkgInfo,v 1.5 2013/07/17 19:34:07 tom Exp $
 
 use strict;
 
@@ -163,6 +163,7 @@ sub removePackage {
                 popupLabel("pkgrm $name");
             }
             else {
+
                 # Set the yes to all flag.
                 $yesToAll = 1;
 
@@ -171,6 +172,7 @@ sub removePackage {
             }
         }
         else {
+
             # Delete the package
             popupLabel("pkgrm $name");
         }

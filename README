@@ -1,8 +1,8 @@
--- $Id: README,v 1.4 2003/12/10 22:42:38 tom Exp $
+-- $Id: README,v 1.5 2013/07/17 20:10:49 tom Exp $
 
 Cdk Perl5 Extension,
 Mike Glover, Copyright 1995-1999
-Thomas Dickey modifications copyright 1999-2002, 2003
+Thomas Dickey modifications copyright 1999-2012, 2013
 
 ------------------------------------------------------------------------------
 
@@ -18,28 +18,15 @@ How to build/install:
 ---------------------
 
 1.  Make sure that Cdk (the C library libcdk and its header files) are
-    installed.  Normally those are
+    installed.  For example
 	/usr/local/include/cdk/cdk.h (and other files)
 	/usr/local/lib/libcdk.a (and perhaps a shared-library)
 
-2.  Modify Makefile.PL as needed to tell the compiler where to find the Cdk
-    library and header files.  In particular, these values may require change:
+2.  Run the configure script; it should find the Cdk library and header files.
 
-    * LIBS tells the compiler where to find the Cdk and curses libraries.  Just
-      change the -L paths to reflect what is on your system.  Leave the -lcdk
-      and -lcurses.  You may have to change -lcurses to -lncurses, for
-      instance.
-
-    * INC tells the compiler where to find the header files.  Just change the
-      -I paths to reflect what is on your system.
-
-3.  If your version of perl supports dynamic loading, it is simple to
-    add new packages.  Run these commands
-	perl Makefile.PL
+3.  Run these commands
+	make
 	make install
-    to generate a makefile for your configuration, build and install the
-    extension.  (The process of building perl with statically loaded extensions
-    is more complicated).
 
 Testing the Cdk extension:
 --------------------------

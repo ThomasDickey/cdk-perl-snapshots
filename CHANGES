@@ -1,4 +1,11 @@
--- $Id: CHANGES,v 1.16 2013/07/14 23:59:29 tom Exp $
+-- $Id: CHANGES,v 1.18 2013/07/17 19:44:21 tom Exp $
+
+2013/07/17 - Thomas Dickey <dickey@invisible-island.net>
+========================================================
+	+ adapt files from FreeBSD port for test-builds.
+	+ add fix for demos/rolodex from FreeBSD port.
+	+ fix handling of Calendar's return value for activate and getDate
+	  methods.
 
 2013/07/14 - Thomas Dickey <dickey@invisible-island.net>
 ========================================================

@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: pwdInfo,v 1.3 2013/07/14 21:22:47 tom Exp $
+# $Id: pwdInfo,v 1.4 2013/07/17 19:34:07 tom Exp $
 
 #
 # This reads the passwd file and creates an interface to browse the
@@ -24,6 +24,7 @@ sub loadPasswd {
         ( $name, $passwd, $uid, $gid, $quota, $comment, $gcos, $dir, $shell ) =
         getpwent )
     {
+
         # Store the information.
         $passwd{$name} = "$uid$gid$comment$gcos$dir$shell";
         push( @logins, $name );

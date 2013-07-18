@@ -5,6 +5,7 @@ Cdk.pm                          perl module for Cdk
 Cdk.xs                          perl interface to Cdk
 Makefile.PL.in                  perl makefile template
 README                          overview (read this first)
+aclocal.m4                      macros for autoconf
 config.guess                    utility script
 config.sub                      utility script
 configure                       configure script
@@ -102,6 +103,7 @@ fulldemo/help/special.help      special keywords used in Cdk's viewer
 fulldemo/help/swindow.help      description of swindow-widget
 fulldemo/help/template.help     description of template-widget
 fulldemo/help/viewer.help       description of viewer-widget
+package/cdk-perl.spec           spec file originally from PLD
 package/debian/README.source    Debian build script
 package/debian/changelog        Debian build script
 package/debian/compat           Debian build script
@@ -112,3 +114,7 @@ package/debian/libcdk-perl.examples  Debian build script
 package/debian/rules            Debian build script
 package/debian/source/format    Debian build script
 package/debian/watch            Debian build script
+package/freebsd/Makefile        FreeBSD port
+package/freebsd/distinfo        FreeBSD port
+package/freebsd/pkg-descr       FreeBSD port
+package/freebsd/pkg-plist       FreeBSD port

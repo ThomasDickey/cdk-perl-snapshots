@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: rolodex,v 1.4 2013/07/14 23:50:52 tom Exp $
+# $Id: rolodex,v 1.5 2013/07/17 19:33:28 tom Exp $
 
 use strict;
 
@@ -40,7 +40,7 @@ our $menuloc = [ "LEFT", "LEFT", "LEFT", "RIGHT" ];
 
 # Create the menu object.
 our $menu = new Cdk::Menu( 'Menulist' => $menulist, 'Menuloc' => $menuloc );
-$menu->draw();
+$menu->activate(0);
 
 # Create the title.
 our @title =
@@ -324,6 +324,7 @@ sub addRolodexGroup {
         return %info;
     }
     else {
+
         # Check if the group already exists.
         if ( defined $info{$newName} ) {
             my $mesg = ["<C>Sorry the group ($newName) already exists."];
