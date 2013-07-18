@@ -1,9 +1,14 @@
+libcdk-perl (20130717) unstable; urgency=low
+
+  * fix for calendar functions
+
+ -- Thomas E. Dickey <dickey@invisible-island.net>  Mon, 15 Jul 2013 21:06:53 -0400
+
 libcdk-perl (20130714) unstable; urgency=low
 
   * improvements for packaging
 
  -- Thomas E. Dickey <dickey@invisible-island.net>  Sat, 13 Jul 2013 07:12:32 -0400
-
 
 libcdk-perl (20120324) unstable; urgency=low
 

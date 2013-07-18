@@ -6,7 +6,7 @@ Upstream-Name: Cdk
 
 Files: *
 Copyright: 1995-1999, Mike Glover
- 1999-2002, 2003 Thomas Dickey
+ 1999-2012, 2013 Thomas Dickey
 License: BSD-4
 
 Files: debian/*

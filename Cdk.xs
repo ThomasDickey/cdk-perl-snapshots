@@ -1,7 +1,7 @@
 /*
  * $Author: tom $
- * $Date: 2013/07/15 00:12:17 $
- * $Revision: 1.29 $
+ * $Date: 2013/07/17 19:57:03 $
+ * $Revision: 1.31 $
  */
 
 #include <EXTERN.h>
@@ -2561,7 +2561,8 @@ New(title,label,min,max,fieldWidth,filler=".",disptype=vMIXED,xPos=CENTER,yPos=C
 	int		max
 	int		fieldWidth
 	chtype		filler = sv2chtype ($arg);
-	EDisplayType	disptype = sv2dtype ($arg);
+	int		int_disptype = sv2dtype ($arg);
+	EDisplayType	disptype = (EDisplayType) int_disptype;
 	int		xPos = sv2int ($arg);
 	int		yPos = sv2int ($arg);
 	chtype		fieldattr = sv2chtype ($arg);
@@ -2893,7 +2894,8 @@ New(title,label,min,physical,logical,fieldWidth,disptype=vMIXED,filler=".",xPos=
 	int		physical
 	int		logical
 	int		fieldWidth
-	EDisplayType	disptype = sv2dtype ($arg);
+	int		int_disptype = sv2dtype ($arg);
+	EDisplayType	disptype = (EDisplayType) int_disptype;
 	chtype		filler = sv2chtype ($arg);
 	int		xPos = sv2int ($arg);
 	int		yPos = sv2int ($arg);

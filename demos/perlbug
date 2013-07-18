@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: perlbug,v 1.5 2013/07/14 21:14:36 tom Exp $
+# $Id: perlbug,v 1.6 2013/07/17 19:34:06 tom Exp $
 
 #
 # Purpose:
@@ -412,6 +412,7 @@ sub sendBugReport {
         return;
     }
     else {
+
         # No, Okay, let's try to use sendmail normally. (normally????)
         my $sendmail = "";
 
