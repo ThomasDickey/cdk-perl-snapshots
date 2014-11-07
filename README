@@ -1,8 +1,8 @@
--- $Id: README,v 1.5 2013/07/17 20:10:49 tom Exp $
+-- $Id: README,v 1.6 2014/11/07 01:34:04 tom Exp $
 
 Cdk Perl5 Extension,
 Mike Glover, Copyright 1995-1999
-Thomas Dickey modifications copyright 1999-2012, 2013
+Thomas Dickey modifications copyright 1999-2013, 2014
 
 ------------------------------------------------------------------------------
 
