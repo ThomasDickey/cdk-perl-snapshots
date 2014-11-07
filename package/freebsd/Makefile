@@ -2,12 +2,12 @@
 # $FreeBSD: devel/p5-Cdk/Makefile 315974 2013-04-17 15:33:37Z miwi $
 
 PORTNAME=	Cdk
-PORTVERSION=	5.0
+PORTVERSION=	5.0.20141106
 PORTREVISION=	1
 CATEGORIES=	devel perl5
 MASTER_SITES=	ftp://invisible-island.net/cdk/
 PKGNAMEPREFIX=	p5-
-DISTNAME=	cdk-perl-20130717
+DISTNAME=	cdk-perl-20130816
 EXTRACT_SUFX=	.tgz
 
 MAINTAINER=	ports@FreeBSD.org

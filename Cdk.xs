@@ -1,7 +1,7 @@
 /*
- * $Author: tom $
- * $Date: 2013/07/17 19:57:03 $
- * $Revision: 1.31 $
+ * $Author: Niko.Tyni $
+ * $Date: 2013/08/16 21:57:50 $
+ * $Revision: 1.32 $
  */
 
 #include <EXTERN.h>
@@ -2561,8 +2561,7 @@ New(title,label,min,max,fieldWidth,filler=".",disptype=vMIXED,xPos=CENTER,yPos=C
 	int		max
 	int		fieldWidth
 	chtype		filler = sv2chtype ($arg);
-	int		int_disptype = sv2dtype ($arg);
-	EDisplayType	disptype = (EDisplayType) int_disptype;
+	int		disptype = sv2dtype ($arg);
 	int		xPos = sv2int ($arg);
 	int		yPos = sv2int ($arg);
 	chtype		fieldattr = sv2chtype ($arg);
@@ -2580,7 +2579,7 @@ New(title,label,min,max,fieldWidth,filler=".",disptype=vMIXED,xPos=CENTER,yPos=C
 
 	   entryWidget = newCDKEntry (GCDKSCREEN,xPos,yPos,
 					Title,label,
-					fieldattr,filler,disptype,
+					fieldattr,filler,(EDisplayType) disptype,
 					fieldWidth,min,max,
 					Box,shadow);
 	   free (Title);
@@ -2894,8 +2893,7 @@ New(title,label,min,physical,logical,fieldWidth,disptype=vMIXED,filler=".",xPos=
 	int		physical
 	int		logical
 	int		fieldWidth
-	int		int_disptype = sv2dtype ($arg);
-	EDisplayType	disptype = (EDisplayType) int_disptype;
+	int		disptype = sv2dtype ($arg);
 	chtype		filler = sv2chtype ($arg);
 	int		xPos = sv2int ($arg);
 	int		yPos = sv2int ($arg);
@@ -2915,7 +2913,7 @@ New(title,label,min,physical,logical,fieldWidth,disptype=vMIXED,filler=".",xPos=
 	   mentryWidget = newCDKMentry (GCDKSCREEN,xPos,yPos,
 					Title,label,
 					fieldattr,filler,
-					disptype,fieldWidth,
+					(EDisplayType) disptype,fieldWidth,
 					physical,logical,min,
 					Box,shadow);
 	   free (Title);
