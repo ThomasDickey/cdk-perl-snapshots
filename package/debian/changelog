@@ -1,3 +1,9 @@
+libcdk-perl (5.0.20150928) unstable; urgency=low
+
+  * maintenance updates
+
+ -- Thomas E. Dickey <dickey@invisible-island.net>  Mon, 28 Sep 2015 21:04:25 -0400
+
 libcdk-perl (5.0.20141106) unstable; urgency=low
 
   * maintenance updates
