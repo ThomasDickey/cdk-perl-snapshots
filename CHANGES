@@ -1,8 +1,11 @@
--- $Id: CHANGES,v 1.20 2014/11/07 01:33:19 tom Exp $
+-- $Id: CHANGES,v 1.21 2015/09/29 01:01:04 tom Exp $
 --------------------------------------------------------------------------------
 Cdk Perl change-list
-Modifications copyright Thomas E. Dickey 2001-2013,2014
+Modifications copyright Thomas E. Dickey 2001-2014,2015
 --------------------------------------------------------------------------------
+
+2015/09/28
+	+ updated configure script
 
 2014/11/06
 	+ build-fixes for dpkg/rpm/ports test-packages
