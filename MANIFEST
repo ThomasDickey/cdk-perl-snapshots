@@ -1,10 +1,12 @@
 MANIFEST                        this file
 CHANGES                         changelog for Perl/Cdk
 COPYING                         copyright notice
+COPYING.asc                     copyright notice signature
 Cdk.pm                          perl module for Cdk
 Cdk.xs                          perl interface to Cdk
 Makefile.PL.in                  perl makefile template
 README                          overview (read this first)
+VERSION                         version information for shared libraries
 aclocal.m4                      macros for autoconf
 config.guess                    utility script
 config.sub                      utility script

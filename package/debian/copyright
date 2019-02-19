@@ -1,12 +1,12 @@
 Format-Specification:
     http://wiki.debian.org/Proposals/CopyrightFormat?action=recall&rev=196
 Upstream-Maintainer: Thomas Dickey
-Upstream-Source: http://invisible-island.net/cdk/
+Upstream-Source: https://invisible-island.net/cdk/
 Upstream-Name: Cdk
 
 Files: *
 Copyright: 1995-1999, Mike Glover
- 1999-2012, 2013 Thomas Dickey
+ 1999-2013, 2019 Thomas Dickey
 License: BSD-4
 
 Files: debian/*

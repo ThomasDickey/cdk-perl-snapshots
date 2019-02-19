@@ -1,0 +1,2 @@
+# no, we want it this way, since the fulldemos scripts expect it
+libcdk-perl: nested-examples-directory usr/share/doc/libcdk-perl/examples/examples/

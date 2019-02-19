@@ -1,8 +1,20 @@
--- $Id: CHANGES,v 1.21 2015/09/29 01:01:04 tom Exp $
+-- $Id: CHANGES,v 1.27 2019/02/19 02:16:55 tom Exp $
 --------------------------------------------------------------------------------
 Cdk Perl change-list
 Modifications copyright Thomas E. Dickey 2001-2014,2015
 --------------------------------------------------------------------------------
+
+2019/02/18
+	+ build-fix for ncurses 6's opaque WINDOW's.
+	+ modify fulldemo to set its working directory to make the examples'
+	  relative paths work.
+	+ update configure-script workaround for test-builds fixing regression
+	  in the uninstall rule.
+	+ fix perl 5.20.2 deprecation warnings.
+	+ updated configure script macros:
+	  CF_ADD_CFLAGS, CF_CC_ENV_FLAGS, CF_GCC_WARNINGS, CF_GNU_SOURCE,
+	  CF_POSIX_C_SOURCE, CF_PROG_EXT, CF_TRY_XOPEN_SOURCE, CF_XOPEN_SOURCE
+	+ update config.guess, config.sub
 
 2015/09/28
 	+ updated configure script

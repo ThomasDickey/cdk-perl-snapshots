@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: rolodex,v 1.5 2013/07/17 19:33:28 tom Exp $
+# $Id: rolodex,v 1.6 2019/02/17 20:30:21 tom Exp $
 
 use strict;
 
@@ -104,7 +104,7 @@ for ( ; ; ) {
                 my %tmpGroup = readRCFile($file);
 
                 # Check the results.
-                if ( !defined %tmpGroup ) {
+                if ( !%tmpGroup ) {
                     my $mesg = [
                         "<C></16>There were too many errors in the file",
                         "<C></16>$file.",
@@ -934,7 +934,7 @@ sub printRolodexGroups {
     undef $select;
 
     # check if the user canceled.
-    if ( !defined @answer ) {
+    if ( !@answer ) {
         my $mesg = ["Print Canceled"];
         popupLabel($mesg);
         return;

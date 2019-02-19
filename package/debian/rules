@@ -1,11 +1,17 @@
 #!/usr/bin/make -f
 
-override_dh_shlibdeps:
-	dh_shlibdeps --dpkg-shlibdeps-params=--ignore-missing-info
-
+# export DH_VERBOSE=1
 %:
-	dh $@
+	dh $@ --without autoreconf --with autotools-dev
 
-# This does not work with Debian 5.0 (use "compress" file instead):
-#override_dh_compress:
-#	dh_compress -Xexamples
+# doesn't work with Debian8:
+#	'CREATE_PACKLIST' is not a known MakeMaker parameter name.
+#override_dh_auto_configure:
+#	dh_auto_configure
+#	dh_auto_configure --buildsystem=perl_makemaker
+
+override_dh_auto_test:
+	# no tests
+
+override_dh_compress:
+	dh_compress -Xexamples -Xcopyright
