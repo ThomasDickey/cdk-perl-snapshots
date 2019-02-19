@@ -1,7 +1,7 @@
 /*
- * $Author: Niko.Tyni $
- * $Date: 2013/08/16 21:57:50 $
- * $Revision: 1.32 $
+ * $Author: tom $
+ * $Date: 2019/02/19 02:11:40 $
+ * $Revision: 1.33 $
  */
 
 #include <EXTERN.h>
@@ -935,8 +935,10 @@ void
 getCdkScreenDim()
 	PPCODE:
 	{
-	   XPUSHs (sv_2mortal(newSViv(GCDKSCREEN->window->_maxy)));
-	   XPUSHs (sv_2mortal(newSViv(GCDKSCREEN->window->_maxx)));
+	   int myY, myX;
+	   getmaxyx(GCDKSCREEN->window, myY, myX);
+	   XPUSHs (sv_2mortal(newSViv(myY)));
+	   XPUSHs (sv_2mortal(newSViv(myX)));
 	}
 
 WINDOW *

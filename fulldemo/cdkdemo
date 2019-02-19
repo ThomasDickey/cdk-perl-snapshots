@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: cdkdemo,v 1.9 2013/07/14 23:03:23 tom Exp $
+# $Id: cdkdemo,v 1.11 2019/02/18 18:51:12 tom Exp $
 #
 # Purpose:
 #	This script demonstrates the Cdk widget set and how to use them.
@@ -9,6 +9,10 @@ use strict;
 
 # for dirname()
 use File::Basename;
+
+# help find related files
+use FindBin qw($Bin);
+chdir "$Bin";
 
 #
 # Use the Cdk module.
@@ -276,7 +280,7 @@ for ( ; ; ) {
             "<C></32>and Thomas E. Dickey<!32>",
             "",
             "</16>Created     : December, 1995<!16>",
-            "</16>Last Updated: July, 2013<!16>",
+            "</16>Last Updated: February, 2019<!16>",
             "",
             $CONTINUE
         );
@@ -833,7 +837,7 @@ sub histogramDemo {
     );
 
     # Take the current time - the start time of this script.
-    my $diff = time - $;
+    my $diff = time - $^T;
 
     # Redraw the histogram every second.
     for ( $x = 0 ; $x < 5 ; $x++ ) {

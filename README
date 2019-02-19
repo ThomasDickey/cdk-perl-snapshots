@@ -1,8 +1,8 @@
--- $Id: README,v 1.7 2015/09/29 01:05:08 tom Exp $
+-- $Id: README,v 1.8 2019/02/17 19:05:24 tom Exp $
 
 Cdk Perl5 Extension,
+Thomas Dickey modifications copyright 1999-2015,2019
 Mike Glover, Copyright 1995-1999
-Thomas Dickey modifications copyright 1999-2014,2015
 
 ------------------------------------------------------------------------------
 
@@ -10,8 +10,8 @@ This is the Perl5 extension to the Cdk library written by Mike Glover.
 See MANIFEST for a list of files provided with this extension.
 See COPYING for the licensing terms for this package.
 See
-	http://invisible-island.net/cdk/
-	ftp://invisible-island.net/cdk/
+	https://invisible-island.net/cdk/
+	ftp://ftp.invisible-island.net/cdk/
 for the current version of this package.
 
 How to build/install:

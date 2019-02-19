@@ -6,7 +6,7 @@ Uploaders: Jeremiah Foster <jeremiah@jeremiahfoster.com>,
  Damyan Ivanov <dmn@debian.org>, gregor herrmann <gregoa@debian.org>,
  Dominic Hargreaves <dom@earth.li>
 Standards-Version: 3.9.2
-Homepage: http://invisible-island.net/cdk/
+Homepage: https://invisible-island.net/cdk/
 Vcs-Git: git://git.debian.org/pkg-perl/packages/libcdk-perl.git
 Vcs-Browser: http://anonscm.debian.org/gitweb/?p=pkg-perl/packages/libcdk-perl.git
 Build-Depends: debhelper (>= 7.0.50), libcdk5, libcdk5-dev, libncurses5-dev (>= 5.3), perl (>= 5.8)
