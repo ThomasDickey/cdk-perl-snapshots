@@ -108,11 +108,13 @@ fulldemo/help/viewer.help       description of viewer-widget
 package/cdk-perl.spec           spec file originally from PLD
 package/debian/README.source    Debian build script
 package/debian/changelog        Debian build script
+package/debian/clean            Debian build script
 package/debian/compat           Debian build script
 package/debian/compress         build-script
 package/debian/control          Debian build script
 package/debian/copyright        Debian build script
 package/debian/libcdk-perl.examples  Debian build script
+package/debian/libcdk-perl.lintian-overrides	Debian build script
 package/debian/rules            Debian build script
 package/debian/source/format    Debian build script
 package/debian/watch            Debian build script

@@ -1,7 +1,7 @@
 /*
  * $Author: tom $
- * $Date: 2019/02/19 02:11:40 $
- * $Revision: 1.33 $
+ * $Date: 2019/02/20 00:15:55 $
+ * $Revision: 1.35 $
  */
 
 #include <EXTERN.h>
@@ -15,8 +15,10 @@
 #include <cdk.h>
 #endif
 
+#if (PERL_REVISION == 5) && (PERL_VERSION >= 10 && PERL_VERSION <= 28)
 #undef dNOOP
-#define dNOOP /*EMPTY*/
+#define dNOOP struct Perl___notused_struct
+#endif
 
 /* Prior to perl5.005, the PL_ prefix wasn't used for things such
    as PL_rs.  Define the PL_ macros that we use if necessary. */
