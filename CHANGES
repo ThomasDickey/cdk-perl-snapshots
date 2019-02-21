@@ -1,10 +1,12 @@
--- $Id: CHANGES,v 1.27 2019/02/19 02:16:55 tom Exp $
+-- $Id: CHANGES,v 1.30 2019/02/21 01:40:25 tom Exp $
 --------------------------------------------------------------------------------
 Cdk Perl change-list
-Modifications copyright Thomas E. Dickey 2001-2014,2015
+Modifications copyright Thomas E. Dickey 2001-2015,2019
 --------------------------------------------------------------------------------
 
-2019/02/18
+2019/02/20
+	+ use definition of dNOOP from perl 5.28.0 to fix most of the needless
+	  compiler warnings.
 	+ build-fix for ncurses 6's opaque WINDOW's.
 	+ modify fulldemo to set its working directory to make the examples'
 	  relative paths work.
