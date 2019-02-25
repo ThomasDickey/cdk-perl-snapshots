@@ -25,11 +25,11 @@ dnl Except as contained in this notice, the name(s) of the above copyright
 dnl holders shall not be used in advertising or otherwise to promote the sale,
 dnl use or other dealings in this Software without prior written authorization.
 dnl ---------------------------------------------------------------------------
-AC_REVISION($Revision: 1.16 $)
+AC_REVISION($Revision: 1.17 $)
 AC_PREREQ(2.13.20030927)
 rm -f config.cache
 
-dnl $Id: configure.in,v 1.16 2019/02/17 23:20:58 tom Exp $
+dnl $Id: configure.in,v 1.17 2019/02/24 22:04:18 tom Exp $
 
 AC_INIT(Cdk.xs)
 AC_PREFIX_DEFAULT(/usr)
@@ -75,6 +75,10 @@ AC_MSG_RESULT($with_cdk)
 
 if test $with_cdk = no
 then
+	# before looking for Cdk, check for the curses library it will use
+	CF_WITH_CURSES_DIR
+	CF_CURSES_CHTYPE
+	CF_WITH_NCURSES_ETC
 	AC_CHECK_HEADER(cdk.h,,[
 		cf_save_CPPFLAGS="$CPPFLAGS"
 		CPPFLAGS="$CPPFLAGS -I/usr/include/cdk"
