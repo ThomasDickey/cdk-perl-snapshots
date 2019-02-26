@@ -25,11 +25,11 @@ dnl Except as contained in this notice, the name(s) of the above copyright
 dnl holders shall not be used in advertising or otherwise to promote the sale,
 dnl use or other dealings in this Software without prior written authorization.
 dnl ---------------------------------------------------------------------------
-AC_REVISION($Revision: 1.17 $)
+AC_REVISION($Revision: 1.18 $)
 AC_PREREQ(2.13.20030927)
 rm -f config.cache
 
-dnl $Id: configure.in,v 1.17 2019/02/24 22:04:18 tom Exp $
+dnl $Id: configure.in,v 1.18 2019/02/26 01:13:49 tom Exp $
 
 AC_INIT(Cdk.xs)
 AC_PREFIX_DEFAULT(/usr)
@@ -131,6 +131,7 @@ else
 		-e 's%\($(PERL_ARCHLIB)/\)%$(BUILDDIR)\1%' \
 		-e '/^UNINSTALL = /s,Command::MM,Install,' \
 		-e '/^UNINSTALL = /s,uninstall,uninstall(shift @ARGV),' \
+		-e '/^test ::/s,^,check ,' \
 		-e '/$(MV) $(FIRST_MAKEFILE)/d' \
 		Makefile >Makefile.old
 	echo "** updated Makefile to allow in-tree test-builds"
