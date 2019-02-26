@@ -4,11 +4,8 @@
 %:
 	dh $@ --without autoreconf --with autotools-dev
 
-# doesn't work with Debian8:
-#	'CREATE_PACKLIST' is not a known MakeMaker parameter name.
-#override_dh_auto_configure:
-#	dh_auto_configure
-#	dh_auto_configure --buildsystem=perl_makemaker
+override_dh_auto_configure:
+	dh_auto_configure -- --with-screen=ncursesw6
 
 override_dh_auto_test:
 	# no tests
