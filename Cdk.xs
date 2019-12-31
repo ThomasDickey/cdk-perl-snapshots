@@ -1,7 +1,7 @@
 /*
  * $Author: tom $
- * $Date: 2019/02/20 00:15:55 $
- * $Revision: 1.35 $
+ * $Date: 2019/12/31 21:42:34 $
+ * $Revision: 1.36 $
  */
 
 #include <EXTERN.h>
@@ -44,13 +44,13 @@ WINDOW *	GCWINDOW	= (WINDOW *)NULL;
 	   AV *array	= (AV *)SvRV((INPUT));				\
 	   int x, y;							\
 									\
-	   (ARRAYLEN)	= av_len (array);				\
+	   (ARRAYLEN)	= (int)av_len (array);				\
 									\
 	   for (x = 0; x <= (ARRAYLEN); x++)				\
 	   {								\
 	      SV *name			= *av_fetch(array,x,FALSE);	\
 	      AV *subArray		= (AV *)SvRV(name);		\
-	      int subLen		= av_len (subArray);		\
+	      int subLen		= (int)av_len (subArray);	\
 	      (ARRAYSIZE)[x+(START)]	= subLen + 1;			\
 									\
 	      for (y=0; y <= subLen; y++)				\
@@ -65,7 +65,7 @@ WINDOW *	GCWINDOW	= (WINDOW *)NULL;
 static void make_int_array(int start, SV* input, int **dest, int *destlen)
 {
    AV *src	= (AV *)SvRV(input);
-   int length	= av_len(src) + 1;
+   int length	= (int)av_len(src) + 1;
    int x;
 
    if ((*dest = (int *)calloc((size_t) length + 2, sizeof(int *))) == 0)
@@ -85,7 +85,7 @@ static void make_int_array(int start, SV* input, int **dest, int *destlen)
 static void make_dtype_array(int start, SV *input, int **dest, int *destlen)
 {
    AV *src	= (AV *)SvRV(input);
-   int length	= av_len(src) + 1;
+   int length	= (int)av_len(src) + 1;
    int x;
 
    if ((*dest = (int *)calloc((size_t) length + 2, sizeof(int *))) == 0)
@@ -105,7 +105,7 @@ static void make_dtype_array(int start, SV *input, int **dest, int *destlen)
 static void make_chtype_array(int start, SV *input, chtype **dest, int *destlen)
 {
    AV *src	= (AV *)SvRV(input);
-   int length	= av_len(src) + 1;
+   int length	= (int)av_len(src) + 1;
    int x;
 
    if ((*dest = (chtype *)calloc((size_t) length + 2, sizeof(chtype *))) == 0)
@@ -125,7 +125,7 @@ static void make_chtype_array(int start, SV *input, chtype **dest, int *destlen)
 static void make_char_array(int start, SV *input, char ***dest, int *destlen)
 {
    AV *src	= (AV *)SvRV(input);
-   int length	= av_len(src) + 1;
+   int length	= (int)av_len(src) + 1;
    int x;
 
    if ((*dest = (char **)calloc((size_t) length + 2, sizeof(char *))) == 0)
@@ -149,7 +149,7 @@ static void make_title(SV * input, char **dest)
    if (SvROK(input) && SvTYPE(SvRV(input)) == SVt_PVAV)
    {
       AV *src	= (AV *)SvRV(input);
-      int len = av_len(src) + 1;
+      int len = (int)av_len(src) + 1;
       int x;
       int length = 2;
 
@@ -3435,7 +3435,7 @@ Set(object,info)
 	   AV *array	= (AV *)SvRV(info);
 	   int x, y;
 
-	   matrixlen	= av_len (array) + 1;
+	   matrixlen	= (int)av_len (array) + 1;
 	   subSize	= (int *)calloc((size_t)matrixlen + 2, sizeof(int));
 
 	   if (subSize != 0)
@@ -3444,7 +3444,7 @@ Set(object,info)
 	      {
 		 SV *name		= *av_fetch(array, x - 1, FALSE);
 		 AV *subArray	= (AV *)SvRV(name);
-		 int subLen	= av_len (subArray) + 1;
+		 int subLen	= (int)av_len (subArray) + 1;
 		 width = MAXIMUM(width, subLen);
 	      }
 	      Info = (char **)calloc((size_t)((width + 1) * (matrixlen + 1)), sizeof(char *));
@@ -3455,7 +3455,7 @@ Set(object,info)
 		 {
 		    SV *name		= *av_fetch(array, x - 1, FALSE);
 		    AV *subArray	= (AV *)SvRV(name);
-		    int subLen	= av_len (subArray) + 1;
+		    int subLen	= (int)av_len (subArray) + 1;
 		    subSize[x]	= subLen;
 
 		    for (y=1; y <= subLen; y++)
