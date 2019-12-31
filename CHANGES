@@ -1,8 +1,13 @@
--- $Id: CHANGES,v 1.34 2019/02/26 02:17:19 tom Exp $
+-- $Id: CHANGES,v 1.37 2019/12/31 21:37:20 tom Exp $
 --------------------------------------------------------------------------------
 Cdk Perl change-list
 Modifications copyright Thomas E. Dickey 2001-2015,2019
 --------------------------------------------------------------------------------
+
+2019/12/31
+	+ indent'd top-level Cdk.pm; the other perl scripts were already done
+	+ updated configure script
+	+ update config.guess, config.sub
 
 2019/02/25
 	+ add "check" target to makefile, for Arch Linux test-package.
