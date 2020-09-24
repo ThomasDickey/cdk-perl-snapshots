@@ -1,8 +1,13 @@
--- $Id: CHANGES,v 1.37 2019/12/31 21:37:20 tom Exp $
+-- $Id: CHANGES,v 1.39 2020/09/24 00:58:50 tom Exp $
 --------------------------------------------------------------------------------
 Cdk Perl change-list
-Modifications copyright Thomas E. Dickey 2001-2015,2019
+Modifications copyright Thomas E. Dickey 2001-2019,2020
 --------------------------------------------------------------------------------
+
+2020/09/23
+	+ configure by default using cdk5-config
+	+ updated configure script
+	+ update config.guess, config.sub
 
 2019/12/31
 	+ indent'd top-level Cdk.pm; the other perl scripts were already done
