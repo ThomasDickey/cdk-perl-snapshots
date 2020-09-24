@@ -5,7 +5,7 @@ Upstream-Source: https://invisible-island.net/cdk/
 Upstream-Name: Cdk
 
 Files: *
-Copyright: 1999-2013, 2019 Thomas Dickey
+Copyright: 1999-2019, 2020 Thomas Dickey
 Copyright: 1995-1999, Mike Glover
 License: BSD-4
 

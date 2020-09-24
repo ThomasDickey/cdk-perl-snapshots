@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 dnl ---------------------------------------------------------------------------
-dnl Copyright 2012-2013,2019 Thomas E. Dickey
+dnl Copyright 2012-2019,2020 Thomas E. Dickey
 dnl
 dnl Permission is hereby granted, free of charge, to any person obtaining a
 dnl copy of this software and associated documentation files (the "Software"),
@@ -25,11 +25,11 @@ dnl Except as contained in this notice, the name(s) of the above copyright
 dnl holders shall not be used in advertising or otherwise to promote the sale,
 dnl use or other dealings in this Software without prior written authorization.
 dnl ---------------------------------------------------------------------------
-AC_REVISION($Revision: 1.18 $)
-AC_PREREQ(2.13.20030927)
+AC_REVISION($Revision: 1.21 $)
+AC_PREREQ(2.25.20200802)
 rm -f config.cache
 
-dnl $Id: configure.in,v 1.18 2019/02/26 01:13:49 tom Exp $
+dnl $Id: configure.in,v 1.21 2020/09/24 00:24:11 tom Exp $
 
 AC_INIT(Cdk.xs)
 AC_PREFIX_DEFAULT(/usr)
@@ -41,16 +41,17 @@ AC_SUBST(VERSION)
 
 CF_PROG_CC
 CF_PROG_AR
+CF_PKG_CONFIG
 AC_CHECK_TOOL(LD,ld,'$(CC)')
 AC_PATH_TOOL(FULL_AR,ar,'$(AR)')
 AC_PROG_RANLIB
 
-CF_PROG_EXT
 CF_LIB_SUFFIX($LIB_MODEL, DFT_LIB_SUFFIX, DFT_DEP_SUFFIX)
 AC_SUBST(DFT_LIB_SUFFIX)
 
+CF_WITH_SCREEN_PDCURSES
 CF_XOPEN_SOURCE
-CF_WITH_WARNINGS
+CF_ENABLE_WARNINGS
 CF_DISABLE_LEAKS
 
 AC_CHECK_PROGS(PERL,[perl perl5],none)
@@ -62,16 +63,22 @@ fi
 AC_MSG_CHECKING(if you want to use cdk5-config for C flags)
 AC_ARG_WITH(cdk,
 	[  --with-cdk              use cdk5-config for C flags],
-	[with_cdk="cdk5-config"],
-	[with_cdk=no])
+	[with_cdk=$withval],
+	[with_cdk=yes])
 AC_MSG_RESULT($with_cdk)
 
-AC_MSG_CHECKING(if you want to use cdkw5-config for C flags)
-AC_ARG_WITH(cdkw,
-	[  --with-cdkw             use cdkw5-config for C flags],
-	[with_cdk="cdkw5-config"],
-	[with_cdk=no])
-AC_MSG_RESULT($with_cdk)
+test "$with_cdk" != no && with_cdk="cdk5-config"
+
+if test "$with_cdk" = no
+then
+	AC_MSG_CHECKING(if you want to use cdkw5-config for C flags)
+	AC_ARG_WITH(cdkw,
+		[  --with-cdkw             use cdkw5-config for C flags],
+		[with_cdk=$withval],
+		[with_cdk=yes])
+	AC_MSG_RESULT($with_cdk)
+	test "$with_cdk" != no && with_cdk="cdkw5-config"
+fi
 
 if test $with_cdk = no
 then
@@ -79,18 +86,38 @@ then
 	CF_WITH_CURSES_DIR
 	CF_CURSES_CHTYPE
 	CF_WITH_NCURSES_ETC
-	AC_CHECK_HEADER(cdk.h,,[
-		cf_save_CPPFLAGS="$CPPFLAGS"
-		CPPFLAGS="$CPPFLAGS -I/usr/include/cdk"
-		AC_CHECK_HEADER(cdk/cdk.h,[
-			AC_DEFINE(HAVE_CDK_CDK_H)
-		],[
-			AC_MSG_ERROR(cannot find cdk header file)
+
+	# now look for Cdk
+	cf_pkg_exists=no
+	if test "x${PKG_CONFIG:=none}" != xnone; then
+		for cf_pkg_name in cdk5 cdkw5
+		do
+			AC_MSG_CHECKING(pkg-config for $cf_pkg_name)
+			"$PKG_CONFIG" --exists $cf_pkg_name && cf_pkg_exists=yes
+			AC_MSG_RESULT($cf_pkg_exists)
+			test $cf_pkg_exists = yes && break
+		done
+		if test "$cf_pkg_exists" = yes; then
+			cf_pkg_cflags=`$PKG_CONFIG --cflags $cf_pkg_name`
+			cf_pkg_libs=`$PKG_CONFIG --libs $cf_pkg_name`
+			CF_ADD_CFLAGS($cf_pkg_cflags)
+			CF_ADD_LIBS($cf_pkg_libs)
+		fi
+	fi
+
+	if test "$cf_pkg_exists" = no; then
+		AC_CHECK_HEADER(cdk.h,,[
+			CPPFLAGS="$CPPFLAGS -I/usr/include/cdk"
+			AC_CHECK_HEADER(cdk/cdk.h,[
+				AC_DEFINE(HAVE_CDK_CDK_H)
+			],[
+				AC_MSG_ERROR(cannot find cdk header file)
+			])
 		])
-	])
-	AC_CHECK_LIB(cdk,initCDKScreen,[LIBS="-lcdk $LIBS"],[
-	AC_CHECK_LIB(cdkw,initCDKScreen,[LIBS="-lcdkw $LIBS"],[
-	AC_MSG_ERROR(cannot find cdk library)])])
+		AC_CHECK_LIB(cdk,initCDKScreen,[LIBS="-lcdk $LIBS"],[
+		AC_CHECK_LIB(cdkw,initCDKScreen,[LIBS="-lcdkw $LIBS"],[
+		AC_MSG_ERROR(cannot find cdk library)])])
+	fi
 
 elif $with_cdk --version 2>/dev/null >/dev/null
 then
@@ -101,6 +128,7 @@ else
 fi
 
 AC_SUBST(LIBS)
+AC_SUBST(CFLAGS)
 AC_SUBST(CPPFLAGS)
 
 ###	output makefile script
