@@ -1,7 +1,7 @@
 /*
  * $Author: tom $
- * $Date: 2019/12/31 21:42:34 $
- * $Revision: 1.36 $
+ * $Date: 2021/12/16 23:09:47 $
+ * $Revision: 1.37 $
  */
 
 #include <EXTERN.h>
@@ -1021,8 +1021,8 @@ New(mesg,xPos=CENTER,yPos=CENTER,Box=TRUE,shadow=FALSE)
 	   MAKE_CHAR_ARRAY (0, mesg, message, messageLines);
 
 	   widget = newCDKLabel (GCDKSCREEN, xPos, yPos,
-					message, messageLines,
-					Box, shadow);
+				 (CDK_CONST char **)message, messageLines,
+				 Box, shadow);
 	   free (message);
 
 	   /* Check the return value. */
@@ -1048,7 +1048,7 @@ SetMessage(object,mesg)
 	   int		messageLines;
 
 	   MAKE_CHAR_ARRAY (0, mesg, message, messageLines);
-	   setCDKLabelMessage (object, message, messageLines);
+	   setCDKLabelMessage (object, (CDK_CONST char **)message, messageLines);
 	   free (message);
 	}
 
@@ -1206,13 +1206,13 @@ GetWindow(object)
 MODULE	= Cdk	PACKAGE = Cdk::Dialog
 
 CDKDIALOG *
-New(message,buttons,xPos=CENTER,yPos=CENTER,highlight=A_REVERSE,seperator=TRUE,Box=TRUE,shadow=FALSE)
+New(message,buttons,xPos=CENTER,yPos=CENTER,highlight=A_REVERSE,separator=TRUE,Box=TRUE,shadow=FALSE)
 	SV *	message
 	SV *	buttons
 	int	xPos = sv2int ($arg);
 	int	yPos = sv2int ($arg);
 	chtype	highlight = sv2chtype ($arg);
-	int	seperator = sv2int ($arg);
+	int	separator = sv2int ($arg);
 	int	Box = sv2int ($arg);
 	int	shadow = sv2int ($arg);
 	CODE:
@@ -1230,9 +1230,9 @@ New(message,buttons,xPos=CENTER,yPos=CENTER,highlight=A_REVERSE,seperator=TRUE,B
 	   MAKE_CHAR_ARRAY (0, buttons, Buttons, buttonCount);
 
 	   dialogWidget = newCDKDialog (GCDKSCREEN,xPos,yPos,
-					Message,rowCount,
-					Buttons,buttonCount,
-					highlight,seperator,
+					(CDK_CONST char **)Message, rowCount,
+					(CDK_CONST char **)Buttons, buttonCount,
+					highlight, separator,
 					Box,shadow);
 	   free (Message);
 	   free (Buttons);
@@ -1521,7 +1521,8 @@ New (title,mesg,height,width,xPos=CENTER,yPos=CENTER,sPos=RIGHT,numbers=TRUE,hig
 
 	   scrollWidget = newCDKScroll (GCDKSCREEN, xPos, yPos, sPos,
 					height, width,
-					Title, Message, mesglen,
+					Title,
+					(CDK_CONST char **)Message, mesglen,
 					numbers, highlight,
 					Box, shadow);
 	   free (Message);
@@ -1681,7 +1682,7 @@ SetItems(object,cItems,numbers=FALSE)
 	   int		itemLength;
 
 	   MAKE_CHAR_ARRAY(0, cItems, Items, itemLength);
-	   setCDKScrollItems (object, Items, itemLength, numbers);
+	   setCDKScrollItems (object, (CDK_CONST char **)Items, itemLength, numbers);
 	   free (Items);
 	}
 
@@ -3270,8 +3271,9 @@ New(title,rowtitles,coltitles,colwidths,coltypes,vrows,vcols,xPos=CENTER,yPos=CE
 					xPos, yPos,
 					rows, cols,
 					vrows, vcols,
-					Title, rowTitles,
-					colTitles,
+					Title,
+					(CDK_CONST char **)rowTitles,
+					(CDK_CONST char **)colTitles,
 					colWidths, colTypes,
 					rowspace, colspace, filler,
 					dominant,
@@ -3465,7 +3467,9 @@ Set(object,info)
 		    }
 		 }
 
-		 setCDKMatrixCells (object, Info, matrixlen, width, subSize);
+		 setCDKMatrixCells (object,
+				    (CDK_CONST char **)Info,
+				    matrixlen, width, subSize);
 
 		 free (Info);
 	      }
@@ -3865,8 +3869,9 @@ New(title,list,choices,height,width,xPos=CENTER,yPos=CENTER,sPos=RIGHT,highlight
 
 	   selectionWidget = newCDKSelection (GCDKSCREEN, xPos, yPos, sPos,
 						height, width,
-						Title, List, listSize,
-						Choices, choiceSize,
+						Title,
+						(CDK_CONST char **)List, listSize,
+						(CDK_CONST char **)Choices, choiceSize,
 						highlight, Box, shadow);
 	   free (List);
 	   free (Choices);
@@ -4193,7 +4198,7 @@ New(buttons,height,width,buttonHighlight=A_REVERSE,xpos=CENTER,ypos=CENTER,Box=T
 
 	   viewerWidget = newCDKViewer (GCDKSCREEN, xpos, ypos,
 					height, width,
-					Buttons, buttonCount,
+					(CDK_CONST char **)Buttons, buttonCount,
 					buttonHighlight, Box, shadow);
 	   free (Buttons);
 
@@ -4238,7 +4243,10 @@ SetInfo(object,info,interpret=TRUE)
 	   int		infolen;
 
 	   MAKE_CHAR_ARRAY(0, info, Info, infolen);
-	   setCDKViewerInfo (object, Info, infolen, interpret);
+	   setCDKViewerInfo (object,
+			     (CDK_CONST char **)Info,
+			     infolen,
+			     interpret);
 	   free (Info);
 	}
 
@@ -4666,11 +4674,11 @@ New(title,list,height,width,xPos=CENTER,yPos=CENTER,sPos=RIGHT,choice="X",defaul
 	   MAKE_CHAR_ARRAY(0, list, List, listlen);
 	   MAKE_TITLE (title,Title);
 
-	   radioWidget = newCDKRadio (GCDKSCREEN,xPos,yPos,sPos,
-					height,width,Title,
-					List,listlen,
-					choice,defaultItem,
-					highlight,Box,shadow);
+	   radioWidget = newCDKRadio (GCDKSCREEN, xPos, yPos, sPos,
+					height, width, Title,
+					(CDK_CONST char **)List, listlen,
+					choice, defaultItem,
+					highlight, Box, shadow);
 	   free (List);
 	   free (Title);
 
@@ -5377,7 +5385,9 @@ SetContents(object,info)
 	   int		infolen;
 
 	   MAKE_CHAR_ARRAY(0, info, Loginfo, infolen);
-	   setCDKSwindowContents (object, Loginfo, infolen);
+	   setCDKSwindowContents (object,
+				  (CDK_CONST char **)Loginfo,
+				  infolen);
 	   free (Loginfo);
 	}
 
@@ -5632,10 +5642,10 @@ New(title,label,itemlist,defaultItem=0,xpos=CENTER,ypos=CENTER,Box=TRUE,shadow=F
 	   MAKE_CHAR_ARRAY (0, itemlist, Itemlist, itemLength);
 	   MAKE_TITLE (title,Title);
 
-	   itemlistWidget = newCDKItemlist (GCDKSCREEN,xpos,ypos,
-						Title,label,
-						Itemlist,itemLength,
-						defaultItem,Box,shadow);
+	   itemlistWidget = newCDKItemlist (GCDKSCREEN, xpos, ypos,
+					    Title, label,
+					    (CDK_CONST char **)Itemlist, itemLength,
+					    defaultItem, Box, shadow);
 	   free (Itemlist);
 	   free (Title);
 
@@ -5745,7 +5755,10 @@ SetValues(object,values)
 	   int		valueLength;
 
 	   MAKE_CHAR_ARRAY(0, values, Values, valueLength);
-	   setCDKItemlistValues (object, Values, valueLength, object->defaultItem);
+	   setCDKItemlistValues (object,
+				 (CDK_CONST char **)Values,
+				 valueLength,
+				 object->defaultItem);
 	   free (Values);
 	}
 
@@ -6571,12 +6584,12 @@ New(title,label,list,height,width,xPos,yPos,highlight,filler,Box,shadow)
 	   MAKE_CHAR_ARRAY(0, list, List, listSize);
 	   MAKE_TITLE (title,Title);
 
-	   alphalistWidget = newCDKAlphalist (GCDKSCREEN,xPos,yPos,
-						height,width,
-						Title,label,
-						List,listSize,
-						filler,highlight,
-						Box,shadow);
+	   alphalistWidget = newCDKAlphalist (GCDKSCREEN, xPos, yPos,
+					      height, width,
+					      Title, label,
+					      (CDK_CONST char **)List, listSize,
+					      filler, highlight,
+					      Box, shadow);
 	   free (List);
 	   free (Title);
 
@@ -6648,7 +6661,7 @@ SetContents(object,list)
 	   int		listSize;
 
 	   MAKE_CHAR_ARRAY(0, list, List, listSize);
-	   setCDKAlphalistContents (object, List, listSize);
+	   setCDKAlphalistContents (object, (CDK_CONST char **) List, listSize);
 	   free (List);
 	}
 
@@ -7146,7 +7159,7 @@ New(title,buttons,rows,cols,height,width,xPos=CENTER,yPos=CENTER,highlight=A_REV
 	   widget = newCDKButtonbox (GCDKSCREEN, xPos, yPos,
 					height, width, Title,
 					rows, cols,
-					Buttons, buttonCount,
+					(CDK_CONST char **)Buttons, buttonCount,
 					highlight, Box, shadow);
 	   free (Buttons);
 	   free (Title);

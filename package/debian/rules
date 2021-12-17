@@ -2,7 +2,7 @@
 
 # export DH_VERBOSE=1
 %:
-	dh $@ --without autoreconf --with autotools-dev
+	dh $@ --without autoreconf
 
 override_dh_auto_configure:
 	dh_auto_configure -- --with-screen=ncursesw6

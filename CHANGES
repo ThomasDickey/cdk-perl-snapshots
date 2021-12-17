@@ -1,8 +1,13 @@
--- $Id: CHANGES,v 1.40 2021/01/09 19:49:12 tom Exp $
+-- $Id: CHANGES,v 1.43 2021/12/16 23:20:11 tom Exp $
 --------------------------------------------------------------------------------
 Cdk Perl change-list
 Modifications copyright Thomas E. Dickey 2001-2020,2021
 --------------------------------------------------------------------------------
+
+2021/12/16
+	+ build-fixes for newer gcc -Wformat warnings.
+	+ updated configure script
+	+ update config.guess, config.sub
 
 2021/01/09
 	+ updated configure script
