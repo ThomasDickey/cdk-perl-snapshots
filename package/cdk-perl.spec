@@ -1,21 +1,16 @@
-# $Revision: 1.31 $, $Date: 2021/01/09 19:48:03 $
+# $Id: cdk-perl.spec,v 1.33 2021/12/17 01:04:31 tom Exp $, $Date: 2021/12/17 01:04:31 $
 #
 # Conditional build:
 # _without_tests - do not perform "make test"
 #
-%include %{_rpmconfigdir}/macros.perl
 Summary:	Perl extensions for CDK
 Summary(pl):	Rozszerzenie Perla dla CDK
 Name:		cdk-perl
 Version:	5.0
-Release:	20210109
+Release:	20211216
 License:	distributable 
 Group:		Development/Languages/Perl
 Source0:	ftp://ftp.invisible-island.net/cdk/cdk-perl-%{release}.tgz
-#BuildRequires:	cdk-devel
-#BuildRequires:	perl >= 5.005_03-10
-#BuildRequires:	rpm-perlprov
-#BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
 This is the Perl5 extension to the Cdk library written by Mike Glover.
@@ -44,10 +39,6 @@ dystrybucji Cdk dotyczą także tego rozszerzenia.
 %build
 
 : "_host_vendor  %{_host_vendor}"
-: "perl_sitelib  %{perl_sitelib}"
-: "perl_sitearch %{perl_sitearch}"
-: "perl_archlib  %{perl_archlib}"
-: "perl_privlib  %{perl_privlib}"
 
 ./configure
 
@@ -87,24 +78,15 @@ install examples/*              %{buildroot}%{examples_dir}
 rm -rf %{buildroot}
 
 %files 
-%if %{os_SUSE}%{os_REDHAT}
-%{perl_archlib}/perllocal.pod
-%endif
-%if %{os_SUSE}%{os_MAGEIA}
-%{perl_sitearch}/auto/Cdk
-%{perl_sitearch}/Cdk.pm
-%{perl_sitearch}/Cdk
-%endif
-%if %{os_REDHAT}
-%{perl_archlib}/auto/Cdk
-%{perl_archlib}/Cdk.pm
-%{perl_archlib}/Cdk
-%endif
+%{_libdir}
 %{doc_dir}
 
 %dir
 
 %changelog
+
+* Thu Dec 16 2021 Thomas Dickey
+- revised to work without macros.perl
 
 * Fri Feb 22 2019 Thomas Dickey
 - convert to UTF-8, port to OpenSUSE, Mageia

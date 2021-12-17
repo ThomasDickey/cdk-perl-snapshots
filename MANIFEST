@@ -110,7 +110,6 @@ package/debian/README.source    Debian build script
 package/debian/changelog        Debian build script
 package/debian/clean            Debian build script
 package/debian/compat           Debian build script
-package/debian/compress         build-script
 package/debian/control          Debian build script
 package/debian/copyright        Debian build script
 package/debian/libcdk-perl.examples  Debian build script
