@@ -1,8 +1,14 @@
--- $Id: CHANGES,v 1.43 2021/12/16 23:20:11 tom Exp $
+-- $Id: CHANGES,v 1.46 2022/10/20 07:54:21 tom Exp $
 --------------------------------------------------------------------------------
 Cdk Perl change-list
-Modifications copyright Thomas E. Dickey 2001-2020,2021
+Modifications copyright Thomas E. Dickey 2001-2021,2022
 --------------------------------------------------------------------------------
+
+2022/10/20
+	+ relicense as MIT-X11
+	+ fix shellcheck warnings in fixpath script.
+	+ updated configure script
+	+ update config.guess, config.sub
 
 2021/12/16
 	+ build-fixes for newer gcc -Wformat warnings.

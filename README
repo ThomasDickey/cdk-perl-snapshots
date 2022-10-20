@@ -1,7 +1,7 @@
--- $Id: README,v 1.10 2021/01/09 19:49:40 tom Exp $
+-- $Id: README,v 1.11 2022/10/20 00:18:53 tom Exp $
 
 Cdk Perl5 Extension,
-Thomas Dickey modifications copyright 1999-2020,2021
+Thomas Dickey Copyright 1999-2021,2022
 Mike Glover, Copyright 1995-1999
 
 ------------------------------------------------------------------------------

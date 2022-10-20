@@ -1,26 +1,39 @@
 #!/bin/sh
-# $Id: fixpaths,v 1.1 2002/07/24 23:00:32 tom Exp $
+# $Id: fixpaths,v 1.2 2022/10/20 00:33:09 tom Exp $
 #
 # Run this script to update the paths in scripts under the current directory
 # which have perl's pathname, so they can be run in your configuration.
 #
-PERL=`which perl`
+
+save_IFS="$IFS"
+IFS=':'
+PERL=perl
+for p in $PATH
+do
+	if [ -f "$p/perl" ]
+	then
+		PERL="$p/perl"
+		break
+	fi
+done
+IFS="$save_IFS"
+
 TEXT="#!$PERL -w"
-for name in `find . -type f -print`
+find . -type f -print | while read name
 do
 	case $name in
 	*~)	;;
 	*)
-		head=`head -1 $name`
+		head=`head -1 "$name"`
 		case $head in #(vi
 		\#!*perl*) #(vi
-			echo process $name
+			echo "process $name"
 			if test "$TEXT" != "$head" ; then
 				echo "...updating "
-				rm -f ${name}~
-				mv ${name} ${name}~
-				sed -e "s@$head@$TEXT@" ${name}~ >${name}
-				chmod +x ${name}
+				rm -f "${name}"~
+				mv "${name}" "${name}"~
+				sed -e "s@$head@$TEXT@" "${name}"~ >"${name}"
+				chmod +x "${name}"
 			else
 				echo "...unchanged"
 			fi
