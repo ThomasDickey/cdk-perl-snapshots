@@ -1,4 +1,4 @@
-# $Id: cdk-perl.spec,v 1.39 2022/10/26 00:03:50 tom Exp $, $Date: 2022/10/26 00:03:50 $
+# $Id: cdk-perl.spec,v 1.40 2023/02/05 14:43:40 tom Exp $, $Date: 2023/02/05 14:43:40 $
 #
 # Conditional build:
 # _without_tests - do not perform "make test"
@@ -7,7 +7,7 @@ Summary:	Perl extensions for CDK
 Summary(pl):	Rozszerzenie Perla dla CDK
 Name:		cdk-perl
 Version:	5.0
-Release:	20221025
+Release:	20230205
 License:	MIT-X11
 Group:		Development/Languages/Perl
 Source0:	ftp://ftp.invisible-island.net/cdk/cdk-perl-%{release}.tgz

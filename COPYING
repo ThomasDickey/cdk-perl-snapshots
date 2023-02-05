@@ -1,6 +1,6 @@
--- $Id: COPYING,v 1.10 2022/10/20 00:17:49 tom Exp $
+-- $Id: COPYING,v 1.11 2023/02/05 14:43:40 tom Exp $
 -------------------------------------------------------------------------------
-Copyright 1999-2021,2022 Thomas Dickey
+Copyright 1999-2022,2023 Thomas Dickey
 Copyright 1999, Mike Glover
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of

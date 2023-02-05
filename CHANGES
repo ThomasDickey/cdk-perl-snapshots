@@ -1,8 +1,11 @@
--- $Id: CHANGES,v 1.47 2022/10/25 22:31:25 tom Exp $
+-- $Id: CHANGES,v 1.49 2023/02/05 14:46:19 tom Exp $
 --------------------------------------------------------------------------------
 Cdk Perl change-list
-Modifications copyright Thomas E. Dickey 2001-2021,2022
+Modifications copyright Thomas E. Dickey 2001-2022,2023
 --------------------------------------------------------------------------------
+
+2023/02/05
+	+ improve configure script checks, reducing warnings
 
 2022/10/25
 	+ update test-package scripts
