@@ -1,3 +1,9 @@
+libcdk-perl (5.0.20240606) unstable; urgency=low
+
+  * maintenance updates
+
+ -- Thomas E. Dickey <dickey@invisible-island.net>  Thu, 06 Jun 2024 16:22:54 -0400
+
 libcdk-perl (5.0.20230205) unstable; urgency=low
 
   * maintenance updates

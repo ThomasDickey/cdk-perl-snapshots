@@ -1,4 +1,4 @@
-# $Id: Cdk.pm,v 1.27 2023/02/05 14:43:40 tom Exp $
+# $Id: Cdk.pm,v 1.28 2024/06/06 20:22:54 tom Exp $
 
 package Cdk;
 
@@ -13,7 +13,7 @@ select(STDIN);
 $| = 1;
 
 # Set the version.
-$VERSION = "5.20230205";    # must be a floating-point number
+$VERSION = "5.20240606";    # must be a floating-point number
 
 # Set the diag flag off.
 $DIAGFLAG = 0;
